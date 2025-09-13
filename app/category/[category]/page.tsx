@@ -17,7 +17,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { products, Product, categories } from "@/lib/products";
-import { Search, Filter, X, ArrowLeft } from "lucide-react";
+import { Search, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 

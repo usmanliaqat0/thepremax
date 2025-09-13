@@ -6,15 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  Star,
-  Users,
-  Award,
-  Heart,
-  Target,
-  Zap,
-  ArrowRight,
-} from "lucide-react";
+import { Star, Heart, Target, Zap, ArrowRight } from "lucide-react";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 
 const About = () => {

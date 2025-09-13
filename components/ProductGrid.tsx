@@ -4,7 +4,6 @@ import { Product } from "@/lib/products";
 import ProductCard from "./ProductCard";
 import { Section, Container, SectionHeader } from "@/components/ui/layout";
 import { ProductGridWrapper } from "@/components/ui/grid";
-import { cn } from "@/lib/utils";
 
 interface ProductGridProps {
   products: Product[];

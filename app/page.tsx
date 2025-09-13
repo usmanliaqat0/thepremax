@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo } from "react";
+import { useMemo } from "react";
 import dynamic from "next/dynamic";
 import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
@@ -43,12 +43,6 @@ export default function Home() {
   // Memoize product arrays to prevent unnecessary re-filtering
   const featuredProducts = useMemo(() => getFeaturedProducts(), []);
   const topRatedProducts = useMemo(() => getTopRatedProducts(), []);
-
-  const heroStats = [
-    { value: "19+", label: "Products" },
-    { value: "4+", label: "Categories" },
-    { value: "98%", label: "Satisfaction Rate" },
-  ];
 
   const features = [
     {

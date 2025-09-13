@@ -5,7 +5,7 @@ import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, ShoppingBag, ArrowLeft } from "lucide-react";
+import { Heart, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";

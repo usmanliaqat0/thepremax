@@ -118,7 +118,6 @@ export const withErrorBoundary = <P extends object>(
 
 // Product-specific error boundary
 export const ProductErrorFallback: React.FC<ErrorFallbackProps> = ({
-  error,
   reset,
 }) => {
   return (

@@ -16,15 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import {
-  CreditCard,
-  MapPin,
-  User,
-  Phone,
-  Mail,
-  ArrowLeft,
-  Check,
-} from "lucide-react";
+import { CreditCard, MapPin, ArrowLeft, Check } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";

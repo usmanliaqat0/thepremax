@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense, useMemo, useCallback } from "react";
+import { useState, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import Navigation from "@/components/Navigation";
 import ProductCard from "@/components/ProductCard";
@@ -23,14 +23,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Section, Container, SectionHeader } from "@/components/ui/layout";
 import { ProductGridWrapper } from "@/components/ui/grid";
-import { PageLoading, GridSkeleton } from "@/components/ui/loading";
+import { GridSkeleton } from "@/components/ui/loading";
 import { products, Product } from "@/lib/products";
-import {
-  processProducts,
-  getAvailableFilters,
-  SortOption,
-} from "@/lib/product-utils";
-import { Search, Filter, X } from "lucide-react";
+import { processProducts, SortOption } from "@/lib/product-utils";
+import { Search, X } from "lucide-react";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 import { useSearchParams } from "next/navigation";
 
@@ -121,7 +117,7 @@ const ShopContent = () => {
           {/* Search and Sort Controls */}
           <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center mb-6">
             {/* Search */}
-            <div className="relative flex-1 max-w-md">
+            <div className="relative flex-1 lg:max-w-md w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 type="search"

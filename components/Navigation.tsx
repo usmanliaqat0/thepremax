@@ -3,22 +3,17 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   Menu,
-  X,
   Search,
   ShoppingBag,
   ShoppingCart,
   User,
   Heart,
   ChevronDown,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -121,9 +116,10 @@ const Navigation = () => {
                   <div className="border-t border-border mt-2 pt-2">
                     <Link
                       href="/shop"
-                      className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
+                      className="flex items-center justify-between px-4 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors font-medium rounded-sm mx-1"
                     >
-                      View All Products →
+                      <span>View All Products</span>
+                      <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>
                 </div>
