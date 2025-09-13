@@ -1,310 +1,506 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/loader";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/context/AuthContext";
+import { BeautifulLoader } from "@/components/ui/loader";
+import { useToast } from "@/hooks/use-toast";
 import {
   User,
-  Mail,
-  Calendar,
+  MapPin,
+  ShoppingBag,
   Settings,
-  LogOut,
-  Edit,
-  Save,
+  Camera,
+  Shield,
+  Upload,
+  Trash2,
+  RefreshCw,
+  Edit3,
+  Check,
   X,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { formatPrice } from "@/lib/currency";
 
-interface UserData {
+import PersonalInfoSection from "@/components/profile/PersonalInfoSection";
+import AddressSection from "@/components/profile/AddressSection";
+import OrderHistorySection from "@/components/profile/OrderHistorySection";
+import SettingsSection from "@/components/profile/SettingsSection";
+
+interface AvatarOption {
   id: string;
   name: string;
-  email: string;
-  avatar: string;
-  joined: string;
+  src: string;
+  category: "male" | "female" | "other" | "custom";
 }
 
 const Profile = () => {
-  const [user, setUser] = useState<UserData | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedName, setEditedName] = useState("");
-  const router = useRouter();
+  const { state, logout } = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [activeTab, setActiveTab] = useState("personal");
+  const [currentAvatar, setCurrentAvatar] = useState<string>(
+    "/profile-images/defaults/male-avatar.svg"
+  );
+  const [isUploading, setIsUploading] = useState(false);
+  const [showAvatarDialog, setShowAvatarDialog] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
+
+  const defaultAvatars: AvatarOption[] = [
+    {
+      id: "male-1",
+      name: "Male Avatar",
+      src: "/profile-images/defaults/male-avatar.svg",
+      category: "male",
+    },
+    {
+      id: "female-1",
+      name: "Female Avatar",
+      src: "/profile-images/defaults/female-avatar.svg",
+      category: "female",
+    },
+    {
+      id: "other-1",
+      name: "Other Avatar",
+      src: "/profile-images/defaults/other-avatar.svg",
+      category: "other",
+    },
+  ];
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-      setEditedName(parsedUser.name);
-    } else {
+    if (!state.isAuthenticated && !state.isLoading) {
       router.push("/login");
     }
-  }, [router]);
+  }, [state.isAuthenticated, state.isLoading, router]);
 
-  const handleSaveProfile = () => {
-    if (user) {
-      const updatedUser = { ...user, name: editedName };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      setUser(updatedUser);
-      setIsEditing(false);
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
-      });
+  useEffect(() => {
+    if (state.user?.avatar) {
+      setCurrentAvatar(state.user.avatar);
     }
-  };
+  }, [state.user?.avatar]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    toast({
-      title: "Logged out",
-      description: "You have been logged out successfully.",
-    });
+  const handleLogout = async () => {
+    await logout();
     router.push("/");
   };
 
-  if (!user) {
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPreviewUrl(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+
+    setIsUploading(true);
+
+    try {
+      // Simulate file upload
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      // In a real app, you would upload to your server here
+      const formData = new FormData();
+      formData.append("avatar", selectedFile);
+
+      // For now, we'll use the preview URL
+      setCurrentAvatar(previewUrl);
+      setShowAvatarDialog(false);
+      setSelectedFile(null);
+      setPreviewUrl("");
+
+      toast({
+        title: "Avatar updated",
+        description: "Your profile picture has been updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: "Failed to update your avatar. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDefaultAvatarSelect = (avatar: AvatarOption) => {
+    setCurrentAvatar(avatar.src);
+    setShowAvatarDialog(false);
+
+    toast({
+      title: "Avatar updated",
+      description: "Your profile picture has been updated.",
+    });
+  };
+
+  const handleRemoveAvatar = () => {
+    setCurrentAvatar("/profile-images/defaults/male-avatar.svg");
+
+    toast({
+      title: "Avatar removed",
+      description: "Your profile picture has been reset to default.",
+    });
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
+  const cancelUpload = () => {
+    setSelectedFile(null);
+    setPreviewUrl("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  if (state.isLoading) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen bg-gray-50">
         <Navigation />
-        <div className="container mx-auto px-4 py-16 flex-1 flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <Spinner size="lg" />
-            <p className="text-muted-foreground">Loading your profile...</p>
-          </div>
+        <div className="flex items-center justify-center py-12">
+          <BeautifulLoader
+            size="lg"
+            message="Loading your profile"
+            variant="default"
+          />
         </div>
         <Footer />
       </div>
     );
   }
 
+  if (!state.user) {
+    return null;
+  }
+
+  const tabsData = [
+    {
+      id: "personal",
+      label: "Personal Info",
+      icon: User,
+      description: "Manage your personal information",
+    },
+    {
+      id: "addresses",
+      label: "Addresses",
+      icon: MapPin,
+      description: "Manage shipping and billing addresses",
+    },
+    {
+      id: "orders",
+      label: "Order History",
+      icon: ShoppingBag,
+      description: "View your order history and tracking",
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: Settings,
+      description: "Account preferences and security",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-gray-50">
       <Navigation />
 
-      {/* Header */}
-      <section className="py-12 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-4">
-              My Profile
-            </h1>
-            <p className="text-muted-foreground">
-              Manage your account settings and preferences
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Profile Card */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader className="text-center">
-                <Avatar className="w-24 h-24 mx-auto mb-4">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="text-2xl">
-                    {user.name.charAt(0).toUpperCase()}
+      <div className="container mx-auto px-4 py-6 max-w-7xl">
+        {/* Profile Header */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
+              <div className="relative">
+                <Avatar className="w-24 h-24 sm:w-32 sm:h-32 ring-4 ring-gray-100">
+                  <AvatarImage src={currentAvatar} />
+                  <AvatarFallback className="text-xl sm:text-2xl font-bold bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                    {state.user
+                      ? `${state.user.firstName?.[0] || ""}${
+                          state.user.lastName?.[0] || ""
+                        }`
+                      : "UN"}
                   </AvatarFallback>
                 </Avatar>
-                {isEditing ? (
-                  <div className="space-y-2">
-                    <Input
-                      value={editedName}
-                      onChange={(e) => setEditedName(e.target.value)}
-                      className="text-center"
-                    />
-                    <div className="flex justify-center gap-2">
-                      <Button size="sm" onClick={handleSaveProfile}>
-                        <Save className="h-4 w-4 mr-1" />
-                        Save
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setIsEditing(false);
-                          setEditedName(user.name);
-                        }}
-                      >
-                        <X className="h-4 w-4 mr-1" />
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div>
-                    <CardTitle className="text-xl mb-2">{user.name}</CardTitle>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
                     <Button
-                      variant="outline"
                       size="sm"
-                      onClick={() => setIsEditing(true)}
+                      className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 rounded-full w-8 h-8 sm:w-10 sm:h-10 p-0"
                     >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit Name
+                      <Camera className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Button>
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{user.email}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">Joined {user.joined}</span>
-                  </div>
-                  <Separator />
-                  <Button
-                    variant="destructive"
-                    className="w-full"
-                    onClick={handleLogout}
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setShowAvatarDialog(true)}>
+                      <Edit3 className="w-4 h-4 mr-2" />
+                      Change Picture
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={handleRemoveAvatar}
+                      className="text-red-600"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Remove Picture
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+
+                <Dialog
+                  open={showAvatarDialog}
+                  onOpenChange={setShowAvatarDialog}
+                >
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Update Profile Picture</DialogTitle>
+                      <DialogDescription>
+                        Upload a new photo or choose from default avatars
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-6">
+                      {/* Upload Section */}
+                      <div className="space-y-4">
+                        <h4 className="font-medium">Upload Custom Picture</h4>
+
+                        {selectedFile ? (
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-center">
+                              <Avatar className="w-24 h-24">
+                                <AvatarImage src={previewUrl} alt="Preview" />
+                                <AvatarFallback>
+                                  <User className="w-8 h-8" />
+                                </AvatarFallback>
+                              </Avatar>
+                            </div>
+
+                            <div className="text-sm text-gray-600 text-center">
+                              {selectedFile.name} (
+                              {(selectedFile.size / 1024 / 1024).toFixed(1)} MB)
+                            </div>
+
+                            <div className="flex space-x-2">
+                              <Button
+                                onClick={handleUpload}
+                                disabled={isUploading}
+                                className="flex-1"
+                              >
+                                {isUploading ? (
+                                  <>
+                                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                                    Uploading...
+                                  </>
+                                ) : (
+                                  <>
+                                    <Check className="w-4 h-4 mr-2" />
+                                    Upload
+                                  </>
+                                )}
+                              </Button>
+                              <Button variant="outline" onClick={cancelUpload}>
+                                <X className="w-4 h-4 mr-2" />
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div
+                            onClick={triggerFileInput}
+                            className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
+                          >
+                            <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                            <p className="text-sm font-medium text-gray-700 mb-1">
+                              Click to upload a photo
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              PNG, JPG, GIF up to 5MB
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Default Avatars */}
+                      {!selectedFile && (
+                        <div className="space-y-4">
+                          <h4 className="font-medium">Choose Default Avatar</h4>
+
+                          <div className="grid grid-cols-3 gap-4">
+                            {defaultAvatars.map((avatar) => (
+                              <div
+                                key={avatar.id}
+                                className={`cursor-pointer rounded-lg p-3 border-2 transition-all ${
+                                  currentAvatar === avatar.src
+                                    ? "border-blue-500 bg-blue-50"
+                                    : "border-gray-200 hover:border-gray-300"
+                                }`}
+                                onClick={() =>
+                                  handleDefaultAvatarSelect(avatar)
+                                }
+                              >
+                                <Avatar className="w-16 h-16 mx-auto mb-2">
+                                  <AvatarImage
+                                    src={avatar.src}
+                                    alt={avatar.name}
+                                  />
+                                  <AvatarFallback>
+                                    <User className="w-6 h-6" />
+                                  </AvatarFallback>
+                                </Avatar>
+                                <p className="text-xs text-center text-gray-600">
+                                  {avatar.name}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              <div className="text-center sm:text-left flex-1 min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 truncate">
+                  {state.user
+                    ? `${state.user.firstName || ""} ${
+                        state.user.lastName || ""
+                      }`.trim() || "User Name"
+                    : "User Name"}
+                </h1>
+                <p className="text-gray-600 mb-3 text-sm sm:text-base truncate">
+                  {state.user?.email}
+                </p>
+
+                <div className="flex flex-wrap justify-center sm:justify-start gap-2">
+                  <Badge
+                    variant="secondary"
+                    className="text-xs bg-green-50 text-green-700 border-green-200"
                   >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logout
-                  </Button>
+                    <Shield className="w-3 h-3 mr-1" />
+                    Verified
+                  </Badge>
+                  <Badge
+                    variant="secondary"
+                    className="text-xs bg-blue-50 text-blue-700 border-blue-200 capitalize"
+                  >
+                    {state.user?.role || "Customer"}
+                  </Badge>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
 
-          {/* Account Details */}
-          <div className="lg:col-span-2">
-            <div className="space-y-8">
-              {/* Account Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Account Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input
-                        id="name"
-                        value={user.name}
-                        disabled
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input
-                        id="email"
-                        value={user.email}
-                        disabled
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <Button
+                onClick={logout}
+                variant="outline"
+                size="sm"
+                className="flex items-center space-x-2 hover:bg-red-50 hover:border-red-200 hover:text-red-600 shrink-0"
+              >
+                <span className="hidden sm:inline">Logout</span>
+                <span className="sm:hidden">Log out</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-              {/* Order History Mock */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Orders</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {/* Mock order data */}
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h4 className="font-semibold">Order #FM-001</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Placed on January 15, 2025
-                        </p>
-                        <Badge variant="outline" className="mt-1">
-                          Delivered
-                        </Badge>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold">{formatPrice(8500)}</p>
-                        <p className="text-sm text-muted-foreground">2 items</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h4 className="font-semibold">Order #FM-002</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Placed on January 20, 2025
-                        </p>
-                        <Badge className="mt-1">Processing</Badge>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold">{formatPrice(15200)}</p>
-                        <p className="text-sm text-muted-foreground">3 items</p>
-                      </div>
-                    </div>
-
-                    <div className="text-center pt-4">
-                      <Button variant="outline">View All Orders</Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Quick Actions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5" />
-                    Quick Actions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Button
-                      variant="outline"
-                      className="h-auto py-4 flex flex-col gap-2"
-                    >
-                      <span>📦</span>
-                      <span className="text-sm">My Orders</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="h-auto py-4 flex flex-col gap-2"
-                    >
-                      <span>❤️</span>
-                      <span className="text-sm">Wishlist</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="h-auto py-4 flex flex-col gap-2"
-                    >
-                      <span>📍</span>
-                      <span className="text-sm">Addresses</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="h-auto py-4 flex flex-col gap-2"
-                    >
-                      <span>💳</span>
-                      <span className="text-sm">Payment</span>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+        {/* Profile Content */}
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-4"
+        >
+          <div className="bg-white rounded-xl border shadow-sm p-1">
+            <div className="overflow-x-auto">
+              <TabsList className="inline-flex h-auto w-full min-w-max bg-transparent gap-1 p-0">
+                {tabsData.map((tab) => (
+                  <TabsTrigger
+                    key={tab.id}
+                    value={tab.id}
+                    className="flex flex-col items-center justify-center space-y-1.5 p-3 min-w-[80px] flex-1 rounded-lg border border-transparent transition-all duration-200 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-blue-200 data-[state=active]:shadow-sm hover:bg-gray-50 text-gray-600 hover:text-gray-900"
+                  >
+                    <tab.icon className="w-5 h-5 shrink-0" />
+                    <span className="text-xs font-medium leading-none whitespace-nowrap">
+                      {tab.label}
+                    </span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
             </div>
           </div>
-        </div>
+
+          {/* Tab Contents */}
+          <TabsContent value="personal" className="space-y-4">
+            <PersonalInfoSection />
+          </TabsContent>
+
+          <TabsContent value="addresses" className="space-y-4">
+            <AddressSection />
+          </TabsContent>
+
+          <TabsContent value="orders" className="space-y-4">
+            <OrderHistorySection />
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-4">
+            <SettingsSection />
+          </TabsContent>
+        </Tabs>
       </div>
 
       <Footer />

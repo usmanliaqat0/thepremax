@@ -157,7 +157,7 @@ export const LoadingOverlay = ({
   children,
   className,
   loaderSize = "lg",
-  message = "Loading...",
+  message = "Loading",
 }: {
   isLoading: boolean;
   children: React.ReactNode;
@@ -194,5 +194,110 @@ export const ButtonLoader = ({
 }) => {
   return (
     <Spinner size={size} variant={variant} className={cn("mr-2", className)} />
+  );
+};
+
+// Beautiful comprehensive loader with text and animations
+export const BeautifulLoader = ({
+  size = "default",
+  variant = "default",
+  message = "Loading",
+  showMessage = true,
+  showDots = true,
+  className,
+}: {
+  size?: "sm" | "default" | "lg" | "xl";
+  variant?: "default" | "light" | "dark" | "muted";
+  message?: string;
+  showMessage?: boolean;
+  showDots?: boolean;
+  className?: string;
+}) => {
+  const sizeClasses = {
+    sm: { spinner: "w-6 h-6", text: "text-sm", container: "gap-3" },
+    default: { spinner: "w-8 h-8", text: "text-base", container: "gap-4" },
+    lg: { spinner: "w-12 h-12", text: "text-lg", container: "gap-5" },
+    xl: { spinner: "w-16 h-16", text: "text-xl", container: "gap-6" },
+  };
+
+  const colorClasses = {
+    default: "text-gray-600",
+    light: "text-white",
+    dark: "text-gray-800",
+    muted: "text-gray-400",
+  };
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center",
+        sizeClasses[size].container,
+        className
+      )}
+    >
+      <div className="relative">
+        <Spinner size={size} variant={variant} />
+        {/* Pulse ring animation */}
+        <div
+          className={cn(
+            "absolute inset-0 rounded-full border-2 border-gray-200 animate-ping opacity-20",
+            sizeClasses[size].spinner
+          )}
+        />
+      </div>
+      {showMessage && (
+        <div
+          className={cn(
+            "flex items-center font-medium",
+            sizeClasses[size].text,
+            colorClasses[variant]
+          )}
+        >
+          <span>{message}</span>
+          {showDots && (
+            <span className="ml-1">
+              <span className="animate-pulse delay-0">.</span>
+              <span className="animate-pulse delay-300">.</span>
+              <span className="animate-pulse delay-700">.</span>
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Full page beautiful loader
+export const FullPageLoader = ({
+  message = "Loading",
+  subtitle,
+  showLogo = false,
+}: {
+  message?: string;
+  subtitle?: string;
+  showLogo?: boolean;
+}) => {
+  return (
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
+      <div className="text-center space-y-6">
+        {showLogo && (
+          <div className="flex justify-center mb-8">
+            <div className="w-16 h-16 bg-gradient-to-br from-gray-900 to-gray-600 rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-xl">TP</span>
+            </div>
+          </div>
+        )}
+        <BeautifulLoader
+          size="lg"
+          message={message}
+          className="animate-fade-in"
+        />
+        {subtitle && (
+          <p className="text-sm text-muted-foreground max-w-sm animate-fade-in delay-300">
+            {subtitle}
+          </p>
+        )}
+      </div>
+    </div>
   );
 };

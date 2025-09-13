@@ -30,6 +30,41 @@ export interface User {
   status: Status;
 }
 
+// Authentication specific interfaces
+export interface AuthUser {
+  id: ID;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  gender?: "male" | "female" | "other";
+  avatar?: string;
+  dateOfBirth?: string;
+  role: "customer" | "admin" | "staff";
+  addresses?: Address[];
+}
+
+export interface SignupData {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  gender?: "male" | "female" | "other";
+  phone?: string;
+}
+
+export interface SigninData {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  user?: AuthUser;
+  token?: string;
+}
+
 export interface UserPreferences {
   newsletter: boolean;
   smsNotifications: boolean;
@@ -48,10 +83,10 @@ export interface Address {
   phone: string;
   address: string;
   city: string;
+  state: string;
   postalCode: string;
   country: string;
   isDefault: boolean;
-  createdAt: Timestamp;
 }
 
 // Product & Inventory

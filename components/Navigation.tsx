@@ -26,7 +26,6 @@ const Navigation = () => {
   const router = useRouter();
   const pathname = usePathname();
 
-  // Memoize categories to prevent recreation on every render
   const categories = useMemo(
     () => [
       { name: "Health & Beauty", href: "/category/health-beauty", icon: "💄" },
@@ -45,7 +44,6 @@ const Navigation = () => {
     []
   );
 
-  // Memoize search handler to prevent recreation
   const handleSearch = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter") {
@@ -60,7 +58,6 @@ const Navigation = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-      {/* Promotional Banner */}
       <div className="bg-accent text-accent-foreground text-center py-2 px-4 text-sm font-medium">
         🛍️ Shop All Categories | Health, Sports, Tools & More | Fast Worldwide
         Shipping! 🌎
@@ -68,7 +65,6 @@ const Navigation = () => {
 
       <div className="container mx-auto px-4">
         <nav className="flex items-center justify-between h-16">
-          {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <Image
               src="/assets/logo.png"
@@ -82,7 +78,6 @@ const Navigation = () => {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-2">
             <Button variant="nav" asChild>
               <Link href="/">Home</Link>
@@ -91,14 +86,12 @@ const Navigation = () => {
               <Link href="/shop">Shop</Link>
             </Button>
 
-            {/* Categories Dropdown */}
             <div className="relative group">
               <Button variant="nav" className="group">
                 Categories
                 <ChevronDown className="ml-1 h-4 w-4 transition-transform group-hover:rotate-180" />
               </Button>
 
-              {/* Hover Dropdown */}
               <div className="absolute top-full left-0 mt-1 w-56 bg-background border border-border rounded-md shadow-fashion-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                 <div className="py-2">
                   {categories.map((category) => (
@@ -134,7 +127,6 @@ const Navigation = () => {
             </Button>
           </div>
 
-          {/* Search Bar */}
           <div className="hidden lg:flex items-center space-x-2 flex-1 max-w-md mx-8">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -147,7 +139,6 @@ const Navigation = () => {
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex items-center space-x-2">
             <Button
               variant="ghost"
@@ -191,7 +182,6 @@ const Navigation = () => {
               </Link>
             </Button>
 
-            {/* Mobile Menu Button */}
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden">
@@ -200,7 +190,6 @@ const Navigation = () => {
               </SheetTrigger>
               <SheetContent side="right" className="w-80 p-0">
                 <div className="flex flex-col h-full">
-                  {/* Header */}
                   <div className="flex items-center gap-2 p-6 border-b">
                     <Image
                       src="/assets/logo.png"
@@ -215,7 +204,6 @@ const Navigation = () => {
                   </div>
 
                   <div className="flex flex-col flex-1 p-6 space-y-6 overflow-y-auto">
-                    {/* Mobile Search */}
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input
@@ -226,7 +214,6 @@ const Navigation = () => {
                       />
                     </div>
 
-                    {/* Main Navigation */}
                     <div className="space-y-1">
                       <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                         Navigation
@@ -279,7 +266,6 @@ const Navigation = () => {
                       </Button>
                     </div>
 
-                    {/* Categories */}
                     <div className="space-y-1">
                       <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                         Categories
@@ -310,7 +296,6 @@ const Navigation = () => {
                       ))}
                     </div>
 
-                    {/* Account & Actions */}
                     <div className="space-y-1 pt-2 border-t">
                       <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                         Account

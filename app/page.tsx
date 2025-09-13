@@ -21,7 +21,6 @@ import {
 } from "lucide-react";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 
-// Dynamic imports for below-the-fold components
 const Footer = dynamic(() => import("@/components/Footer"), {
   loading: () => <div className="h-96 bg-muted animate-pulse" />,
 });
@@ -37,10 +36,8 @@ const Newsletter = dynamic(
 );
 
 export default function Home() {
-  // Scroll to top when navigating to home page
   useScrollToTop();
 
-  // Memoize product arrays to prevent unnecessary re-filtering
   const featuredProducts = useMemo(() => getFeaturedProducts(), []);
   const topRatedProducts = useMemo(() => getTopRatedProducts(), []);
 

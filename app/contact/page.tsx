@@ -151,7 +151,7 @@ const Contact = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">
+                      <Label htmlFor="name" className="mb-2 block">
                         Full Name <span className="text-destructive">*</span>
                       </Label>
                       <Input
@@ -164,7 +164,7 @@ const Contact = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">
+                      <Label htmlFor="email" className="mb-2 block">
                         Email Address{" "}
                         <span className="text-destructive">*</span>
                       </Label>
@@ -181,7 +181,9 @@ const Contact = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="subject">Subject</Label>
+                    <Label htmlFor="subject" className="mb-2 block">
+                      Subject
+                    </Label>
                     <Input
                       id="subject"
                       name="subject"
@@ -192,7 +194,7 @@ const Contact = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="message">
+                    <Label htmlFor="message" className="mb-2 block">
                       Message <span className="text-destructive">*</span>
                     </Label>
                     <Textarea
