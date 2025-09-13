@@ -34,8 +34,18 @@ const Navigation = () => {
   // Memoize categories to prevent recreation on every render
   const categories = useMemo(
     () => [
-      { name: "Shirts", href: "/category/shirts" },
-      { name: "Perfumes", href: "/category/perfumes" },
+      { name: "Health & Beauty", href: "/category/health-beauty", icon: "💄" },
+      {
+        name: "Sports & Recreation",
+        href: "/category/sports-recreation",
+        icon: "🏀",
+      },
+      {
+        name: "Tools & Equipment",
+        href: "/category/tools-equipment",
+        icon: "🔧",
+      },
+      { name: "Automotive", href: "/category/automotive", icon: "🚗" },
     ],
     []
   );
@@ -57,7 +67,8 @@ const Navigation = () => {
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
       {/* Promotional Banner */}
       <div className="bg-accent text-accent-foreground text-center py-2 px-4 text-sm font-medium">
-        🎉 Free Delivery On Orders Above $50 | Get 15% Off On 3+ Items! 🔥
+        🛍️ Shop All Categories | Health, Sports, Tools & More | Fast Worldwide
+        Shipping! 🌎
       </div>
 
       <div className="container mx-auto px-4">
@@ -93,17 +104,28 @@ const Navigation = () => {
               </Button>
 
               {/* Hover Dropdown */}
-              <div className="absolute top-full left-0 mt-1 w-48 bg-background border border-border rounded-md shadow-fashion-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <div className="absolute top-full left-0 mt-1 w-56 bg-background border border-border rounded-md shadow-fashion-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                 <div className="py-2">
                   {categories.map((category) => (
                     <Link
                       key={category.name}
                       href={category.href}
-                      className="block px-4 py-2 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                      className="flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                     >
-                      {category.name}
+                      <span className="mr-3 text-lg">{category.icon}</span>
+                      <div>
+                        <div className="font-medium">{category.name}</div>
+                      </div>
                     </Link>
                   ))}
+                  <div className="border-t border-border mt-2 pt-2">
+                    <Link
+                      href="/shop"
+                      className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors font-medium"
+                    >
+                      View All Products →
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -122,7 +144,7 @@ const Navigation = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 type="search"
-                placeholder="Search products..."
+                placeholder="Search across all categories..."
                 className="pl-10 bg-muted border-0 focus:bg-background"
                 onKeyPress={handleSearch}
               />
@@ -202,7 +224,7 @@ const Navigation = () => {
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input
                         type="search"
-                        placeholder="Search products..."
+                        placeholder="Search across all categories..."
                         className="pl-10"
                         onKeyPress={handleSearch}
                       />
@@ -272,14 +294,22 @@ const Navigation = () => {
                           variant={
                             pathname === category.href ? "secondary" : "ghost"
                           }
-                          className={`w-full justify-start h-9 text-base pl-4 transition-colors ${
+                          className={`w-full justify-start h-10 text-base pl-4 transition-colors ${
                             pathname === category.href
                               ? "bg-accent text-accent-foreground font-medium"
                               : ""
                           }`}
                           asChild
                         >
-                          <Link href={category.href}>{category.name}</Link>
+                          <Link
+                            href={category.href}
+                            className="flex items-center"
+                          >
+                            <span className="mr-3 text-lg">
+                              {category.icon}
+                            </span>
+                            {category.name}
+                          </Link>
                         </Button>
                       ))}
                     </div>

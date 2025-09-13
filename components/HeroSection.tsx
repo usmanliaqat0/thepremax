@@ -14,24 +14,24 @@ const HeroSection = () => {
           <div className="space-y-8 lg:space-y-10">
             <div className="space-y-4">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-primary leading-tight">
-                Upgrade Your Style With{" "}
-                <span className="text-accent">Designs That Speak</span> Volumes.
+                Everything You Need,{" "}
+                <span className="text-accent">All in One Place</span>.
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-lg">
-                Discover ThePreMax's curated collection of premium fashion
-                pieces designed to make every outfit a statement.
+                From health & beauty to tools & automotive - ThePreMax brings
+                you quality products across every category at unbeatable prices.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Button asChild size="lg" variant="luxury" className="group">
                 <Link href="/shop">
-                  Shop Collection
+                  Shop All Categories
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
               <Button asChild variant="outline" size="lg">
-                <Link href="/about">Learn More</Link>
+                <Link href="/category/health-beauty">Browse Categories</Link>
               </Button>
             </div>
 
@@ -40,13 +40,21 @@ const HeroSection = () => {
               <div className="grid grid-cols-3 gap-6">
                 <div className="text-center">
                   <div className="text-2xl md:text-3xl font-bold text-primary">
-                    500+
+                    19+
                   </div>
                   <div className="text-sm text-muted-foreground">Products</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl md:text-3xl font-bold text-primary">
-                    10k+
+                    4+
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    Categories
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl md:text-3xl font-bold text-primary">
+                    98%
                   </div>
                   <div className="text-sm text-muted-foreground">
                     Happy Customers

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/loader";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,11 +75,12 @@ const Profile = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <Navigation />
-        <div className="container mx-auto px-4 py-16">
-          <div className="text-center">
-            <p>Loading...</p>
+        <div className="container mx-auto px-4 py-16 flex-1 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <Spinner size="lg" />
+            <p className="text-muted-foreground">Loading your profile...</p>
           </div>
         </div>
         <Footer />
@@ -87,7 +89,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
 
       {/* Header */}

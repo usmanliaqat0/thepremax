@@ -148,13 +148,11 @@ const ProductDetail = () => {
     }
   };
 
-  // Mock product images (in a real app, these would come from the product data)
-  const productImages = [
-    product.image,
-    product.image, // For demo, using same image
-    product.image,
-    product.image,
-  ];
+  // Use the images array from product data, fallback to main image if no additional images
+  const productImages =
+    product.images && product.images.length > 0
+      ? product.images
+      : [product.image];
 
   const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
   const colors = ["Black", "White", "Gray", "Navy", "Red"];
@@ -221,27 +219,29 @@ const ProductDetail = () => {
               )}
             </div>
 
-            {/* Image Thumbnails */}
-            <div className="grid grid-cols-4 gap-2">
-              {productImages.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`relative aspect-square rounded-md overflow-hidden border-2 transition-colors ${
-                    selectedImage === index
-                      ? "border-primary"
-                      : "border-transparent hover:border-muted-foreground"
-                  }`}
-                >
-                  <Image
-                    src={image}
-                    alt={`${product.name} ${index + 1}`}
-                    fill
-                    className="object-cover"
-                  />
-                </button>
-              ))}
-            </div>
+            {/* Image Thumbnails - Only show if there are multiple images */}
+            {productImages.length > 1 && (
+              <div className="flex flex-wrap gap-2">
+                {productImages.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImage(index)}
+                    className={`relative aspect-square w-20 md:w-32 rounded-md overflow-hidden border-2 transition-colors ${
+                      selectedImage === index
+                        ? "border-primary"
+                        : "border-transparent hover:border-muted-foreground"
+                    }`}
+                  >
+                    <Image
+                      src={image}
+                      alt={`${product.name} ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Product Details */}

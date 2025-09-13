@@ -54,16 +54,21 @@ const CategoryPage = () => {
     // Price range filter
     if (priceRange !== "all") {
       switch (priceRange) {
-        case "under-5000":
-          filtered = filtered.filter((product) => product.price < 18);
+        case "under-15":
+          filtered = filtered.filter((product) => product.price < 15);
           break;
-        case "5000-8000":
+        case "15-30":
           filtered = filtered.filter(
-            (product) => product.price >= 18 && product.price <= 28
+            (product) => product.price >= 15 && product.price <= 30
           );
           break;
-        case "over-8000":
-          filtered = filtered.filter((product) => product.price > 28);
+        case "30-50":
+          filtered = filtered.filter(
+            (product) => product.price >= 30 && product.price <= 50
+          );
+          break;
+        case "over-50":
+          filtered = filtered.filter((product) => product.price > 50);
           break;
       }
     }
@@ -77,6 +82,10 @@ const CategoryPage = () => {
           return b.price - a.price;
         case "name":
           return a.name.localeCompare(b.name);
+        case "brand":
+          return a.brand.localeCompare(b.brand);
+        case "rating":
+          return b.rating - a.rating;
         case "featured":
           return b.featured ? 1 : -1;
         default:
@@ -145,10 +154,16 @@ const CategoryPage = () => {
                 <span>/</span>
                 <span className="text-primary">{category.name}</span>
               </div>
-              <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-2">
-                {category.name}
-              </h1>
-              <p className="text-muted-foreground">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-4xl">{category.icon}</span>
+                <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary">
+                  {category.name}
+                </h1>
+              </div>
+              <p className="text-muted-foreground mb-2">
+                {category.description}
+              </p>
+              <p className="text-sm text-muted-foreground">
                 {filteredProducts.length} products available
               </p>
             </div>
@@ -186,9 +201,10 @@ const CategoryPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Prices</SelectItem>
-                  <SelectItem value="under-5000">Under $18</SelectItem>
-                  <SelectItem value="5000-8000">$18 - $28</SelectItem>
-                  <SelectItem value="over-8000">Over $28</SelectItem>
+                  <SelectItem value="under-15">Under $15</SelectItem>
+                  <SelectItem value="15-30">$15 - $30</SelectItem>
+                  <SelectItem value="30-50">$30 - $50</SelectItem>
+                  <SelectItem value="over-50">Over $50</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -200,6 +216,8 @@ const CategoryPage = () => {
                   <SelectItem value="name">Name A-Z</SelectItem>
                   <SelectItem value="price-low">Price: Low to High</SelectItem>
                   <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  <SelectItem value="rating">Highest Rated</SelectItem>
+                  <SelectItem value="brand">Brand A-Z</SelectItem>
                   <SelectItem value="featured">Featured First</SelectItem>
                 </SelectContent>
               </Select>

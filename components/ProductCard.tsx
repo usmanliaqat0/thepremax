@@ -24,7 +24,8 @@ const ProductCard = ({
   variant = "default",
   className,
 }: ProductCardProps) => {
-  const { addToCart, addToWishlist, isInWishlist } = useCart();
+  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } =
+    useCart();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -38,7 +39,7 @@ const ProductCard = ({
     e.preventDefault();
     e.stopPropagation();
     if (isInWishlist(product.id)) {
-      // Remove from wishlist logic would go here
+      removeFromWishlist(product.id);
     } else {
       addToWishlist(product);
     }
@@ -155,8 +156,52 @@ const ProductCard = ({
         </div>
 
         <CardContent className={variantStyles.content}>
+          {/* Brand & Category */}
+          <div className="flex items-center justify-between">
+            <span
+              className={cn(
+                "text-muted-foreground font-medium",
+                variant === "featured" ? "text-sm" : "text-xs"
+              )}
+            >
+              {product.brand}
+            </span>
+            <Badge
+              variant="outline"
+              className={cn(
+                "text-xs capitalize",
+                variant === "compact" && "text-xs px-1.5 py-0.5"
+              )}
+            >
+              {product.category.replace("-", " ")}
+            </Badge>
+          </div>
+
           {/* Product Name */}
           <h3 className={variantStyles.title}>{product.name}</h3>
+
+          {/* Rating & Reviews */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center">
+              <span className="text-yellow-500">★</span>
+              <span
+                className={cn(
+                  "ml-1 font-medium",
+                  variant === "featured" ? "text-sm" : "text-xs"
+                )}
+              >
+                {product.rating}
+              </span>
+            </div>
+            <span
+              className={cn(
+                "text-muted-foreground",
+                variant === "featured" ? "text-sm" : "text-xs"
+              )}
+            >
+              ({product.reviewCount})
+            </span>
+          </div>
 
           {/* Price */}
           <div className="flex items-center gap-2">
@@ -175,53 +220,23 @@ const ProductCard = ({
             )}
           </div>
 
-          {/* Colors */}
-          <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                "text-muted-foreground",
-                variant === "featured" ? "text-base" : "text-sm"
-              )}
-            >
-              Colors:
-            </span>
-            <div className="flex gap-1">
-              {product.colors
-                .slice(0, variant === "compact" ? 3 : 4)
-                .map((color, index) => (
-                  <div
-                    key={index}
-                    className={cn(
-                      "rounded-full border border-border ring-1 ring-transparent hover:ring-accent transition-all cursor-pointer",
-                      variant === "featured" ? "w-5 h-5" : "w-4 h-4"
-                    )}
-                    style={{ backgroundColor: getColorValue(color) }}
-                    title={color}
-                  />
-                ))}
-              {product.colors.length > (variant === "compact" ? 3 : 4) && (
-                <span className="text-xs text-muted-foreground">
-                  +{product.colors.length - (variant === "compact" ? 3 : 4)}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Stock Status */}
+          {/* Stock Status & Shipping */}
           <div className="flex items-center justify-between">
-            <Badge
-              variant={product.inStock ? "secondary" : "destructive"}
-              className={variant === "featured" ? "text-sm" : "text-xs"}
-            >
-              {product.inStock ? "In Stock" : "Out of Stock"}
-            </Badge>
             <span
               className={cn(
-                "text-muted-foreground capitalize",
+                "text-green-600 font-medium",
                 variant === "featured" ? "text-sm" : "text-xs"
               )}
             >
-              {product.category}
+              {product.inStock ? "✓ In Stock" : "Out of Stock"}
+            </span>
+            <span
+              className={cn(
+                "text-muted-foreground",
+                variant === "featured" ? "text-sm" : "text-xs"
+              )}
+            >
+              Fast Shipping
             </span>
           </div>
         </CardContent>

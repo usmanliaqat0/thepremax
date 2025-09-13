@@ -57,12 +57,12 @@ const ShopContent = () => {
 
   const getPriceRangeValues = (range: string) => {
     switch (range) {
-      case "under-5000":
-        return { min: 0, max: 18 };
-      case "5000-8000":
-        return { min: 18, max: 28 };
-      case "over-8000":
-        return { min: 28, max: 999999 };
+      case "under-10":
+        return { min: 0, max: 10 };
+      case "10-15":
+        return { min: 10, max: 15 };
+      case "over-15":
+        return { min: 15, max: 999999 };
       default:
         return undefined;
     }
@@ -140,8 +140,14 @@ const ShopContent = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Products</SelectItem>
-                  <SelectItem value="shirts">Shirts</SelectItem>
-                  <SelectItem value="perfumes">Perfumes</SelectItem>
+                  <SelectItem value="health-beauty">Health & Beauty</SelectItem>
+                  <SelectItem value="sports-recreation">
+                    Sports & Recreation
+                  </SelectItem>
+                  <SelectItem value="tools-equipment">
+                    Tools & Equipment
+                  </SelectItem>
+                  <SelectItem value="automotive">Automotive</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -151,9 +157,9 @@ const ShopContent = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Prices</SelectItem>
-                  <SelectItem value="under-5000">Under $18</SelectItem>
-                  <SelectItem value="5000-8000">$18 - $28</SelectItem>
-                  <SelectItem value="over-8000">Over $28</SelectItem>
+                  <SelectItem value="under-10">Under $10</SelectItem>
+                  <SelectItem value="10-15">$10 - $15</SelectItem>
+                  <SelectItem value="over-15">Over $15</SelectItem>
                 </SelectContent>
               </Select>
 

@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ButtonLoader } from "@/components/ui/loader";
 import { Eye, EyeOff } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -63,11 +64,11 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navigation />
 
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-md mx-auto">
+      <div className="container mx-auto px-4 py-16 flex-1 flex items-center justify-center min-h-[calc(100vh-200px)]">
+        <div className="max-w-md mx-auto w-full">
           <Card>
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl font-heading font-bold text-center">
@@ -127,6 +128,7 @@ const Login = () => {
                   </div>
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading && <ButtonLoader variant="light" />}
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
