@@ -8,8 +8,8 @@ import Image from "next/image";
 const HeroSection = () => {
   return (
     <section className="relative min-h-[600px] lg:min-h-[700px] bg-gradient-hero overflow-hidden">
-      <div className="container mx-auto px-4 h-full">
-        <div className="grid lg:grid-cols-2 gap-8 items-center min-h-[600px] lg:min-h-[700px]">
+      <div className="container mx-auto p-4 md:px-4 md:py-0 h-full">
+        <div className="grid lg:grid-cols-2 gap-10 items-center min-h-[600px] lg:min-h-[700px]">
           {/* Text Content */}
           <div className="space-y-8 lg:space-y-10">
             <div className="space-y-4">
@@ -17,7 +17,7 @@ const HeroSection = () => {
                 Everything You Need,{" "}
                 <span className="text-accent">All in One Place</span>.
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-lg">
+              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-xl">
                 From health & beauty to tools & automotive - ThePreMax brings
                 you quality products across every category at unbeatable prices.
               </p>
@@ -37,7 +37,7 @@ const HeroSection = () => {
 
             {/* Stats */}
             <div className="pt-8 border-t border-border">
-              <div className="grid grid-cols-3 gap-6">
+              <div className="flex flex-wrap gap-8 justify-between">
                 <div className="text-center">
                   <div className="text-2xl md:text-3xl font-bold text-primary">
                     19+
@@ -60,7 +60,7 @@ const HeroSection = () => {
                     Happy Customers
                   </div>
                 </div>
-                <div className="text-center">
+                <div className="text-center hidden md:block">
                   <div className="text-2xl md:text-3xl font-bold text-primary">
                     98%
                   </div>
