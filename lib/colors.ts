@@ -1,5 +1,5 @@
 /**
- * Fashion Misst Color Utilities
+ * ThePreMax Color Utilities
  * Centralized color management for consistent styling
  */
 

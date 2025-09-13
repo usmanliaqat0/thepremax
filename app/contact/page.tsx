@@ -127,9 +127,9 @@ const Contact = () => {
                   Email Us
                 </h3>
                 <p className="text-muted-foreground">
-                  info@fashionmisst.com
+                  info@ThePreMax.com
                   <br />
-                  support@fashionmisst.com
+                  support@ThePreMax.com
                   <br />
                   Response within 24 hours
                 </p>

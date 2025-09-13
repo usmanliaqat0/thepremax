@@ -218,7 +218,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Load state from localStorage on mount
   useEffect(() => {
-    const savedState = localStorage.getItem("fashionmisst-cart");
+    const savedState = localStorage.getItem("ThePreMax-cart");
     if (savedState) {
       try {
         const parsedState = JSON.parse(savedState);
@@ -231,7 +231,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem("fashionmisst-cart", JSON.stringify(state));
+    localStorage.setItem("ThePreMax-cart", JSON.stringify(state));
   }, [state]);
 
   // Memoized callback functions for better performance

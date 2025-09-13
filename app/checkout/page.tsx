@@ -104,7 +104,7 @@ const Checkout = () => {
   }
 
   const subtotal = getCartTotal();
-  const shipping = subtotal > 14000 ? 0 : 2800;
+  const shipping = subtotal > 50 ? 0 : 10;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
 

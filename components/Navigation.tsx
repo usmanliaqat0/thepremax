@@ -57,8 +57,7 @@ const Navigation = () => {
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
       {/* Promotional Banner */}
       <div className="bg-accent text-accent-foreground text-center py-2 px-4 text-sm font-medium">
-        🎉 Free Delivery On Orders Above PKR 14,000 | Get 15% Off On 3+ Items!
-        🔥
+        🎉 Free Delivery On Orders Above $50 | Get 15% Off On 3+ Items! 🔥
       </div>
 
       <div className="container mx-auto px-4">
@@ -67,13 +66,13 @@ const Navigation = () => {
           <Link href="/" className="flex items-center space-x-2">
             <Image
               src="/assets/logo.png"
-              alt="Fashion Misst"
+              alt="ThePreMax"
               width={40}
               height={40}
               className="rounded"
             />
             <span className="font-heading font-bold text-xl text-primary">
-              Fashion Misst
+              ThePreMax
             </span>
           </Link>
 
@@ -187,13 +186,13 @@ const Navigation = () => {
                   <div className="flex items-center gap-2 p-6 border-b">
                     <Image
                       src="/assets/logo.png"
-                      alt="Fashion Misst"
+                      alt="ThePreMax"
                       width={32}
                       height={32}
                       className="rounded"
                     />
                     <span className="font-heading font-bold text-lg">
-                      Fashion Misst
+                      ThePreMax
                     </span>
                   </div>
 

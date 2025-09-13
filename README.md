@@ -1,4 +1,16 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ThePreMax - Premium Fashion E-commerce
+
+A modern, responsive e-commerce website built with Next.js, featuring premium fashion items including shirts and perfumes.
+
+## Features
+
+- 🛍️ Modern e-commerce functionality
+- 📱 Responsive design for all devices
+- 🎨 Beautiful UI with dark/light theme support
+- 🛒 Shopping cart with persistent storage
+- 🔍 Product search and filtering
+- 💳 Checkout process
+- 📧 Contact forms and newsletters
 
 ## Getting Started
 
@@ -16,9 +28,13 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework:** Next.js 15 with App Router
+- **Styling:** Tailwind CSS with custom design system
+- **UI Components:** Radix UI primitives
+- **Icons:** Lucide React
+- **Fonts:** Poppins from Google Fonts
 
 ## Learn More
 

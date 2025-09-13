@@ -39,7 +39,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-} /* Fashion Misst Design System */
+} /* ThePreMax Design System */
 :root {
   --radius: 0.75rem;
   --font-poppins: "Poppins", -apple-system, BlinkMacSystemFont, system-ui,

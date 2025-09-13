@@ -1,5 +1,5 @@
 /**
- * Enhanced TypeScript types for Fashion Misst application
+ * Enhanced TypeScript types for ThePreMax application
  */
 
 import { LucideIcon } from "lucide-react";
@@ -7,7 +7,7 @@ import { LucideIcon } from "lucide-react";
 // Base types
 export type ID = string;
 export type Timestamp = string; // ISO string
-export type Currency = "PKR" | "USD" | "EUR";
+export type Currency = "USD" | "EUR" | "PKR";
 export type Status = "active" | "inactive" | "pending" | "archived";
 
 // User & Authentication

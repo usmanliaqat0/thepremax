@@ -416,7 +416,7 @@ const ProductDetail = () => {
               <div className="flex items-center gap-3">
                 <Truck className="h-5 w-5 text-muted-foreground" />
                 <span className="text-sm">
-                  Free shipping on orders over PKR 14,000
+                  Free shipping on orders over $50
                 </span>
               </div>
               <div className="flex items-center gap-3">

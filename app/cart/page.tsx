@@ -47,7 +47,7 @@ const Cart = () => {
 
   const subtotal = getCartTotal();
   const discount = appliedPromo ? subtotal * 0.1 : 0;
-  const shipping = subtotal > 14000 ? 0 : 2800; // Free shipping over PKR 14,000, otherwise PKR 2,800
+  const shipping = subtotal > 50 ? 0 : 10; // Free shipping over $50, otherwise $10
   const tax = (subtotal - discount) * 0.08;
   const total = subtotal - discount + shipping + tax;
 
@@ -275,7 +275,7 @@ const Cart = () => {
                   <div className="space-y-3 mt-6 pt-6 border-t">
                     <div className="flex items-center gap-3 text-sm">
                       <Truck className="h-4 w-4 text-muted-foreground" />
-                      <span>Free shipping on orders over PKR 14,000</span>
+                      <span>Free shipping on orders over $50</span>
                     </div>
                     <div className="flex items-center gap-3 text-sm">
                       <Shield className="h-4 w-4 text-muted-foreground" />

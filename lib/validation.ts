@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Validation schemas and utilities for the Fashion Misst application
+ * Validation schemas and utilities for the ThePreMax application
  */
 
 // Common validation patterns

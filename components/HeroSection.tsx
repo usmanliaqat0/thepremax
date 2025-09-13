@@ -18,7 +18,7 @@ const HeroSection = () => {
                 <span className="text-accent">Designs That Speak</span> Volumes.
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-lg">
-                Discover Fashion Misst's curated collection of premium fashion
+                Discover ThePreMax's curated collection of premium fashion
                 pieces designed to make every outfit a statement.
               </p>
             </div>

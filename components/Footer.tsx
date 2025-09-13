@@ -25,14 +25,12 @@ const Footer = () => {
             <Link href="/" className="flex items-center space-x-2">
               <Image
                 src="/assets/logo.png"
-                alt="Fashion Misst"
+                alt="ThePreMax"
                 width={40}
                 height={40}
                 className="rounded"
               />
-              <span className="font-heading font-bold text-xl">
-                Fashion Misst
-              </span>
+              <span className="font-heading font-bold text-xl">ThePreMax</span>
             </Link>
             <p className="text-primary-foreground/80 leading-relaxed">
               Discover premium fashion pieces designed to elevate your style.
@@ -185,7 +183,7 @@ const Footer = () => {
               <div className="flex items-center space-x-3">
                 <Mail className="h-5 w-5 text-accent" />
                 <span className="text-primary-foreground/80 text-sm">
-                  info@fashionmisst.com
+                  info@ThePreMax.com
                 </span>
               </div>
             </div>
@@ -211,7 +209,7 @@ const Footer = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-primary-foreground/80 text-sm">
-              © 2024 Fashion Misst. All rights reserved.
+              © 2024 ThePreMax. All rights reserved.
             </div>
             <div className="flex space-x-6">
               <Link

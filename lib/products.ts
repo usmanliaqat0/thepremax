@@ -20,12 +20,12 @@ export interface Product {
 }
 
 export const products: Product[] = [
-  // Shirts - Prices converted to Pakistani Rupees (PKR)
+  // Shirts - Prices in USD
   {
     id: "1",
     name: "Secret Wars",
-    price: 8400,
-    originalPrice: 9800,
+    price: 30,
+    originalPrice: 35,
     image: "/assets/secret-garden-tee.jpg",
     category: "shirts",
     description:
@@ -40,7 +40,7 @@ export const products: Product[] = [
   {
     id: "2",
     name: "Kakashi V",
-    price: 8400,
+    price: 30,
     image: "/assets/urban-warrior-tee.jpg",
     category: "shirts",
     description:
@@ -55,7 +55,7 @@ export const products: Product[] = [
   {
     id: "3",
     name: "Vegito",
-    price: 8400,
+    price: 30,
     image: "/assets/cosmic-dreams-tee.jpg",
     category: "shirts",
     description:
@@ -70,7 +70,7 @@ export const products: Product[] = [
   {
     id: "4",
     name: "One Piece III",
-    price: 8400,
+    price: 30,
     image: "/assets/one-piece-tee.jpg",
     category: "shirts",
     description:
@@ -85,7 +85,7 @@ export const products: Product[] = [
   {
     id: "5",
     name: "Transformers",
-    price: 8400,
+    price: 30,
     image: "/assets/transformers-tee.jpg",
     category: "shirts",
     description:
@@ -100,7 +100,7 @@ export const products: Product[] = [
   {
     id: "6",
     name: "Need For Speed",
-    price: 8400,
+    price: 30,
     image: "/assets/nfs-tee.jpg",
     category: "shirts",
     description:
@@ -115,7 +115,7 @@ export const products: Product[] = [
   {
     id: "7",
     name: "Superman",
-    price: 8400,
+    price: 30,
     image: "/assets/superman-tee.jpg",
     category: "shirts",
     description:
@@ -130,7 +130,7 @@ export const products: Product[] = [
   {
     id: "8",
     name: "Assassin's Creed",
-    price: 8400,
+    price: 30,
     image: "/assets/assassins-creed-tee.jpg",
     category: "shirts",
     description:
@@ -147,8 +147,8 @@ export const products: Product[] = [
   {
     id: "9",
     name: "Flames & Passion",
-    price: 4200,
-    originalPrice: 4900,
+    price: 15,
+    originalPrice: 17.5,
     image: "/assets/flames-passion-perfume.jpg",
     category: "perfumes",
     description:
@@ -163,7 +163,7 @@ export const products: Product[] = [
   {
     id: "10",
     name: "Janan Vanilla",
-    price: 3500,
+    price: 12.5,
     image: "/assets/janan-vanilla-perfume.jpg",
     category: "perfumes",
     description:
@@ -178,7 +178,7 @@ export const products: Product[] = [
   {
     id: "11",
     name: "Black Musk",
-    price: 4900,
+    price: 17.5,
     image: "/assets/black-musk-perfume.jpg",
     category: "perfumes",
     description:
@@ -193,7 +193,7 @@ export const products: Product[] = [
   {
     id: "12",
     name: "Janan Tobacco",
-    price: 4200,
+    price: 15,
     image: "/assets/janan-tobacco-perfume.jpg",
     category: "perfumes",
     description:
@@ -208,7 +208,7 @@ export const products: Product[] = [
   {
     id: "13",
     name: "Dark Star",
-    price: 5600,
+    price: 20,
     image: "/assets/dark-star-perfume.jpg",
     category: "perfumes",
     description:

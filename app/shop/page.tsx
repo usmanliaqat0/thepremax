@@ -58,11 +58,11 @@ const ShopContent = () => {
   const getPriceRangeValues = (range: string) => {
     switch (range) {
       case "under-5000":
-        return { min: 0, max: 5000 };
+        return { min: 0, max: 18 };
       case "5000-8000":
-        return { min: 5000, max: 8000 };
+        return { min: 18, max: 28 };
       case "over-8000":
-        return { min: 8000, max: 999999 };
+        return { min: 28, max: 999999 };
       default:
         return undefined;
     }
@@ -151,9 +151,9 @@ const ShopContent = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Prices</SelectItem>
-                  <SelectItem value="under-5000">Under PKR 5,000</SelectItem>
-                  <SelectItem value="5000-8000">PKR 5,000 - 8,000</SelectItem>
-                  <SelectItem value="over-8000">Over PKR 8,000</SelectItem>
+                  <SelectItem value="under-5000">Under $18</SelectItem>
+                  <SelectItem value="5000-8000">$18 - $28</SelectItem>
+                  <SelectItem value="over-8000">Over $28</SelectItem>
                 </SelectContent>
               </Select>
 

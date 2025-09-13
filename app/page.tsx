@@ -53,7 +53,7 @@ export default function Home() {
     {
       icon: Truck,
       title: "Free Shipping",
-      description: "Free delivery on orders over PKR 14,000",
+      description: "Free delivery on orders over $50",
     },
     {
       icon: Shield,

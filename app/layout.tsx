@@ -11,9 +11,9 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Fashion Misst - Premium Fashion & Style",
+  title: "ThePreMax - Premium Fashion & Style",
   description:
-    "Discover our curated collection of premium fashion pieces designed to elevate your wardrobe.",
+    "Discover ThePreMax's curated collection of premium fashion pieces designed to elevate your wardrobe.",
   keywords: [
     "fashion",
     "clothing",
@@ -21,22 +21,23 @@ export const metadata: Metadata = {
     "perfumes",
     "premium fashion",
     "online shopping",
+    "ThePreMax",
   ],
-  authors: [{ name: "Fashion Misst" }],
+  authors: [{ name: "ThePreMax" }],
   robots: "index, follow",
   openGraph: {
-    title: "Fashion Misst - Premium Fashion & Style",
+    title: "ThePreMax - Premium Fashion & Style",
     description:
-      "Discover our curated collection of premium fashion pieces designed to elevate your wardrobe.",
+      "Discover ThePreMax's curated collection of premium fashion pieces designed to elevate your wardrobe.",
     type: "website",
     locale: "en_US",
-    siteName: "Fashion Misst",
+    siteName: "ThePreMax",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Fashion Misst - Premium Fashion & Style",
+    title: "ThePreMax - Premium Fashion & Style",
     description:
-      "Discover our curated collection of premium fashion pieces designed to elevate your wardrobe.",
+      "Discover ThePreMax's curated collection of premium fashion pieces designed to elevate your wardrobe.",
   },
 };
 

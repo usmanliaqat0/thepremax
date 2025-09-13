@@ -55,15 +55,15 @@ const CategoryPage = () => {
     if (priceRange !== "all") {
       switch (priceRange) {
         case "under-5000":
-          filtered = filtered.filter((product) => product.price < 5000);
+          filtered = filtered.filter((product) => product.price < 18);
           break;
         case "5000-8000":
           filtered = filtered.filter(
-            (product) => product.price >= 5000 && product.price <= 8000
+            (product) => product.price >= 18 && product.price <= 28
           );
           break;
         case "over-8000":
-          filtered = filtered.filter((product) => product.price > 8000);
+          filtered = filtered.filter((product) => product.price > 28);
           break;
       }
     }
@@ -186,9 +186,9 @@ const CategoryPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Prices</SelectItem>
-                  <SelectItem value="under-5000">Under PKR 5,000</SelectItem>
-                  <SelectItem value="5000-8000">PKR 5,000 - 8,000</SelectItem>
-                  <SelectItem value="over-8000">Over PKR 8,000</SelectItem>
+                  <SelectItem value="under-5000">Under $18</SelectItem>
+                  <SelectItem value="5000-8000">$18 - $28</SelectItem>
+                  <SelectItem value="over-8000">Over $28</SelectItem>
                 </SelectContent>
               </Select>
 

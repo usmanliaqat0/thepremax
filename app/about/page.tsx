@@ -29,7 +29,7 @@ const About = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-primary mb-6">
-              About <span className="text-accent">Fashion Misst</span>
+              About <span className="text-accent">ThePreMax</span>
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
               We're passionate about bringing you premium fashion pieces that
@@ -50,8 +50,8 @@ const About = () => {
               </h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  Fashion Misst was born from a simple belief: everyone deserves
-                  to express their personality through high-quality, stylish
+                  ThePreMax was born from a simple belief: everyone deserves to
+                  express their personality through high-quality, stylish
                   clothing that doesn't compromise on comfort or craftsmanship.
                 </p>
                 <p>
@@ -89,7 +89,7 @@ const About = () => {
               Our Values
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              These core values guide everything we do at Fashion Misst.
+              These core values guide everything we do at ThePreMax.
             </p>
           </div>
 
@@ -147,7 +147,7 @@ const About = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-heading font-bold text-primary mb-4">
-              Fashion Misst by Numbers
+              ThePreMax by Numbers
             </h2>
           </div>
 
