@@ -91,11 +91,11 @@ const Contact = () => {
                   Visit Our Store
                 </h3>
                 <p className="text-muted-foreground">
-                  123 Fashion Street
+                  456 Fashion Avenue
                   <br />
-                  Karachi, Pakistan
+                  New York, NY 10001
                   <br />
-                  75400
+                  United States
                 </p>
               </CardContent>
             </Card>
@@ -109,11 +109,11 @@ const Contact = () => {
                   Call Us
                 </h3>
                 <p className="text-muted-foreground">
-                  +92 300 1234567
+                  +1 (555) 123-4567
                   <br />
-                  +92 21 1234567
+                  +1 (555) 987-6543
                   <br />
-                  Available 9 AM - 9 PM
+                  Available 9 AM - 9 PM EST
                 </p>
               </CardContent>
             </Card>
@@ -127,9 +127,9 @@ const Contact = () => {
                   Email Us
                 </h3>
                 <p className="text-muted-foreground">
-                  info@ThePreMax.com
+                  info@thepremax.com
                   <br />
-                  support@ThePreMax.com
+                  support@thepremax.com
                   <br />
                   Response within 24 hours
                 </p>

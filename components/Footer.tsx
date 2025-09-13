@@ -171,19 +171,19 @@ const Footer = () => {
               <div className="flex items-center space-x-3">
                 <MapPin className="h-5 w-5 text-accent" />
                 <span className="text-primary-foreground/80 text-sm">
-                  123 Fashion Street, Karachi, Pakistan
+                  456 Fashion Avenue, New York, NY 10001
                 </span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-accent" />
                 <span className="text-primary-foreground/80 text-sm">
-                  +92 300 1234567
+                  +1 (555) 123-4567
                 </span>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="h-5 w-5 text-accent" />
                 <span className="text-primary-foreground/80 text-sm">
-                  info@ThePreMax.com
+                  info@thepremax.com
                 </span>
               </div>
             </div>
@@ -209,7 +209,7 @@ const Footer = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-primary-foreground/80 text-sm">
-              © 2024 ThePreMax. All rights reserved.
+              © {new Date().getFullYear()} ThePreMax. All rights reserved.
             </div>
             <div className="flex space-x-6">
               <Link
@@ -223,12 +223,6 @@ const Footer = () => {
                 className="text-primary-foreground/80 hover:text-accent text-sm transition-colors"
               >
                 Terms of Service
-              </Link>
-              <Link
-                href="/sitemap"
-                className="text-primary-foreground/80 hover:text-accent text-sm transition-colors"
-              >
-                Sitemap
               </Link>
             </div>
           </div>

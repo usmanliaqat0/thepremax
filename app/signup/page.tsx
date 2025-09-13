@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -25,6 +26,7 @@ const Signup = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    agreeToTerms: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -41,6 +43,18 @@ const Signup = () => {
       toast({
         title: "Error",
         description: "Passwords do not match.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate terms agreement
+    if (!formData.agreeToTerms) {
+      toast({
+        title: "Error",
+        description:
+          "You must agree to the Terms of Service and Privacy Policy.",
         variant: "destructive",
       });
       setIsLoading(false);
@@ -72,7 +86,11 @@ const Signup = () => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
   };
 
   return (
@@ -172,7 +190,40 @@ const Signup = () => {
                     </Button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="agreeToTerms"
+                    name="agreeToTerms"
+                    checked={formData.agreeToTerms}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, agreeToTerms: !!checked })
+                    }
+                  />
+                  <Label
+                    htmlFor="agreeToTerms"
+                    className="text-sm leading-relaxed"
+                  >
+                    I agree to the{" "}
+                    <Link
+                      href="/terms"
+                      className="text-primary hover:underline"
+                    >
+                      Terms of Service
+                    </Link>{" "}
+                    and{" "}
+                    <Link
+                      href="/privacy"
+                      className="text-primary hover:underline"
+                    >
+                      Privacy Policy
+                    </Link>
+                  </Label>
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isLoading || !formData.agreeToTerms}
+                >
                   {isLoading && <ButtonLoader variant="light" />}
                   {isLoading ? "Creating account..." : "Sign Up"}
                 </Button>
