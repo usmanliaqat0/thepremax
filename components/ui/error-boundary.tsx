@@ -76,8 +76,8 @@ export const DefaultErrorFallback: React.FC<ErrorFallbackProps> = ({
       </CardHeader>
       <CardContent className="space-y-4">
         <p className="text-muted-foreground">
-          We're sorry, but something unexpected happened. Please try refreshing
-          the page.
+          We&apos;re sorry, but something unexpected happened. Please try
+          refreshing the page.
         </p>
         {process.env.NODE_ENV === "development" && (
           <details className="text-sm">

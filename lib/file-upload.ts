@@ -262,7 +262,7 @@ export class FileUploadService {
         size: stats.size,
         modified: stats.mtime,
       };
-    } catch (error) {
+    } catch {
       return {
         exists: false,
         message: "File not found",
@@ -290,7 +290,7 @@ export class FileUploadService {
             console.log(`Cleaned up temp file: ${file}`);
           }
         }
-      } catch (error) {
+      } catch {
         // Temp directory doesn't exist or is empty, which is fine
       }
     } catch (error) {

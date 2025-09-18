@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 export interface IOrderItem {
   productId: string;
@@ -10,7 +10,7 @@ export interface IOrderItem {
   color?: string;
 }
 
-export interface IOrder extends Document {
+export interface IOrder {
   userId: string;
   orderNumber: string;
   items: IOrderItem[];
@@ -110,7 +110,6 @@ const OrderSchema = new Schema<IOrder>(
 
 // Create indexes
 OrderSchema.index({ userId: 1, createdAt: -1 });
-OrderSchema.index({ orderNumber: 1 });
 OrderSchema.index({ status: 1 });
 
 const Order =

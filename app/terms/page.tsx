@@ -32,8 +32,8 @@ export default function TermsOfService() {
               <p className="text-muted-foreground leading-relaxed mb-4">
                 By accessing and using ThePreMax website, you accept and agree
                 to be bound by the terms and provision of this agreement. These
-                Terms of Service ("Terms") govern your use of our website and
-                services.
+                Terms of Service (&quot;Terms&quot;) govern your use of our
+                website and services.
               </p>
               <p className="text-muted-foreground leading-relaxed">
                 If you do not agree to abide by the above, please do not use
@@ -193,8 +193,8 @@ export default function TermsOfService() {
                 9. Disclaimer of Warranties
               </h2>
               <p className="text-muted-foreground leading-relaxed">
-                Our website and services are provided "as is" without any
-                representations or warranties of any kind. We disclaim all
+                Our website and services are provided &quot;as is&quot; without
+                any representations or warranties of any kind. We disclaim all
                 warranties, express or implied, including but not limited to
                 merchantability, fitness for a particular purpose, and
                 non-infringement.

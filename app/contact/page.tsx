@@ -71,8 +71,8 @@ const Contact = () => {
               Get in <span className="text-accent">Touch</span>
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              Have questions about our products or need assistance? We're here
-              to help! Reach out to us through any of the channels below.
+              Have questions about our products or need assistance? We&apos;re
+              here to help! Reach out to us through any of the channels below.
             </p>
           </div>
         </div>

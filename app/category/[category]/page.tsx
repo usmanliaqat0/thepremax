@@ -118,7 +118,7 @@ const CategoryPage = () => {
                 Category not found
               </h2>
               <p className="text-muted-foreground mb-6">
-                The category you're looking for doesn't exist.
+                The category you&apos;re looking for doesn&apos;t exist.
               </p>
               <Link href="/shop">
                 <Button className="w-full">
@@ -241,7 +241,7 @@ const CategoryPage = () => {
             <div className="flex flex-wrap gap-2 mt-4">
               {searchTerm.trim() && (
                 <Badge variant="secondary">
-                  Search: "{searchTerm}"
+                  Search: &quot;{searchTerm}&quot;
                   <button
                     onClick={() => setSearchTerm("")}
                     className="ml-2 hover:text-destructive"

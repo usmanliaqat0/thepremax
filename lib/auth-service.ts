@@ -4,6 +4,14 @@ import { AuthUser, SigninData, SignupData } from "./types";
 import User from "./models/User";
 import connectDB from "./db";
 
+interface JWTPayload {
+  id: string;
+  email: string;
+  type: string;
+  iat?: number;
+  exp?: number;
+}
+
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const TOKEN_EXPIRY = process.env.JWT_EXPIRES_IN || "7d";
@@ -121,30 +129,30 @@ export class TokenUtils {
     } as jwt.SignOptions);
   }
 
-  static verifyAccessToken(token: string): any {
+  static verifyAccessToken(token: string): JWTPayload {
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as any;
+      const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
       if (decoded.type !== "access") {
         throw new Error("Invalid token type");
       }
       return decoded;
-    } catch (error) {
+    } catch {
       throw new Error("Invalid or expired access token");
     }
   }
 
-  static verifyRefreshToken(token: string): any {
+  static verifyRefreshToken(token: string): JWTPayload {
     if (!REFRESH_TOKENS_ENABLED || !JWT_REFRESH_SECRET) {
       throw new Error("Refresh tokens are not enabled");
     }
 
     try {
-      const decoded = jwt.verify(token, JWT_REFRESH_SECRET) as any;
+      const decoded = jwt.verify(token, JWT_REFRESH_SECRET) as JWTPayload;
       if (decoded.type !== "refresh") {
         throw new Error("Invalid token type");
       }
       return decoded;
-    } catch (error) {
+    } catch {
       throw new Error("Invalid or expired refresh token");
     }
   }

@@ -24,9 +24,9 @@ const About = () => {
               About <span className="text-accent">ThePreMax</span>
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              We're passionate about bringing you premium fashion pieces that
-              speak volumes about your unique style. Every design tells a story,
-              and we're here to help you tell yours.
+              We&apos;re passionate about bringing you premium fashion pieces
+              that speak volumes about your unique style. Every design tells a
+              story, and we&apos;re here to help you tell yours.
             </p>
           </div>
         </div>
@@ -44,13 +44,14 @@ const About = () => {
                 <p>
                   ThePreMax was born from a simple belief: everyone deserves to
                   express their personality through high-quality, stylish
-                  clothing that doesn't compromise on comfort or craftsmanship.
+                  clothing that doesn&apos;t compromise on comfort or
+                  craftsmanship.
                 </p>
                 <p>
-                  Started in 2020, we've grown from a small passion project to a
-                  trusted brand serving thousands of fashion enthusiasts across
-                  Pakistan. Our journey began with a mission to bridge the gap
-                  between premium quality and accessible pricing.
+                  Started in 2020, we&apos;ve grown from a small passion project
+                  to a trusted brand serving thousands of fashion enthusiasts
+                  across Pakistan. Our journey began with a mission to bridge
+                  the gap between premium quality and accessible pricing.
                 </p>
                 <p>
                   Every piece in our collection is carefully curated and tested

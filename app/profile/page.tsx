@@ -102,11 +102,6 @@ const Profile = () => {
     }
   }, [state.user?.avatar]);
 
-  const handleLogout = async () => {
-    await logout();
-    router.push("/");
-  };
-
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -165,7 +160,7 @@ const Profile = () => {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Upload failed",
         description: "Failed to update your avatar. Please try again.",
@@ -188,7 +183,7 @@ const Profile = () => {
           description: "Your profile picture has been updated.",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Update failed",
         description: "Failed to update your avatar. Please try again.",
@@ -208,7 +203,7 @@ const Profile = () => {
           description: "Your profile picture has been reset to default.",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Reset failed",
         description: "Failed to reset your avatar. Please try again.",

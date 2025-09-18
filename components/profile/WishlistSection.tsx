@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -28,7 +29,6 @@ import {
   List,
   Filter,
   Star,
-  Eye,
   Share2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -54,7 +54,7 @@ const WishlistSection = () => {
   const { toast } = useToast();
 
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<string>("dateAdded");
   const [filterBy, setFilterBy] = useState<string>("all");
@@ -246,9 +246,11 @@ const WishlistSection = () => {
           className="group hover:shadow-lg transition-all duration-300"
         >
           <div className="relative overflow-hidden">
-            <img
+            <Image
               src={item.image}
               alt={item.name}
+              width={300}
+              height={192}
               className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
             />
             {item.discount && (
@@ -354,9 +356,11 @@ const WishlistSection = () => {
           <CardContent className="p-4">
             <div className="flex space-x-4">
               <div className="relative">
-                <img
+                <Image
                   src={item.image}
                   alt={item.name}
+                  width={80}
+                  height={80}
                   className="w-20 h-20 object-cover rounded-lg"
                 />
                 {item.discount && (

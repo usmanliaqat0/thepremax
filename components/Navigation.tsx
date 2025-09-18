@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useCart } from "@/context/CartContext";
+import { useCart, CartItem } from "@/context/CartContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useMemo, useCallback } from "react";
 
@@ -362,7 +362,8 @@ const Navigation = () => {
                               className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs font-bold min-w-[1.25rem] ml-auto"
                             >
                               {state.items.reduce(
-                                (sum: number, item: any) => sum + item.quantity,
+                                (sum: number, item: CartItem) =>
+                                  sum + item.quantity,
                                 0
                               )}
                             </Badge>
