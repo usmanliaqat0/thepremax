@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -17,96 +17,127 @@ import { ButtonLoader } from "@/components/ui/loader";
 import { Eye, EyeOff } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
+import { SigninData } from "@/lib/types";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { state, signin } = useAuth();
   const router = useRouter();
-  const { toast } = useToast();
+
+  const validateForm = (): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+    if (!password) {
+      newErrors.password = "Password is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      if (email && password) {
-        // Store dummy user data in localStorage
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            id: "1",
-            email: email,
-            name: email.split("@")[0],
-            avatar:
-              "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-            joined: "2025-01-15",
-          })
-        );
+    if (!validateForm()) {
+      return;
+    }
 
-        toast({
-          title: "Welcome back!",
-          description: "You have been successfully logged in.",
-        });
-        router.push("/profile");
-      } else {
-        toast({
-          title: "Error",
-          description: "Please fill in all fields.",
-          variant: "destructive",
-        });
-      }
-      setIsLoading(false);
-    }, 1500);
+    const signinData: SigninData = {
+      email,
+      password,
+    };
+
+    const result = await signin(signinData);
+    if (result.success) {
+      router.push("/profile");
+    } else if (result.errors) {
+      setErrors((prev) => ({ ...prev, ...result.errors }));
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    if (field === "email") setEmail(value);
+    if (field === "password") setPassword(value);
+
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
       <Navigation />
 
-      <div className="container mx-auto px-4 py-16 flex-1 flex items-center justify-center min-h-[calc(100vh-200px)]">
-        <div className="max-w-md mx-auto w-full">
-          <Card>
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl font-heading font-bold text-center">
+      <main className="flex-1 flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-lg">
+          <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+            <CardHeader className="space-y-2 pb-6">
+              <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
                 Welcome Back
               </CardTitle>
-              <CardDescription className="text-center">
+              <CardDescription className="text-center text-gray-600 text-base">
                 Sign in to your account to continue shopping
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
+            <CardContent className="px-8 pb-8">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label
+                    htmlFor="email"
+                    className="text-gray-700 font-medium mb-2 block"
+                  >
+                    Email
+                  </Label>
                   <Input
                     id="email"
                     type="email"
                     placeholder="Enter your email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    className={`h-11 ${
+                      errors.email
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-gray-200 focus:border-gray-400"
+                    } transition-colors`}
                   />
+                  {errors.email && (
+                    <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label
+                    htmlFor="password"
+                    className="text-gray-700 font-medium mb-2 block"
+                  >
+                    Password
+                  </Label>
                   <div className="relative">
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
+                      onChange={(e) =>
+                        handleInputChange("password", e.target.value)
+                      }
+                      className={`h-11 pr-10 ${
+                        errors.password
+                          ? "border-red-500 focus:border-red-500"
+                          : "border-gray-200 focus:border-gray-400"
+                      } transition-colors`}
                     />
-                    <Button
+                    <button
                       type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? (
@@ -114,36 +145,49 @@ const Login = () => {
                       ) : (
                         <Eye className="h-4 w-4" />
                       )}
-                    </Button>
+                    </button>
                   </div>
+                  {errors.password && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.password}
+                    </p>
+                  )}
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-end">
                   <div className="text-sm">
                     <Link
                       href="/forgot-password"
-                      className="text-primary hover:underline"
+                      className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
                     >
-                      Forgot your password?
+                      Forgot password?
                     </Link>
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <ButtonLoader variant="light" />}
-                  {isLoading ? "Signing in..." : "Sign In"}
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-base font-semibold bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  disabled={state.isLoading}
+                >
+                  {state.isLoading && <ButtonLoader variant="light" />}
+                  {state.isLoading ? "Signing In" : "Sign In"}
                 </Button>
               </form>
+
               <div className="mt-6 text-center text-sm">
-                <span className="text-muted-foreground">
-                  Don't have an account?{" "}
+                <span className="text-gray-600">
+                  Don&apos;t have an account?{" "}
                 </span>
-                <Link href="/signup" className="text-primary hover:underline">
-                  Sign up
+                <Link
+                  href="/signup"
+                  className="font-semibold text-gray-900 hover:text-gray-700 transition-colors"
+                >
+                  Sign up here
                 </Link>
               </div>
             </CardContent>
           </Card>
         </div>
-      </div>
+      </main>
 
       <Footer />
     </div>

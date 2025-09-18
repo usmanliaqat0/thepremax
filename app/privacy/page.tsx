@@ -184,11 +184,11 @@ export default function PrivacyPolicy() {
                   <strong>Email:</strong> info@thepremax.com
                 </p>
                 <p className="text-muted-foreground">
-                  <strong>Phone:</strong> +1 (555) 123-4567
+                  <strong>Phone:</strong> +1 512-355-5110
                 </p>
                 <p className="text-muted-foreground">
-                  <strong>Address:</strong> 456 Fashion Avenue, New York, NY
-                  10001
+                  <strong>Address:</strong> 5900 BALCONES DR 23935, AUSTIN TX
+                  78731
                 </p>
               </div>
             </section>

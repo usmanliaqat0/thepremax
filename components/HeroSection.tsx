@@ -76,18 +76,15 @@ const HeroSection = () => {
           <div className="relative">
             <div className="relative z-10">
               <Image
-                src="/assets/hero-shirts.jpg"
-                alt="Fashion Collection"
+                src="/hero-image.jpg"
+                alt="ThePreMax - Everything You Need, All in One Place"
                 width={600}
-                height={600}
-                className="w-full h-auto object-cover rounded-2xl shadow-fashion-luxury"
+                height={400}
+                className="w-full h-auto object-cover rounded-xl"
                 priority
+                unoptimized
               />
             </div>
-
-            {/* Background decorative elements */}
-            <div className="absolute top-4 right-4 w-72 h-72 bg-accent/10 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-4 left-4 w-64 h-64 bg-primary/5 rounded-full blur-2xl"></div>
           </div>
         </div>
       </div>

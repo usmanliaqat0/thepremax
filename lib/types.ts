@@ -1,16 +1,10 @@
-/**
- * Enhanced TypeScript types for ThePreMax application
- */
-
 import { LucideIcon } from "lucide-react";
 
-// Base types
 export type ID = string;
-export type Timestamp = string; // ISO string
+export type Timestamp = string;
 export type Currency = "USD" | "EUR" | "PKR";
 export type Status = "active" | "inactive" | "pending" | "archived";
 
-// User & Authentication
 export interface User {
   id: ID;
   email: string;
@@ -30,10 +24,42 @@ export interface User {
   status: Status;
 }
 
+export interface AuthUser {
+  id: ID;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  gender?: "male" | "female" | "other";
+  avatar?: string;
+  dateOfBirth?: string;
+  role: "customer" | "admin" | "staff";
+  addresses?: Address[];
+  preferences?: UserPreferences;
+}
+
+export interface SignupData {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  gender?: "male" | "female" | "other";
+  phone?: string;
+}
+
+export interface SigninData {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  user?: AuthUser;
+  token?: string;
+}
+
 export interface UserPreferences {
-  newsletter: boolean;
-  smsNotifications: boolean;
-  pushNotifications: boolean;
   currency: Currency;
   language: string;
   theme: "light" | "dark" | "auto";
@@ -48,20 +74,19 @@ export interface Address {
   phone: string;
   address: string;
   city: string;
+  state: string;
   postalCode: string;
   country: string;
   isDefault: boolean;
-  createdAt: Timestamp;
 }
 
-// Product & Inventory
 export interface ProductVariant {
   id: ID;
   size: string;
   color: string;
   sku: string;
   stock: number;
-  price?: number; // Override base price if different
+  price?: number;
   images?: string[];
 }
 
@@ -118,7 +143,6 @@ export interface ProductCategory {
   updatedAt: Timestamp;
 }
 
-// Cart & Orders
 export interface CartItem {
   id: ID;
   productId: ID;

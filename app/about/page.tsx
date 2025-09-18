@@ -62,11 +62,11 @@ const About = () => {
             </div>
             <div className="relative">
               <Image
-                src="/assets/hero-fashion.jpg"
-                alt="Fashion Story"
-                width={600}
-                height={500}
-                className="w-full h-auto rounded-2xl shadow-fashion-luxury"
+                src="/logo.png"
+                alt="ThePreMax Logo"
+                width={400}
+                height={400}
+                className="w-full h-auto rounded-2xl shadow-fashion-luxury mx-auto"
               />
             </div>
           </div>

@@ -91,9 +91,9 @@ const Contact = () => {
                   Visit Our Store
                 </h3>
                 <p className="text-muted-foreground">
-                  456 Fashion Avenue
+                  5900 BALCONES DR 23935
                   <br />
-                  New York, NY 10001
+                  AUSTIN TX 78731
                   <br />
                   United States
                 </p>
@@ -109,11 +109,9 @@ const Contact = () => {
                   Call Us
                 </h3>
                 <p className="text-muted-foreground">
-                  +1 (555) 123-4567
+                  +1 512-355-5110
                   <br />
-                  +1 (555) 987-6543
-                  <br />
-                  Available 9 AM - 9 PM EST
+                  Available 9 AM - 9 PM CST
                 </p>
               </CardContent>
             </Card>
@@ -151,7 +149,7 @@ const Contact = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">
+                      <Label htmlFor="name" className="mb-2 block">
                         Full Name <span className="text-destructive">*</span>
                       </Label>
                       <Input
@@ -164,7 +162,7 @@ const Contact = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">
+                      <Label htmlFor="email" className="mb-2 block">
                         Email Address{" "}
                         <span className="text-destructive">*</span>
                       </Label>
@@ -181,7 +179,9 @@ const Contact = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="subject">Subject</Label>
+                    <Label htmlFor="subject" className="mb-2 block">
+                      Subject
+                    </Label>
                     <Input
                       id="subject"
                       name="subject"
@@ -192,7 +192,7 @@ const Contact = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="message">
+                    <Label htmlFor="message" className="mb-2 block">
                       Message <span className="text-destructive">*</span>
                     </Label>
                     <Textarea

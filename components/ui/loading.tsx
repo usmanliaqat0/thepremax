@@ -67,7 +67,7 @@ interface PageLoadingProps {
 }
 
 export function PageLoading({
-  title = "Loading...",
+  title = "Loading",
   subtitle = "Please wait while we load the content",
   showHeader = true,
 }: PageLoadingProps) {

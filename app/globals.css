@@ -39,7 +39,27 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-} /* ThePreMax Design System */
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-fade-in.delay-300 {
+  animation-delay: 0.3s;
+  opacity: 0;
+}
+
 :root {
   --radius: 0.75rem;
   --font-poppins: "Poppins", -apple-system, BlinkMacSystemFont, system-ui,
@@ -188,7 +208,6 @@
   font-weight: 600;
 }
 
-/* Custom smooth sheet animations */
 @keyframes slide-in-from-right-smooth {
   from {
     transform: translateX(100%);
@@ -219,4 +238,38 @@
 .animate-slide-out-right {
   animation: slide-out-to-right-smooth 0.3s cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
+}
+
+[data-sonner-toaster] {
+  --normal-bg: #ffffff !important;
+  --normal-border: #e5e5e5 !important;
+  --normal-text: #000000 !important;
+}
+
+[data-sonner-toast] {
+  background-color: white !important;
+  border: 1px solid #e5e5e5 !important;
+  color: #000000 !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-sonner-toast][data-type="success"] {
+  background-color: white !important;
+  border-left: 4px solid #22c55e !important;
+}
+
+[data-sonner-toast][data-type="error"] {
+  background-color: white !important;
+  border-left: 4px solid #ef4444 !important;
+}
+
+[data-sonner-toast][data-type="info"] {
+  background-color: white !important;
+  border-left: 4px solid #3b82f6 !important;
+}
+
+[data-sonner-toast][data-type="warning"] {
+  background-color: white !important;
+  border-left: 4px solid #f59e0b !important;
 }

@@ -24,6 +24,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Section, Container, SectionHeader } from "@/components/ui/layout";
 import { ProductGridWrapper } from "@/components/ui/grid";
 import { GridSkeleton } from "@/components/ui/loading";
+import { BeautifulLoader } from "@/components/ui/loader";
 import { products, Product } from "@/lib/products";
 import { processProducts, SortOption } from "@/lib/product-utils";
 import { Search, X } from "lucide-react";
@@ -281,7 +282,13 @@ const ShopContent = () => {
 
 const Shop = () => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <BeautifulLoader size="lg" message="Loading shop" variant="default" />
+        </div>
+      }
+    >
       <ShopContent />
     </Suspense>
   );

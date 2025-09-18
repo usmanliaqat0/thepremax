@@ -1,10 +1,5 @@
 import { z } from "zod";
 
-/**
- * Validation schemas and utilities for the ThePreMax application
- */
-
-// Common validation patterns
 export const emailSchema = z
   .string()
   .email("Please enter a valid email address")
@@ -28,12 +23,10 @@ export const nameSchema = z
   .max(50, "Name must be less than 50 characters")
   .regex(/^[a-zA-Z\s]+$/, "Name can only contain letters and spaces");
 
-// Newsletter subscription
 export const newsletterSchema = z.object({
   email: emailSchema,
 });
 
-// Contact form
 export const contactFormSchema = z.object({
   name: nameSchema,
   email: emailSchema,
@@ -47,7 +40,6 @@ export const contactFormSchema = z.object({
     .max(1000, "Message must be less than 1000 characters"),
 });
 
-// User registration
 export const registrationSchema = z
   .object({
     firstName: nameSchema,
@@ -65,14 +57,12 @@ export const registrationSchema = z
     path: ["confirmPassword"],
   });
 
-// User login
 export const loginSchema = z.object({
   email: emailSchema,
   password: z.string().min(1, "Password is required"),
   rememberMe: z.boolean().optional(),
 });
 
-// Shipping address
 export const shippingAddressSchema = z.object({
   firstName: nameSchema,
   lastName: nameSchema,
@@ -91,7 +81,6 @@ export const shippingAddressSchema = z.object({
   isDefault: z.boolean().optional(),
 });
 
-// Payment information
 export const paymentSchema = z.object({
   cardNumber: z
     .string()
@@ -112,7 +101,6 @@ export const paymentSchema = z.object({
   cvv: z.string().regex(/^\d{3,4}$/, "CVV must be 3 or 4 digits"),
 });
 
-// Order checkout
 export const checkoutSchema = z.object({
   shippingAddress: shippingAddressSchema,
   billingAddress: shippingAddressSchema.optional(),
@@ -125,7 +113,6 @@ export const checkoutSchema = z.object({
     .optional(),
 });
 
-// Search and filter parameters
 export const searchParamsSchema = z.object({
   q: z.string().optional(),
   category: z.string().optional(),
@@ -140,7 +127,6 @@ export const searchParamsSchema = z.object({
   limit: z.coerce.number().min(1).max(100).default(12),
 });
 
-// Type exports for use in components
 export type NewsletterFormData = z.infer<typeof newsletterSchema>;
 export type ContactFormData = z.infer<typeof contactFormSchema>;
 export type RegistrationFormData = z.infer<typeof registrationSchema>;
@@ -150,10 +136,6 @@ export type PaymentData = z.infer<typeof paymentSchema>;
 export type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 export type SearchParamsData = z.infer<typeof searchParamsSchema>;
-
-/**
- * Validation helper functions
- */
 
 export function validateEmail(email: string): boolean {
   return emailSchema.safeParse(email).success;

@@ -38,7 +38,7 @@ const OrderSuccess = () => {
     items: 3,
     estimatedDelivery: "3-5 business days",
     email: "customer@example.com",
-    phone: "+1 (555) 123-4567",
+    phone: "+1 512-355-5110",
   };
 
   return (
@@ -235,7 +235,7 @@ const OrderSuccess = () => {
               </Link>
               <Button variant="outline">
                 <Phone className="mr-2 h-4 w-4" />
-                Call: +1 (555) 123-4567
+                Call: +1 512-355-5110
               </Button>
             </div>
           </CardContent>

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
 
 const poppins = Poppins({
@@ -11,39 +12,87 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "ThePreMax - Premium Fashion & Style",
+  metadataBase: new URL("https://thepremax.com"),
+  title: {
+    default: "ThePreMax - Everything You Need, All in One Place",
+    template: "%s | ThePreMax",
+  },
   description:
-    "Discover ThePreMax's curated collection of premium fashion pieces designed to elevate your wardrobe.",
+    "Discover premium products across Health & Beauty, Sports & Recreation, Tools & Equipment, and Automotive. Quality products from trusted suppliers with fast USA shipping.",
   keywords: [
-    "fashion",
-    "clothing",
-    "shirts",
-    "perfumes",
-    "premium fashion",
     "online shopping",
+    "health and beauty",
+    "sports equipment",
+    "tools and equipment",
+    "automotive parts",
+    "premium products",
     "ThePreMax",
+    "fast shipping",
+    "quality assured",
+    "multi-category marketplace",
   ],
-  authors: [{ name: "ThePreMax" }],
-  robots: "index, follow",
+  authors: [{ name: "ThePreMax", url: "https://thepremax.com" }],
+  creator: "ThePreMax",
+  publisher: "ThePreMax",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/site.webmanifest",
   openGraph: {
-    title: "ThePreMax - Premium Fashion & Style",
+    title: "ThePreMax - Everything You Need, All in One Place",
     description:
-      "Discover ThePreMax's curated collection of premium fashion pieces designed to elevate your wardrobe.",
+      "Discover premium products across Health & Beauty, Sports & Recreation, Tools & Equipment, and Automotive. Quality products from trusted suppliers with fast USA shipping.",
     type: "website",
     locale: "en_US",
+    url: "https://thepremax.com",
     siteName: "ThePreMax",
+    images: [
+      {
+        url: "/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "ThePreMax - Premium Multi-Category Marketplace",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ThePreMax - Premium Fashion & Style",
+    title: "ThePreMax - Everything You Need, All in One Place",
     description:
-      "Discover ThePreMax's curated collection of premium fashion pieces designed to elevate your wardrobe.",
+      "Discover premium products across Health & Beauty, Sports & Recreation, Tools & Equipment, and Automotive. Quality products from trusted suppliers with fast USA shipping.",
+    images: ["/logo.png"],
+    creator: "@ThePreMax",
   },
+  alternates: {
+    canonical: "https://thepremax.com",
+  },
+  category: "shopping",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: "#0F172A",
 };
 
 export default function RootLayout({
@@ -52,12 +101,36 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" dir="ltr">
+      <head>
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="ThePreMax" />
+        <meta name="application-name" content="ThePreMax" />
+        <meta name="msapplication-TileColor" content="#0F172A" />
+        <meta name="msapplication-tap-highlight" content="no" />
+      </head>
       <body className={`${poppins.variable} font-sans antialiased`}>
-        <CartProvider>
-          {children}
-          <Toaster />
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            {children}
+            <Toaster
+              position="bottom-right"
+              toastOptions={{
+                style: {
+                  background: "white",
+                  color: "black",
+                  border: "1px solid #e5e5e5",
+                  borderRadius: "8px",
+                  boxShadow:
+                    "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                },
+              }}
+            />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

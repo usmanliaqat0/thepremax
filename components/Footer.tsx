@@ -17,14 +17,12 @@ import { Input } from "@/components/ui/input";
 const Footer = () => {
   return (
     <footer className="bg-primary text-primary-foreground">
-      {/* Main Footer Content */}
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Brand Section */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2">
               <Image
-                src="/assets/logo.png"
+                src="/logo.png"
                 alt="ThePreMax"
                 width={40}
                 height={40}
@@ -68,7 +66,6 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
           <div className="space-y-4">
             <h3 className="font-heading font-semibold text-lg">Quick Links</h3>
             <ul className="space-y-2">
@@ -115,7 +112,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Customer Service */}
           <div className="space-y-4">
             <h3 className="font-heading font-semibold text-lg">
               Customer Service
@@ -164,20 +160,19 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact Info */}
           <div className="space-y-4">
             <h3 className="font-heading font-semibold text-lg">Get in Touch</h3>
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <MapPin className="h-5 w-5 text-accent" />
                 <span className="text-primary-foreground/80 text-sm">
-                  456 Fashion Avenue, New York, NY 10001
+                  5900 BALCONES DR 23935, AUSTIN TX 78731
                 </span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-accent" />
                 <span className="text-primary-foreground/80 text-sm">
-                  +1 (555) 123-4567
+                  +1 512-355-5110
                 </span>
               </div>
               <div className="flex items-center space-x-3">
@@ -188,7 +183,6 @@ const Footer = () => {
               </div>
             </div>
 
-            {/* Newsletter */}
             <div className="space-y-3 pt-4">
               <h4 className="font-semibold">Newsletter</h4>
               <div className="flex space-x-2">
@@ -204,7 +198,6 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Bottom Bar */}
       <div className="border-t border-primary-foreground/20">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">

@@ -167,7 +167,9 @@ const Checkout = () => {
                 <form className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="fullName">Full Name</Label>
+                      <Label htmlFor="fullName" className="mb-2 block">
+                        Full Name
+                      </Label>
                       <Input
                         id="fullName"
                         name="fullName"
@@ -177,7 +179,9 @@ const Checkout = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email" className="mb-2 block">
+                        Email
+                      </Label>
                       <Input
                         id="email"
                         name="email"
@@ -189,7 +193,9 @@ const Checkout = () => {
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="phone">Phone Number</Label>
+                    <Label htmlFor="phone" className="mb-2 block">
+                      Phone Number
+                    </Label>
                     <Input
                       id="phone"
                       name="phone"
@@ -199,7 +205,9 @@ const Checkout = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="address">Address</Label>
+                    <Label htmlFor="address" className="mb-2 block">
+                      Address
+                    </Label>
                     <Input
                       id="address"
                       name="address"

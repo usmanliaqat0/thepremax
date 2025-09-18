@@ -1,6 +1,3 @@
-// Comprehensive marketplace product data - Multi-category e-commerce platform
-
-// Cache for memoized results
 const productCache = new Map();
 
 export interface Product {
@@ -9,7 +6,7 @@ export interface Product {
   price: number;
   originalPrice?: number;
   image: string;
-  images?: string[]; // Multiple images for product gallery
+  images?: string[];
   category: string;
   description: string;
   specifications?: string[];
@@ -26,7 +23,6 @@ export interface Product {
 }
 
 export const products: Product[] = [
-  // Health & Beauty Products
   {
     id: "1",
     name: "1 Pack Ryze Mushroom Coffee Organic 30 Servings | Fast Free Shipping USA",

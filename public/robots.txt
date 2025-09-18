@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+
+# Important pages for crawling
+Allow: /shop
+Allow: /category/*
+Allow: /product/*
+Allow: /about
+Allow: /contact
+
+# Block unnecessary pages
+Disallow: /api/
+Disallow: /profile
+Disallow: /cart
+Disallow: /checkout
+Disallow: /login
+Disallow: /signup
+Disallow: /order-success
+Disallow: /_next/
+Disallow: /uploads/
+Disallow: /profile-images/
+
+# Sitemap location
+Sitemap: https://thepremax.com/sitemap.xml
