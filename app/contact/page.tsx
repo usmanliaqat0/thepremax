@@ -91,9 +91,9 @@ const Contact = () => {
                   Visit Our Store
                 </h3>
                 <p className="text-muted-foreground">
-                  456 Fashion Avenue
+                  5900 BALCONES DR 23935
                   <br />
-                  New York, NY 10001
+                  AUSTIN TX 78731
                   <br />
                   United States
                 </p>
@@ -109,11 +109,9 @@ const Contact = () => {
                   Call Us
                 </h3>
                 <p className="text-muted-foreground">
-                  +1 (555) 123-4567
+                  +1 512-355-5110
                   <br />
-                  +1 (555) 987-6543
-                  <br />
-                  Available 9 AM - 9 PM EST
+                  Available 9 AM - 9 PM CST
                 </p>
               </CardContent>
             </Card>

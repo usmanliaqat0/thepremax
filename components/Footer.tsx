@@ -22,7 +22,7 @@ const Footer = () => {
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2">
               <Image
-                src="/assets/logo.png"
+                src="/logo.png"
                 alt="ThePreMax"
                 width={40}
                 height={40}
@@ -166,13 +166,13 @@ const Footer = () => {
               <div className="flex items-center space-x-3">
                 <MapPin className="h-5 w-5 text-accent" />
                 <span className="text-primary-foreground/80 text-sm">
-                  456 Fashion Avenue, New York, NY 10001
+                  5900 BALCONES DR 23935, AUSTIN TX 78731
                 </span>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="h-5 w-5 text-accent" />
                 <span className="text-primary-foreground/80 text-sm">
-                  +1 (555) 123-4567
+                  +1 512-355-5110
                 </span>
               </div>
               <div className="flex items-center space-x-3">

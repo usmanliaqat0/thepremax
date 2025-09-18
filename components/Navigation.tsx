@@ -59,23 +59,19 @@ const Navigation = () => {
   return (
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
       <div className="bg-accent text-accent-foreground text-center py-2 px-4 text-sm font-medium">
-        🛍️ Shop All Categories | Health, Sports, Tools & More | Fast Worldwide
-        Shipping! 🌎
+        Shop All Categories | Health, Sports, Tools & More | Fast USA Shipping!
       </div>
 
       <div className="container mx-auto px-4">
         <nav className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center space-x-2">
             <Image
-              src="/assets/logo.png"
+              src="/logo.png"
               alt="ThePreMax"
-              width={40}
-              height={40}
+              width={50}
+              height={50}
               className="rounded"
             />
-            <span className="font-heading font-bold text-xl text-primary">
-              ThePreMax
-            </span>
           </Link>
 
           <div className="hidden md:flex items-center space-x-2">
@@ -192,7 +188,7 @@ const Navigation = () => {
                 <div className="flex flex-col h-full">
                   <div className="flex items-center gap-2 p-6 border-b">
                     <Image
-                      src="/assets/logo.png"
+                      src="/logo.png"
                       alt="ThePreMax"
                       width={32}
                       height={32}

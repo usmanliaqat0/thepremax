@@ -39,7 +39,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-} /* Custom animations for loaders */
+}
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -60,7 +60,6 @@
   opacity: 0;
 }
 
-/* ThePreMax Design System */
 :root {
   --radius: 0.75rem;
   --font-poppins: "Poppins", -apple-system, BlinkMacSystemFont, system-ui,
@@ -209,7 +208,6 @@
   font-weight: 600;
 }
 
-/* Custom smooth sheet animations */
 @keyframes slide-in-from-right-smooth {
   from {
     transform: translateX(100%);
@@ -242,7 +240,6 @@
     forwards;
 }
 
-/* Custom Toast Styling */
 [data-sonner-toaster] {
   --normal-bg: #ffffff !important;
   --normal-border: #e5e5e5 !important;

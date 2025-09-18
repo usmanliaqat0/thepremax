@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import dynamic from "next/dynamic";
+import Head from "next/head";
 import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
 import ProductCard from "@/components/ProductCard";
@@ -45,7 +46,7 @@ export default function Home() {
     {
       icon: Truck,
       title: "Fast Shipping",
-      description: "Quick delivery from trusted suppliers worldwide",
+      description: "Quick delivery from trusted suppliers across USA",
     },
     {
       icon: Shield,
@@ -64,12 +65,89 @@ export default function Home() {
     },
   ];
 
+  // Structured data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://thepremax.com/#organization",
+        name: "ThePreMax",
+        url: "https://thepremax.com",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://thepremax.com/logo.png",
+        },
+        contactPoint: {
+          "@type": "ContactPoint",
+          telephone: "+1 512-355-5110",
+          contactType: "customer service",
+          email: "info@thepremax.com",
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: "5900 BALCONES DR 23935",
+            addressLocality: "AUSTIN",
+            addressRegion: "TX",
+            postalCode: "78731",
+            addressCountry: "US",
+          },
+        },
+        sameAs: [
+          "https://www.facebook.com/thepremax",
+          "https://www.instagram.com/thepremax",
+          "https://www.twitter.com/thepremax",
+        ],
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://thepremax.com/#website",
+        url: "https://thepremax.com",
+        name: "ThePreMax",
+        description:
+          "Everything You Need, All in One Place - Health, Beauty, Sports, Tools & More",
+        publisher: {
+          "@id": "https://thepremax.com/#organization",
+        },
+        potentialAction: [
+          {
+            "@type": "SearchAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate:
+                "https://thepremax.com/shop?search={search_term_string}",
+            },
+            "query-input": "required name=search_term_string",
+          },
+        ],
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://thepremax.com/#webpage",
+        url: "https://thepremax.com",
+        name: "ThePreMax - Everything You Need, All in One Place",
+        isPartOf: {
+          "@id": "https://thepremax.com/#website",
+        },
+        about: {
+          "@id": "https://thepremax.com/#organization",
+        },
+        description:
+          "Discover premium products across Health & Beauty, Sports & Recreation, Tools & Equipment, and Automotive. Quality products from trusted suppliers with fast USA shipping.",
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <Head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+      </Head>
       <Navigation />
       <HeroSection />
 
-      {/* Categories Showcase */}
       <Section>
         <Container>
           <SectionHeader
@@ -123,7 +201,6 @@ export default function Home() {
         </Container>
       </Section>
 
-      {/* Top Rated Products */}
       <Section variant="muted">
         <Container>
           <SectionHeader
@@ -138,7 +215,6 @@ export default function Home() {
         </Container>
       </Section>
 
-      {/* Featured Products */}
       <Section variant="muted">
         <Container>
           <SectionHeader
@@ -163,7 +239,6 @@ export default function Home() {
         </Container>
       </Section>
 
-      {/* Features Section */}
       <Section>
         <Container>
           <FeatureGrid>
@@ -180,10 +255,8 @@ export default function Home() {
         </Container>
       </Section>
 
-      {/* Newsletter Section */}
       <Newsletter variant="accent" />
 
-      {/* Footer */}
       <Footer />
     </div>
   );

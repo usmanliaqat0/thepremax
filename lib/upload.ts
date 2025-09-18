@@ -20,7 +20,6 @@ export async function handleImageUpload(
       return { success: false, message: "No file provided" };
     }
 
-    // Validate file type
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
       return {
@@ -29,8 +28,7 @@ export async function handleImageUpload(
       };
     }
 
-    // Validate file size (5MB max)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       return {
         success: false,
@@ -38,7 +36,6 @@ export async function handleImageUpload(
       };
     }
 
-    // Create directory if it doesn't exist
     const uploadDir = path.join(
       process.cwd(),
       "public",
@@ -47,17 +44,14 @@ export async function handleImageUpload(
     );
     await fs.mkdir(uploadDir, { recursive: true });
 
-    // Generate unique filename
     const fileExtension = path.extname(file.name);
     const fileName = `user-${userId}-${Date.now()}${fileExtension}`;
     const filePath = path.join(uploadDir, fileName);
 
-    // Write file
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     await fs.writeFile(filePath, buffer);
 
-    // Return relative path for database storage
     const relativePath = `/profile-images/custom/${fileName}`;
 
     return {
