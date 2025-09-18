@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -49,21 +50,78 @@ interface WishlistItem {
 }
 
 const WishlistSection = () => {
+  const { state } = useAuth();
   const { toast } = useToast();
 
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
-
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<string>("dateAdded");
   const [filterBy, setFilterBy] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const handleRemoveFromWishlist = (itemId: string) => {
-    setWishlistItems((prev) => prev.filter((item) => item.id !== itemId));
-    toast({
-      title: "Item removed",
-      description: "The item has been removed from your wishlist.",
-    });
+  // Fetch wishlist from API
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      if (!state.token) return;
+
+      try {
+        const response = await fetch("/api/profile/wishlist", {
+          headers: {
+            Authorization: `Bearer ${state.token}`,
+          },
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          setWishlistItems(result.wishlist?.items || []);
+        }
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWishlist();
+  }, [state.token]);
+
+  const handleRemoveFromWishlist = async (itemId: string) => {
+    try {
+      const response = await fetch("/api/profile/wishlist", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${state.token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: "remove",
+          productId: itemId,
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setWishlistItems((prev) => prev.filter((item) => item.id !== itemId));
+        toast({
+          title: "Item removed",
+          description: "The item has been removed from your wishlist.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to remove item from wishlist.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error removing from wishlist:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove item from wishlist.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAddToCart = (item: WishlistItem) => {

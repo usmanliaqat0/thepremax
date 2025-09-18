@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -70,11 +71,38 @@ interface Order {
 }
 
 const OrderHistorySection = () => {
-  const [orders] = useState<Order[]>([]);
-
+  const { state } = useAuth();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+
+  // Fetch orders from API
+  useEffect(() => {
+    const fetchOrders = async () => {
+      if (!state.token) return;
+
+      try {
+        const response = await fetch("/api/profile/orders", {
+          headers: {
+            Authorization: `Bearer ${state.token}`,
+          },
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          setOrders(result.orders || []);
+        }
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [state.token]);
 
   const getStatusIcon = (status: Order["status"]) => {
     switch (status) {

@@ -38,11 +38,13 @@ import {
   Edit3,
   Check,
   X,
+  Heart,
 } from "lucide-react";
 
 import PersonalInfoSection from "@/components/profile/PersonalInfoSection";
 import AddressSection from "@/components/profile/AddressSection";
 import OrderHistorySection from "@/components/profile/OrderHistorySection";
+import WishlistSection from "@/components/profile/WishlistSection";
 import SettingsSection from "@/components/profile/SettingsSection";
 
 interface AvatarOption {
@@ -53,7 +55,7 @@ interface AvatarOption {
 }
 
 const Profile = () => {
-  const { state, logout } = useAuth();
+  const { state, logout, updateProfile, uploadAvatar, resetAvatar } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -145,23 +147,24 @@ const Profile = () => {
     setIsUploading(true);
 
     try {
-      // Simulate file upload
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const success = await uploadAvatar(selectedFile);
 
-      // In a real app, you would upload to your server here
-      const formData = new FormData();
-      formData.append("avatar", selectedFile);
+      if (success) {
+        setShowAvatarDialog(false);
+        setSelectedFile(null);
+        setPreviewUrl("");
 
-      // For now, we'll use the preview URL
-      setCurrentAvatar(previewUrl);
-      setShowAvatarDialog(false);
-      setSelectedFile(null);
-      setPreviewUrl("");
-
-      toast({
-        title: "Avatar updated",
-        description: "Your profile picture has been updated successfully.",
-      });
+        toast({
+          title: "Avatar updated",
+          description: "Your profile picture has been updated successfully.",
+        });
+      } else {
+        toast({
+          title: "Upload failed",
+          description: "Failed to update your avatar. Please try again.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       toast({
         title: "Upload failed",
@@ -173,23 +176,45 @@ const Profile = () => {
     }
   };
 
-  const handleDefaultAvatarSelect = (avatar: AvatarOption) => {
-    setCurrentAvatar(avatar.src);
-    setShowAvatarDialog(false);
+  const handleDefaultAvatarSelect = async (avatar: AvatarOption) => {
+    try {
+      const success = await updateProfile({ avatar: avatar.src });
+      if (success) {
+        setCurrentAvatar(avatar.src);
+        setShowAvatarDialog(false);
 
-    toast({
-      title: "Avatar updated",
-      description: "Your profile picture has been updated.",
-    });
+        toast({
+          title: "Avatar updated",
+          description: "Your profile picture has been updated.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Update failed",
+        description: "Failed to update your avatar. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleRemoveAvatar = () => {
-    setCurrentAvatar("/profile-images/defaults/male-avatar.svg");
+  const handleRemoveAvatar = async () => {
+    try {
+      const success = await resetAvatar();
+      if (success) {
+        setCurrentAvatar("/profile-images/defaults/male-avatar.svg");
 
-    toast({
-      title: "Avatar removed",
-      description: "Your profile picture has been reset to default.",
-    });
+        toast({
+          title: "Avatar removed",
+          description: "Your profile picture has been reset to default.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Reset failed",
+        description: "Failed to reset your avatar. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const triggerFileInput = () => {
@@ -242,6 +267,12 @@ const Profile = () => {
       label: "Order History",
       icon: ShoppingBag,
       description: "View your order history and tracking",
+    },
+    {
+      id: "wishlist",
+      label: "Wishlist",
+      icon: Heart,
+      description: "Manage your favorite items",
     },
     {
       id: "settings",
@@ -495,6 +526,10 @@ const Profile = () => {
 
           <TabsContent value="orders" className="space-y-4">
             <OrderHistorySection />
+          </TabsContent>
+
+          <TabsContent value="wishlist" className="space-y-4">
+            <WishlistSection />
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-4">

@@ -35,6 +35,7 @@ export interface AuthUser {
   dateOfBirth?: string;
   role: "customer" | "admin" | "staff";
   addresses?: Address[];
+  preferences?: UserPreferences;
 }
 
 export interface SignupData {
@@ -59,9 +60,6 @@ export interface AuthResponse {
 }
 
 export interface UserPreferences {
-  newsletter: boolean;
-  smsNotifications: boolean;
-  pushNotifications: boolean;
   currency: Currency;
   language: string;
   theme: "light" | "dark" | "auto";

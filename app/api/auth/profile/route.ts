@@ -85,6 +85,7 @@ export async function PUT(req: NextRequest) {
       phone: updates.phone,
       dateOfBirth: updates.dateOfBirth,
       gender: updates.gender,
+      avatar: updates.avatar,
       preferences: updates.preferences,
       addresses: updates.addresses,
     };

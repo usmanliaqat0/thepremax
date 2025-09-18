@@ -15,9 +15,6 @@ export interface IUser extends Document {
   role: "customer" | "admin" | "staff";
   status: "active" | "inactive" | "pending" | "archived";
   preferences: {
-    newsletter: boolean;
-    smsNotifications: boolean;
-    pushNotifications: boolean;
     currency: "USD" | "EUR" | "PKR";
     language: string;
     theme: "light" | "dark" | "auto";
@@ -106,9 +103,6 @@ const UserSchema = new Schema<IUser>(
       default: "active",
     },
     preferences: {
-      newsletter: { type: Boolean, default: true },
-      smsNotifications: { type: Boolean, default: false },
-      pushNotifications: { type: Boolean, default: true },
       currency: { type: String, enum: ["USD", "EUR", "PKR"], default: "USD" },
       language: { type: String, default: "en" },
       theme: {

@@ -283,7 +283,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const uploadAvatar = async (file: File): Promise<boolean> => {
     try {
       const formData = new FormData();
-      formData.append("image", file);
+      formData.append("avatar", file);
 
       const response = await fetch("/api/profile/avatar", {
         method: "POST",

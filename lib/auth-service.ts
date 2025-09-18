@@ -327,9 +327,6 @@ export class AuthService {
         gender,
         avatar: AvatarUtils.getDefaultAvatar(gender),
         preferences: {
-          newsletter: true,
-          smsNotifications: false,
-          pushNotifications: true,
           currency: "USD",
           language: "en",
           theme: "light",

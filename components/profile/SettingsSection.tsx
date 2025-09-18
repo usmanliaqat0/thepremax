@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,14 +24,16 @@ import { Globe, Lock, Trash2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const SettingsSection = () => {
+  const { state } = useAuth();
   const { toast } = useToast();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  const changePassword = () => {
+  const changePassword = async () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
       toast({
         title: "Error",
@@ -49,25 +52,57 @@ const SettingsSection = () => {
       return;
     }
 
-    if (newPassword.length < 8) {
+    if (newPassword.length < 6) {
       toast({
         title: "Error",
-        description: "Password must be at least 8 characters long.",
+        description: "Password must be at least 6 characters long.",
         variant: "destructive",
       });
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-      toast({
-        title: "Password changed",
-        description: "Your password has been updated successfully.",
+    setIsChangingPassword(true);
+
+    try {
+      const response = await fetch("/api/profile/password", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${state.token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
       });
-    }, 1000);
+
+      const result = await response.json();
+
+      if (result.success) {
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        toast({
+          title: "Password changed",
+          description: "Your password has been updated successfully.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.message || "Failed to change password.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+      toast({
+        title: "Error",
+        description: "Failed to change password. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   return (
@@ -123,9 +158,13 @@ const SettingsSection = () => {
             />
           </div>
 
-          <Button onClick={changePassword} className="w-full sm:w-auto">
+          <Button
+            onClick={changePassword}
+            className="w-full sm:w-auto"
+            disabled={isChangingPassword}
+          >
             <Lock className="w-4 h-4 mr-2" />
-            Change Password
+            {isChangingPassword ? "Changing..." : "Change Password"}
           </Button>
         </CardContent>
       </Card>
