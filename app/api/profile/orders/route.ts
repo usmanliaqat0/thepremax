@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import Order from "@/lib/models/Order";
+import Order, { IOrder } from "@/lib/models/Order";
 import { TokenUtils } from "@/lib/auth-service";
 
 // Get user orders
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build query
-    let query: any = { userId: decoded.id };
+    const query: Record<string, unknown> = { userId: decoded.id };
 
     if (status && status !== "all") {
       query.status = status;
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      orders: orders.map((order: any) => ({
+      orders: orders.map((order: IOrder & { _id: string }) => ({
         ...order,
         id: order._id?.toString(),
       })),
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       success: true,
       order: {
         ...order,
-        id: (order as any)._id?.toString(),
+        id: (order as any)._id?.toString(), // eslint-disable-line @typescript-eslint/no-explicit-any
       },
     });
   } catch (error) {

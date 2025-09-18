@@ -61,17 +61,6 @@ const AddressSection = () => {
     isDefault: false,
   });
 
-  const countries = [
-    "United States",
-    "Canada",
-    "United Kingdom",
-    "Australia",
-    "Germany",
-    "France",
-    "Pakistan",
-    "India",
-  ];
-
   const handleInputChange = (field: keyof Address, value: string | boolean) => {
     setFormData((prev) => ({
       ...prev,
@@ -122,7 +111,7 @@ const AddressSection = () => {
       } else {
         toast.error("Failed to save address");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to save address");
     } finally {
       setIsLoading(false);
@@ -147,7 +136,7 @@ const AddressSection = () => {
       } else {
         toast.error("Failed to delete address");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete address");
     }
   };
@@ -166,7 +155,7 @@ const AddressSection = () => {
       } else {
         toast.error("Failed to update default address");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to update default address");
     }
   };

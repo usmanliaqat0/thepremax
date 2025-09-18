@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -35,7 +36,6 @@ import {
   Clock,
   Search,
   Eye,
-  Star,
   Download,
 } from "lucide-react";
 
@@ -73,7 +73,7 @@ interface Order {
 const OrderHistorySection = () => {
   const { state } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -274,9 +274,11 @@ const OrderHistorySection = () => {
                           className="w-12 h-12 rounded-lg border-2 border-white bg-gray-100 flex items-center justify-center overflow-hidden"
                           style={{ zIndex: order.items.length - index }}
                         >
-                          <img
+                          <Image
                             src={item.image}
                             alt={item.name}
+                            width={48}
+                            height={48}
                             className="w-full h-full object-cover"
                           />
                         </div>
@@ -354,9 +356,11 @@ const OrderHistorySection = () => {
                                       key={item.id}
                                       className="flex items-center space-x-4 p-3 border rounded-lg"
                                     >
-                                      <img
+                                      <Image
                                         src={item.image}
                                         alt={item.name}
+                                        width={64}
+                                        height={64}
                                         className="w-16 h-16 object-cover rounded-lg"
                                       />
                                       <div className="flex-1">

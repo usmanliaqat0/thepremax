@@ -55,8 +55,8 @@ const OrderSuccess = () => {
             Order Placed Successfully!
           </h1>
           <p className="text-muted-foreground text-lg">
-            Thank you for your purchase. We've received your order and will send
-            you a confirmation email shortly.
+            Thank you for your purchase. We&apos;ve received your order and will
+            send you a confirmation email shortly.
           </p>
         </div>
 
@@ -111,7 +111,7 @@ const OrderSuccess = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5" />
-                What's Next?
+                What&apos;s Next?
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -121,7 +121,7 @@ const OrderSuccess = () => {
                   <div>
                     <h4 className="font-medium">Confirmation Email</h4>
                     <p className="text-sm text-muted-foreground">
-                      You'll receive an order confirmation email at{" "}
+                      You&apos;ll receive an order confirmation email at{" "}
                       <span className="font-medium">{orderData.email}</span>
                     </p>
                   </div>
@@ -131,8 +131,8 @@ const OrderSuccess = () => {
                   <div>
                     <h4 className="font-medium">Order Processing</h4>
                     <p className="text-sm text-muted-foreground">
-                      We'll start preparing your order right away and notify you
-                      when it ships.
+                      We&apos;ll start preparing your order right away and
+                      notify you when it ships.
                     </p>
                   </div>
                 </div>
@@ -141,7 +141,7 @@ const OrderSuccess = () => {
                   <div>
                     <h4 className="font-medium">Tracking Information</h4>
                     <p className="text-sm text-muted-foreground">
-                      You'll receive tracking details via SMS at{" "}
+                      You&apos;ll receive tracking details via SMS at{" "}
                       <span className="font-medium">{orderData.phone}</span>
                     </p>
                   </div>

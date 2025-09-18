@@ -30,11 +30,11 @@ export async function GET(req: NextRequest) {
       success: true,
       wishlist: wishlist
         ? {
-            id: (wishlist as any)._id?.toString(),
-            userId: (wishlist as any).userId,
-            items: (wishlist as any).items || [],
-            createdAt: (wishlist as any).createdAt,
-            updatedAt: (wishlist as any).updatedAt,
+            id: (wishlist as any)._id?.toString(), // eslint-disable-line @typescript-eslint/no-explicit-any
+            userId: wishlist.userId,
+            items: wishlist.items || [],
+            createdAt: wishlist.createdAt,
+            updatedAt: wishlist.updatedAt,
           }
         : {
             id: "",
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
     if (action === "add" && item) {
       // Check if item already exists
       const existingItemIndex = wishlist.items.findIndex(
-        (existingItem: any) => existingItem.productId === item.productId
+        (existingItem: any) => existingItem.productId === item.productId // eslint-disable-line @typescript-eslint/no-explicit-any
       );
 
       if (existingItemIndex === -1) {
@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
     } else if (action === "remove" && productId) {
       // Remove item
       wishlist.items = wishlist.items.filter(
-        (item: any) => item.productId !== productId
+        (item: any) => item.productId !== productId // eslint-disable-line @typescript-eslint/no-explicit-any
       );
     }
 

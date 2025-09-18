@@ -49,7 +49,7 @@ const PersonalInfoSection = () => {
     }
   }, [state.user]);
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -78,7 +78,7 @@ const PersonalInfoSection = () => {
         setIsEditing(false);
         toast.success("Profile updated successfully!");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to update profile");
     } finally {
       setIsLoading(false);

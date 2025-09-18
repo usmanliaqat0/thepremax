@@ -194,7 +194,7 @@ const ShopContent = () => {
             <div className="flex flex-wrap gap-2 mt-4">
               {searchTerm.trim() && (
                 <Badge variant="secondary">
-                  Search: "{searchTerm}"
+                  Search: &quot;{searchTerm}&quot;
                   <button
                     onClick={() => setSearchTerm("")}
                     className="ml-2 hover:text-destructive"

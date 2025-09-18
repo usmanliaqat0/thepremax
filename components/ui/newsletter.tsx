@@ -102,7 +102,7 @@ export function Newsletter({
               Thank You!
             </h3>
             <p className="text-muted-foreground">
-              You've successfully subscribed to our newsletter.
+              You&apos;ve successfully subscribed to our newsletter.
             </p>
           </div>
         </Container>

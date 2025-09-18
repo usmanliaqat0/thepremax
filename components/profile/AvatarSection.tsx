@@ -127,7 +127,7 @@ const AvatarSection = () => {
         title: "Avatar updated",
         description: "Your profile picture has been updated successfully.",
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Upload failed",
         description: "Failed to update your avatar. Please try again.",

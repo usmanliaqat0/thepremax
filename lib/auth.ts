@@ -38,10 +38,10 @@ export function generateToken(user: AuthUser): string {
 }
 
 // Verify JWT token
-export function verifyToken(token: string): any {
+export function verifyToken(token: string): jwt.JwtPayload | string {
   try {
     return jwt.verify(token, JWT_SECRET);
-  } catch (error) {
+  } catch {
     throw new Error("Invalid or expired token");
   }
 }

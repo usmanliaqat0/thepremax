@@ -102,7 +102,7 @@ const ProductDetail = () => {
         router.push("/checkout");
         setIsBuyingNow(false);
       }, 1000);
-    } catch (error) {
+    } catch {
       setIsBuyingNow(false);
       toast({
         title: "Error",
