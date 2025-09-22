@@ -216,7 +216,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
 
-  // Load state from localStorage on mount
   useEffect(() => {
     const savedState = localStorage.getItem("ThePreMax-cart");
     if (savedState) {
@@ -229,12 +228,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  // Save state to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem("ThePreMax-cart", JSON.stringify(state));
   }, [state]);
 
-  // Memoized callback functions for better performance
   const addToCart = useCallback(
     (product: Product, size: string, color: string, quantity = 1) => {
       dispatch({
@@ -294,7 +291,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     []
   );
 
-  // Memoized expensive calculations
   const cartTotal = useMemo(() => {
     return state.items.reduce(
       (total, item) => total + item.product.price * item.quantity,

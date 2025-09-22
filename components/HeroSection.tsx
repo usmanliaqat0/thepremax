@@ -10,7 +10,6 @@ const HeroSection = () => {
     <section className="relative min-h-[600px] lg:min-h-[700px] bg-gradient-hero overflow-hidden">
       <div className="container mx-auto p-4 md:px-4 md:py-0 h-full">
         <div className="grid lg:grid-cols-2 gap-10 items-center min-h-[600px] lg:min-h-[700px]">
-          {/* Text Content */}
           <div className="space-y-8 lg:space-y-10">
             <div className="space-y-4">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-primary leading-tight">
@@ -35,7 +34,6 @@ const HeroSection = () => {
               </Button>
             </div>
 
-            {/* Stats */}
             <div className="pt-8 border-t border-border">
               <div className="flex flex-wrap gap-8 justify-between">
                 <div className="text-center">
@@ -72,7 +70,6 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Hero Image */}
           <div className="relative">
             <div className="relative z-10">
               <Image

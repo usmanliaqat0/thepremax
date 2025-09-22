@@ -21,10 +21,8 @@ if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is required");
 }
 
-// Refresh token is optional - if not provided, only access tokens will be used
 const REFRESH_TOKENS_ENABLED = !!JWT_REFRESH_SECRET;
 
-// Password utilities
 export class PasswordUtils {
   private static readonly SALT_ROUNDS = 12;
   private static readonly MIN_LENGTH = 8;
@@ -85,7 +83,6 @@ export class PasswordUtils {
   }
 }
 
-// Email utilities
 export class EmailUtils {
   private static readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -98,7 +95,6 @@ export class EmailUtils {
   }
 }
 
-// Token utilities
 export class TokenUtils {
   static generateAccessToken(user: AuthUser): string {
     const payload = {
@@ -158,7 +154,6 @@ export class TokenUtils {
   }
 }
 
-// Avatar utilities
 export class AvatarUtils {
   static getDefaultAvatar(gender?: "male" | "female" | "other"): string {
     const basePath = "/profile-images/defaults";
@@ -179,7 +174,6 @@ export class AvatarUtils {
   }
 }
 
-// Main authentication service
 export class AuthService {
   static async signin(data: SigninData): Promise<{
     success: boolean;
@@ -191,7 +185,6 @@ export class AuthService {
     try {
       const { email, password } = data;
 
-      // Validate input
       if (!email || !password) {
         return {
           success: false,
@@ -206,11 +199,46 @@ export class AuthService {
         };
       }
 
-      // Connect to database
+      const normalizedEmail = EmailUtils.normalize(email);
+
+      const adminEmail = process.env.ADMIN_EMAIL;
+      const adminPassword = process.env.ADMIN_PASSWORD;
+
+      if (
+        adminEmail &&
+        adminPassword &&
+        normalizedEmail === EmailUtils.normalize(adminEmail)
+      ) {
+        if (password === adminPassword) {
+          const adminUserData: AuthUser = {
+            id: "admin-super-user",
+            email: normalizedEmail,
+            firstName: "Super",
+            lastName: "Admin",
+            role: "admin",
+            avatar: AvatarUtils.getDefaultAvatar(),
+          };
+
+          const accessToken = TokenUtils.generateAccessToken(adminUserData);
+          const refreshToken = TokenUtils.generateRefreshToken(adminUserData);
+
+          return {
+            success: true,
+            user: adminUserData,
+            accessToken,
+            refreshToken,
+            message: "Admin login successful",
+          };
+        } else {
+          return {
+            success: false,
+            message: "Invalid admin credentials",
+          };
+        }
+      }
+
       await connectDB();
 
-      // Find user by email
-      const normalizedEmail = EmailUtils.normalize(email);
       const user = await User.findOne({ email: normalizedEmail }).select(
         "+password"
       );
@@ -222,7 +250,6 @@ export class AuthService {
         };
       }
 
-      // Check account status
       if (user.status !== "active") {
         return {
           success: false,
@@ -230,7 +257,6 @@ export class AuthService {
         };
       }
 
-      // Verify password
       const isPasswordValid = await PasswordUtils.compare(
         password,
         user.password
@@ -242,7 +268,6 @@ export class AuthService {
         };
       }
 
-      // Prepare user data
       const userData: AuthUser = {
         id: user._id.toString(),
         email: user.email,
@@ -253,7 +278,6 @@ export class AuthService {
         role: user.role,
       };
 
-      // Generate tokens
       const accessToken = TokenUtils.generateAccessToken(userData);
       const refreshToken = TokenUtils.generateRefreshToken(userData);
 
@@ -283,7 +307,6 @@ export class AuthService {
     try {
       const { email, password, firstName, lastName, gender, phone } = data;
 
-      // Validate required fields
       if (!email || !password || !firstName || !lastName) {
         return {
           success: false,
@@ -291,7 +314,6 @@ export class AuthService {
         };
       }
 
-      // Validate email
       if (!EmailUtils.isValid(email)) {
         return {
           success: false,
@@ -299,7 +321,6 @@ export class AuthService {
         };
       }
 
-      // Validate password
       const passwordValidation = PasswordUtils.validate(password);
       if (!passwordValidation.valid) {
         return {
@@ -308,7 +329,6 @@ export class AuthService {
         };
       }
 
-      // Connect to database
       await connectDB();
 
       // Check if user exists

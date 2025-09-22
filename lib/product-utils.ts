@@ -1,9 +1,5 @@
 import { Product } from "./products";
 
-/**
- * Product utility functions for enhanced functionality
- */
-
 export type SortOption =
   | "name"
   | "price-low"
@@ -26,9 +22,6 @@ export type FilterOptions = {
   topRated?: boolean;
 };
 
-/**
- * Search products by name, description, or category
- */
 export function searchProducts(
   products: Product[],
   searchTerm: string
@@ -57,7 +50,6 @@ export function filterProducts(
   filters: FilterOptions
 ): Product[] {
   return products.filter((product) => {
-    // Category filter
     if (filters.category && product.category !== filters.category) {
       return false;
     }

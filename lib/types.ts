@@ -221,13 +221,8 @@ export type PaymentStatus =
   | "refunded"
   | "cancelled";
 
-export type PaymentMethod =
-  | "card"
-  | "cod" // Cash on Delivery
-  | "bank_transfer"
-  | "digital_wallet";
+export type PaymentMethod = "card" | "cod" | "bank_transfer" | "digital_wallet";
 
-// Wishlist
 export interface WishlistItem {
   id: ID;
   productId: ID;
@@ -242,7 +237,6 @@ export interface Wishlist {
   updatedAt: Timestamp;
 }
 
-// Navigation & UI
 export interface NavigationItem {
   id: ID;
   label: string;
@@ -260,7 +254,6 @@ export interface Breadcrumb {
   href?: string;
 }
 
-// API & State Management
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
@@ -284,7 +277,6 @@ export interface LoadingState {
   lastFetch?: Timestamp;
 }
 
-// Feature Components
 export interface FeatureItem {
   icon: LucideIcon;
   title: string;
@@ -311,7 +303,6 @@ export interface TestimonialItem {
   verified: boolean;
 }
 
-// Forms
 export interface FormField<T = unknown> {
   name: keyof T;
   label: string;
@@ -341,7 +332,6 @@ export interface FormField<T = unknown> {
   }>;
 }
 
-// Search & Filtering
 export interface SearchFilters {
   query?: string;
   categories?: string[];
@@ -363,7 +353,6 @@ export interface SortOption {
   order: "asc" | "desc";
 }
 
-// Analytics & Tracking
 export interface AnalyticsEvent {
   event: string;
   properties: Record<string, unknown>;
@@ -377,7 +366,6 @@ export interface ProductAnalytics {
   conversionRate: number;
 }
 
-// Newsletter & Communication
 export interface NewsletterSubscription {
   id: ID;
   email: string;
@@ -391,7 +379,6 @@ export interface NewsletterSubscription {
   unsubscribedAt?: Timestamp;
 }
 
-// Configuration
 export interface SiteConfig {
   name: string;
   description: string;
@@ -415,7 +402,6 @@ export interface SiteConfig {
   };
 }
 
-// Utility types
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
 export type DeepPartial<T> = {

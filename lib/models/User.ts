@@ -137,6 +137,15 @@ const UserSchema = new Schema<IUser>(
 UserSchema.index({ createdAt: -1 });
 UserSchema.index({ status: 1 });
 
-// Export the model
-const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+// Export the model - only create if we're on the server side
+let User: any;
+
+if (typeof window === 'undefined') {
+  // Server-side only
+  User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+} else {
+  // Client-side - export empty object to prevent errors
+  User = {};
+}
+
 export default User;

@@ -18,11 +18,13 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { useCart, CartItem } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useMemo, useCallback } from "react";
 
 const Navigation = () => {
   const { getCartItemsCount, state } = useCart();
+  const { isAdmin } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -121,6 +123,13 @@ const Navigation = () => {
             <Button variant="nav" asChild>
               <Link href="/contact">Contact</Link>
             </Button>
+            {isAdmin() && (
+              <Button variant="nav" asChild>
+                <Link href="/admin" className="text-accent font-semibold">
+                  Admin
+                </Link>
+              </Button>
+            )}
           </div>
 
           <div className="hidden lg:flex items-center space-x-2 flex-1 max-w-md mx-8">
@@ -160,7 +169,7 @@ const Navigation = () => {
               className="hidden sm:flex"
               asChild
             >
-              <Link href="/profile">
+              <Link href={isAdmin() ? "/admin" : "/profile"}>
                 <User className="h-5 w-5" />
               </Link>
             </Button>
@@ -260,6 +269,21 @@ const Navigation = () => {
                       >
                         <Link href="/contact">Contact</Link>
                       </Button>
+                      {isAdmin() && (
+                        <Button
+                          variant={pathname === "/admin" ? "secondary" : "ghost"}
+                          className={`w-full justify-start h-10 text-base transition-colors ${
+                            pathname === "/admin"
+                              ? "bg-accent text-accent-foreground font-medium"
+                              : ""
+                          }`}
+                          asChild
+                        >
+                          <Link href="/admin" className="text-accent font-semibold">
+                            Admin Panel
+                          </Link>
+                        </Button>
+                      )}
                     </div>
 
                     <div className="space-y-1">
@@ -326,21 +350,21 @@ const Navigation = () => {
 
                       <Button
                         variant={
-                          pathname === "/profile" ? "secondary" : "ghost"
+                          (pathname === "/profile" || (isAdmin() && pathname === "/admin")) ? "secondary" : "ghost"
                         }
                         className={`w-full justify-start h-10 text-base transition-colors ${
-                          pathname === "/profile"
+                          (pathname === "/profile" || (isAdmin() && pathname === "/admin"))
                             ? "bg-accent text-accent-foreground font-medium"
                             : ""
                         }`}
                         asChild
                       >
                         <Link
-                          href="/profile"
+                          href={isAdmin() ? "/admin" : "/profile"}
                           className="flex items-center gap-3"
                         >
                           <User className="h-5 w-5" />
-                          Profile
+                          {isAdmin() ? "Admin Panel" : "Profile"}
                         </Link>
                       </Button>
 

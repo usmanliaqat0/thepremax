@@ -14,7 +14,6 @@ export function handleApiError(
   const errors: ApiError[] = [];
 
   if (!response.success) {
-    // Check for specific field errors based on message content
     const message = response.message || defaultMessage;
 
     if (message.includes("email") && message.includes("required")) {
@@ -89,7 +88,6 @@ export function displayApiErrors(errors: ApiError[]): Record<string, string> {
     if (error.field) {
       fieldErrors[error.field] = error.message;
     } else {
-      // Show general errors as toast
       toast.error(error.message);
     }
   });

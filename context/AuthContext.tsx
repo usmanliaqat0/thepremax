@@ -31,7 +31,6 @@ type AuthAction =
   | { type: "UPDATE_USER"; payload: Partial<AuthUser> }
   | { type: "UPDATE_AVATAR"; payload: string };
 
-// Auth Context Interface
 interface AuthContextType {
   state: AuthState;
   signin: (
@@ -45,9 +44,10 @@ interface AuthContextType {
   uploadAvatar: (file: File) => Promise<boolean>;
   resetAvatar: () => Promise<boolean>;
   refreshUser: () => Promise<void>;
+  isAdmin: () => boolean;
+  requireAdmin: () => boolean;
 }
 
-// Initial State
 const initialState: AuthState = {
   user: null,
   token: null,
@@ -55,7 +55,6 @@ const initialState: AuthState = {
   isAuthenticated: false,
 };
 
-// Reducer
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
     case "AUTH_START":
@@ -108,14 +107,11 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
   }
 }
 
-// Create Context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Auth Provider Component
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Load user from localStorage on mount
   useEffect(() => {
     const token = localStorage.getItem("auth_token");
     const userData = localStorage.getItem("user_data");
@@ -138,7 +134,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // API call helper
   const apiCall = async (
     endpoint: string,
     options: RequestInit = {}
@@ -158,7 +153,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  // Sign in function
   const signin = async (
     data: SigninData
   ): Promise<{ success: boolean; errors?: Record<string, string> }> => {
@@ -174,7 +168,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result: AuthResponse = await response.json();
 
       if (result.success && result.user && result.token) {
-        // Store in localStorage
         localStorage.setItem("auth_token", result.token);
         localStorage.setItem("user_data", JSON.stringify(result.user));
 
@@ -199,7 +192,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Sign up function
   const signup = async (
     data: SignupData
   ): Promise<{ success: boolean; errors?: Record<string, string> }> => {
@@ -215,7 +207,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result: AuthResponse = await response.json();
 
       if (result.success && result.user && result.token) {
-        // Store in localStorage
         localStorage.setItem("auth_token", result.token);
         localStorage.setItem("user_data", JSON.stringify(result.user));
 
@@ -240,7 +231,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Logout function
   const logout = () => {
     localStorage.removeItem("auth_token");
     localStorage.removeItem("user_data");
@@ -248,7 +238,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     toast.success("Logged out successfully");
   };
 
-  // Update profile function
   const updateProfile = async (
     updates: Partial<AuthUser>
   ): Promise<boolean> => {
@@ -279,7 +268,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Upload avatar function
   const uploadAvatar = async (file: File): Promise<boolean> => {
     try {
       const formData = new FormData();
@@ -312,7 +300,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Reset avatar function
   const resetAvatar = async (): Promise<boolean> => {
     try {
       const response = await apiCall("/api/profile/avatar", {
@@ -338,7 +325,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Refresh user data function
   const refreshUser = async (): Promise<void> => {
     try {
       const response = await apiCall("/api/auth/profile");
@@ -353,6 +339,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const isAdmin = (): boolean => {
+    return state.user?.role === "admin";
+  };
+
+  const requireAdmin = (): boolean => {
+    if (!state.isAuthenticated || !state.user) {
+      return false;
+    }
+    return isAdmin();
+  };
+
   const contextValue: AuthContextType = {
     state,
     signin,
@@ -362,6 +359,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     uploadAvatar,
     resetAvatar,
     refreshUser,
+    isAdmin,
+    requireAdmin,
   };
 
   return (
@@ -369,7 +368,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Custom hook to use auth context
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (context === undefined) {

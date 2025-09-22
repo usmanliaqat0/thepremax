@@ -93,8 +93,15 @@ const Profile = () => {
   useEffect(() => {
     if (!state.isAuthenticated && !state.isLoading) {
       router.push("/login");
+      return;
     }
-  }, [state.isAuthenticated, state.isLoading, router]);
+
+    // Redirect admin users to admin dashboard instead of profile
+    if (state.isAuthenticated && state.user?.role === "admin") {
+      router.push("/admin");
+      return;
+    }
+  }, [state.isAuthenticated, state.isLoading, state.user?.role, router]);
 
   useEffect(() => {
     if (state.user?.avatar) {

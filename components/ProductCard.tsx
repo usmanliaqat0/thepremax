@@ -78,7 +78,6 @@ const ProductCard = ({
     <Card className={cn(variantStyles.card, "p-0 gap-0", className)}>
       <Link href={`/product/${product.id}`}>
         <div className="relative overflow-hidden">
-          {/* Product Image */}
           <div className={cn(variantStyles.image, "overflow-hidden bg-muted")}>
             <Image
               src={product.image}
@@ -94,7 +93,6 @@ const ProductCard = ({
             />
           </div>
 
-          {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {product.sale && (
               <Badge
@@ -119,7 +117,6 @@ const ProductCard = ({
             )}
           </div>
 
-          {/* Wishlist Button */}
           <Button
             variant="ghost"
             size={variant === "compact" ? "icon-sm" : "icon"}
@@ -136,7 +133,6 @@ const ProductCard = ({
             />
           </Button>
 
-          {/* Quick Add to Cart */}
           <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <Button
               onClick={handleAddToCart}
@@ -156,7 +152,6 @@ const ProductCard = ({
         </div>
 
         <CardContent className={variantStyles.content}>
-          {/* Brand & Category */}
           <div className="flex items-center justify-between">
             <span
               className={cn(
@@ -177,10 +172,8 @@ const ProductCard = ({
             </Badge>
           </div>
 
-          {/* Product Name */}
           <h3 className={variantStyles.title}>{product.name}</h3>
 
-          {/* Rating & Reviews */}
           <div className="flex items-center gap-2">
             <div className="flex items-center">
               <span className="text-yellow-500">★</span>
@@ -203,7 +196,6 @@ const ProductCard = ({
             </span>
           </div>
 
-          {/* Price */}
           <div className="flex items-center gap-2">
             <span className={variantStyles.price}>
               {formatPrice(product.price)}
@@ -220,7 +212,6 @@ const ProductCard = ({
             )}
           </div>
 
-          {/* Stock Status & Shipping */}
           <div className="flex items-center justify-between">
             <span
               className={cn(
