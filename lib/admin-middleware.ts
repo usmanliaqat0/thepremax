@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TokenUtils } from "./auth-service";
 
+interface JWTPayload {
+  id: string;
+  email: string;
+  role?: string;
+  type: string;
+  iat?: number;
+  exp?: number;
+}
+
 export interface AdminUser {
   id: string;
   email: string;
@@ -31,7 +40,7 @@ export class AdminMiddleware {
       }
 
       // Verify token
-      const decoded = TokenUtils.verifyAccessToken(token);
+      const decoded = TokenUtils.verifyAccessToken(token) as JWTPayload;
 
       // Check if user is admin
       if (decoded.role !== "admin") {
@@ -52,7 +61,7 @@ export class AdminMiddleware {
           role: "admin",
         },
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
         error: "Invalid or expired token",
@@ -64,10 +73,13 @@ export class AdminMiddleware {
     handler: (
       request: NextRequest,
       adminUser: AdminUser,
-      ...args: any[]
+      ...args: unknown[]
     ) => Promise<NextResponse>
   ) {
-    return async (request: NextRequest, ...args: any[]): Promise<NextResponse> => {
+    return async (
+      request: NextRequest,
+      ...args: unknown[]
+    ): Promise<NextResponse> => {
       const verification = AdminMiddleware.verifyAdminToken(request);
 
       if (!verification.success || !verification.user) {

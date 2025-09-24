@@ -138,7 +138,7 @@ UserSchema.index({ createdAt: -1 });
 UserSchema.index({ status: 1 });
 
 // Export the model - only create if we're on the server side
-let User: any;
+let User: mongoose.Model<IUser> | Record<string, never>;
 
 if (typeof window === 'undefined') {
   // Server-side only

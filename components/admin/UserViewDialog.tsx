@@ -12,10 +12,8 @@ import { User } from "@/lib/types";
 import {
   Mail,
   Phone,
-  Calendar,
   MapPin,
   Heart,
-  CreditCard,
   User as UserIcon,
   Settings,
 } from "lucide-react";

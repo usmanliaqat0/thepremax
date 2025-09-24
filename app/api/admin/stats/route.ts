@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { AdminMiddleware } from "@/lib/admin-middleware";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
 
 // GET - Fetch admin dashboard stats (Admin only)
 export const GET = AdminMiddleware.requireAdmin(
-  async (request: NextRequest) => {
+  async () => {
     try {
       await connectDB();
 
@@ -47,7 +47,7 @@ export const GET = AdminMiddleware.requireAdmin(
           emailVerificationRate,
           phoneVerificationRate,
         },
-        recentUsers: recentUsers.map((user: any) => ({
+        recentUsers: recentUsers.map((user) => ({
           id: user._id.toString(),
           firstName: user.firstName,
           lastName: user.lastName,

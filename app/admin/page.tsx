@@ -5,16 +5,15 @@ import {
   Users,
   Package,
   ShoppingCart,
-  DollarSign,
   TrendingUp,
-  TrendingDown,
 } from "lucide-react";
 
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
+import { AdminStats } from "@/lib/types";
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,7 +27,7 @@ export default function AdminDashboard() {
         } else {
           setStats(null);
         }
-      } catch (error) {
+      } catch {
         setStats(null);
       } finally {
         setLoading(false);
@@ -163,7 +162,7 @@ export default function AdminDashboard() {
                     <span className="bg-muted h-4 w-16 animate-pulse rounded" />
                   </div>
                 ))
-              : stats.recentUsers.map((user: any) => (
+              : stats.recentUsers.map((user) => (
                   <div
                     key={user.id}
                     className="flex items-center justify-between border-b border-border pb-3 last:border-b-0"

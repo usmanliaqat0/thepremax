@@ -402,6 +402,29 @@ export interface SiteConfig {
   };
 }
 
+export interface AdminStats {
+  users: {
+    total: number;
+    active: number;
+    inactive: number;
+    growth: string;
+  };
+  verification: {
+    emailVerified: number;
+    phoneVerified: number;
+    emailVerificationRate: number;
+    phoneVerificationRate: number;
+  };
+  recentUsers: Array<{
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    status: string;
+    createdAt: string;
+  }>;
+}
+
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
 export type DeepPartial<T> = {

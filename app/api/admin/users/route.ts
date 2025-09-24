@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { AdminMiddleware } from "@/lib/admin-middleware";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
-import { User as UserType } from "@/lib/types";
 
 // GET - Fetch all users (Admin only)
 export const GET = AdminMiddleware.requireAdmin(
@@ -18,7 +17,7 @@ export const GET = AdminMiddleware.requireAdmin(
       const role = searchParams.get("role") || "";
 
       // Build filter query
-      const filter: any = {};
+      const filter: Record<string, unknown> = {};
 
       if (search) {
         filter.$or = [
@@ -55,7 +54,7 @@ export const GET = AdminMiddleware.requireAdmin(
       return NextResponse.json({
         success: true,
         data: {
-          users: users.map((user: any) => ({
+          users: users.map((user) => ({
             ...user,
             id: user._id.toString(),
             _id: undefined,
@@ -118,7 +117,7 @@ export const POST = AdminMiddleware.requireAdmin(
       }
 
       // Create new user
-      const newUser = new User({
+      const newUser = await User.create({
         email: email.toLowerCase(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
@@ -141,7 +140,7 @@ export const POST = AdminMiddleware.requireAdmin(
         message: "User created successfully",
         data: {
           ...savedUser.toObject(),
-          id: savedUser._id.toString(),
+          id: (savedUser as any)._id.toString(),
           _id: undefined,
           password: undefined,
         },

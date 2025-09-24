@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AdminMiddleware } from "@/lib/admin-middleware";
+import { AdminMiddleware, AdminUser } from "@/lib/admin-middleware";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
 
 // GET - Fetch specific user (Admin only)
 export const GET = AdminMiddleware.requireAdmin(
-  async (request: NextRequest, adminUser: any, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, adminUser: AdminUser, ...args: unknown[]) => {
+    const { params } = args[0] as { params: { id: string } };
     try {
       await connectDB();
 
@@ -38,7 +39,8 @@ export const GET = AdminMiddleware.requireAdmin(
 
 // PUT - Update user (Admin only)
 export const PUT = AdminMiddleware.requireAdmin(
-  async (request: NextRequest, adminUser: any, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, adminUser: AdminUser, ...args: unknown[]) => {
+    const { params } = args[0] as { params: { id: string } };
     try {
       const body = await request.json();
       const {
@@ -71,7 +73,7 @@ export const PUT = AdminMiddleware.requireAdmin(
       if (email && email !== user.email) {
         const existingUser = await User.findOne({
           email: email.toLowerCase(),
-          _id: { $ne: params.id }
+          _id: { $ne: params.id },
         });
         if (existingUser) {
           return NextResponse.json(
@@ -85,7 +87,7 @@ export const PUT = AdminMiddleware.requireAdmin(
       }
 
       // Update user fields
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
 
       if (firstName !== undefined) updateData.firstName = firstName.trim();
       if (lastName !== undefined) updateData.lastName = lastName.trim();
@@ -94,16 +96,19 @@ export const PUT = AdminMiddleware.requireAdmin(
       if (gender !== undefined) updateData.gender = gender;
       if (status !== undefined) updateData.status = status;
       if (role !== undefined) updateData.role = role;
-      if (isEmailVerified !== undefined) updateData.isEmailVerified = isEmailVerified;
-      if (isPhoneVerified !== undefined) updateData.isPhoneVerified = isPhoneVerified;
+      if (isEmailVerified !== undefined)
+        updateData.isEmailVerified = isEmailVerified;
+      if (isPhoneVerified !== undefined)
+        updateData.isPhoneVerified = isPhoneVerified;
 
       updateData.updatedAt = new Date();
 
-      const updatedUser = await User.findByIdAndUpdate(
-        params.id,
-        updateData,
-        { new: true, runValidators: true }
-      ).select("-password").lean();
+      const updatedUser = await User.findByIdAndUpdate(params.id, updateData, {
+        new: true,
+        runValidators: true,
+      })
+        .select("-password")
+        .lean();
 
       return NextResponse.json({
         success: true,
@@ -123,7 +128,8 @@ export const PUT = AdminMiddleware.requireAdmin(
 
 // DELETE - Delete user (Admin only)
 export const DELETE = AdminMiddleware.requireAdmin(
-  async (request: NextRequest, adminUser: any, { params }: { params: { id: string } }) => {
+  async (request: NextRequest, adminUser: AdminUser, ...args: unknown[]) => {
+    const { params } = args[0] as { params: { id: string } };
     try {
       await connectDB();
 
