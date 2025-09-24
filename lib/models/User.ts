@@ -1,7 +1,8 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 
 // User document interface for Mongoose
 export interface IUser extends Document {
+  _id: Types.ObjectId;
   email: string;
   password: string;
   firstName: string;
@@ -140,7 +141,7 @@ UserSchema.index({ status: 1 });
 // Export the model - only create if we're on the server side
 let User: mongoose.Model<IUser> | Record<string, never>;
 
-if (typeof window === 'undefined') {
+if (typeof window === "undefined") {
   // Server-side only
   User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
 } else {

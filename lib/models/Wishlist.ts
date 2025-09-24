@@ -45,7 +45,6 @@ const WishlistSchema = new Schema<IWishlist>(
       type: String,
       required: true,
       unique: true,
-      index: true,
     },
     items: [WishlistItemSchema],
   },
@@ -55,7 +54,6 @@ const WishlistSchema = new Schema<IWishlist>(
 );
 
 // Create indexes
-WishlistSchema.index({ userId: 1 });
 WishlistSchema.index({ "items.productId": 1 });
 
 const Wishlist =

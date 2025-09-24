@@ -140,7 +140,7 @@ export const POST = AdminMiddleware.requireAdmin(
         message: "User created successfully",
         data: {
           ...savedUser.toObject(),
-          id: (savedUser as any)._id.toString(),
+          id: String(savedUser._id),
           _id: undefined,
           password: undefined,
         },

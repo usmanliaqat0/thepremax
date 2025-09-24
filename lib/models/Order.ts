@@ -74,7 +74,6 @@ const OrderSchema = new Schema<IOrder>(
     userId: {
       type: String,
       required: true,
-      index: true,
     },
     orderNumber: {
       type: String,
