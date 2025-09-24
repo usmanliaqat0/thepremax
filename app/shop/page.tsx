@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import Navigation from "@/components/Navigation";
 import ProductCard from "@/components/ProductCard";
 
-// Lazy load Footer for better performance
 const Footer = dynamic(() => import("@/components/Footer"), {
   loading: () => <div className="h-96 bg-muted animate-pulse" />,
 });
@@ -41,10 +40,8 @@ const ShopContent = () => {
 
   const searchParams = useSearchParams();
 
-  // Scroll to top when navigating to shop page
   useScrollToTop();
 
-  // Handle URL search parameter
   useEffect(() => {
     const urlSearch = searchParams.get("search");
     if (urlSearch) {
@@ -65,11 +62,9 @@ const ShopContent = () => {
     }
   };
 
-  // Filter and sort products
   useEffect(() => {
     setIsLoading(true);
 
-    // Simulate loading delay for better UX
     const timer = setTimeout(() => {
       const filters = {
         category: categoryFilter !== "all" ? categoryFilter : undefined,

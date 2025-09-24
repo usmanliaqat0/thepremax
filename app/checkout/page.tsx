@@ -64,10 +64,8 @@ const Checkout = () => {
   const { toast } = useToast();
   const router = useRouter();
 
-  // Scroll to top when navigating to checkout page
   useScrollToTop();
 
-  // Redirect if cart is empty
   if (state.items.length === 0) {
     return (
       <div className="min-h-screen bg-background">
@@ -112,7 +110,6 @@ const Checkout = () => {
     e.preventDefault();
     setIsProcessing(true);
 
-    // Simulate payment processing
     setTimeout(() => {
       clearCart();
       toast({

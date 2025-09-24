@@ -20,18 +20,15 @@ import Link from "next/link";
 import { formatPrice } from "@/lib/currency";
 
 const OrderSuccess = () => {
-  // Generate a random order number
   const orderNumber = `FM-${Math.random()
     .toString(36)
     .substr(2, 9)
     .toUpperCase()}`;
 
   useEffect(() => {
-    // Scroll to top when component mounts
     window.scrollTo(0, 0);
   }, []);
 
-  // Mock order data
   const orderData = {
     orderNumber,
     total: 15800,

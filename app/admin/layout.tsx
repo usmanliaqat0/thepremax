@@ -7,7 +7,6 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminHeader from "@/components/admin/AdminHeader";
 import { Loader2 } from "lucide-react";
 
-// Client-side admin check function
 function isAdminUser(userRole?: string): boolean {
   return userRole === "admin";
 }
@@ -22,7 +21,6 @@ export default function AdminLayout({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check authentication and admin role
     if (!state.isLoading) {
       if (!state.isAuthenticated) {
         router.push("/login");
@@ -50,7 +48,7 @@ export default function AdminLayout({
   }
 
   if (!state.isAuthenticated || !isAdminUser(state.user?.role)) {
-    return null; // Will redirect before this renders
+    return null;
   }
 
   return (
@@ -58,9 +56,7 @@ export default function AdminLayout({
       <AdminSidebar />
       <div className="pl-64">
         <AdminHeader />
-        <main className="p-8">
-          {children}
-        </main>
+        <main className="p-8">{children}</main>
       </div>
     </div>
   );

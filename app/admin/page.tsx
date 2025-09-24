@@ -1,12 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Users,
-  Package,
-  ShoppingCart,
-  TrendingUp,
-} from "lucide-react";
+import { Users, Package, ShoppingCart, TrendingUp } from "lucide-react";
 
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
@@ -38,7 +33,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Welcome Section */}
       <div className="bg-gradient-to-r from-accent/10 to-accent/5 rounded-lg p-6 border border-accent/20">
         <h1 className="text-2xl font-bold text-foreground mb-2">
           Welcome to ThePreMax Admin Panel
@@ -49,7 +43,6 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {loading || !stats ? (
           Array.from({ length: 4 }).map((_, i) => (
@@ -145,7 +138,6 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* Recent Users */}
       <Card>
         <CardHeader>
           <CardTitle>Recent Users</CardTitle>
@@ -186,7 +178,6 @@ export default function AdminDashboard() {
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="cursor-pointer hover:shadow-md transition-shadow">
           <CardHeader>

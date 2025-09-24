@@ -16,7 +16,6 @@ const About = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      {/* Hero Section */}
       <section className="py-16 lg:py-24 bg-gradient-hero">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
@@ -32,7 +31,6 @@ const About = () => {
         </div>
       </section>
 
-      {/* Our Story */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -74,7 +72,6 @@ const About = () => {
         </div>
       </section>
 
-      {/* Our Values */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -135,7 +132,6 @@ const About = () => {
         </div>
       </section>
 
-      {/* Statistics */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -179,7 +175,6 @@ const About = () => {
         </div>
       </section>
 
-      {/* Mission */}
       <section className="py-16 bg-gradient-accent">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto">

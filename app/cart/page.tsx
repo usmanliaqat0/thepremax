@@ -35,7 +35,6 @@ const Cart = () => {
   const [promoCode, setPromoCode] = useState("");
   const [appliedPromo, setAppliedPromo] = useState("");
 
-  // Scroll to top when navigating to cart page
   useScrollToTop();
 
   const applyPromoCode = () => {
@@ -85,7 +84,6 @@ const Cart = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      {/* Header */}
       <section className="py-12 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
@@ -109,7 +107,6 @@ const Cart = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
@@ -200,10 +197,8 @@ const Cart = () => {
             </Card>
           </div>
 
-          {/* Order Summary */}
           <div className="lg:col-span-1">
             <div className="space-y-6">
-              {/* Promo Code */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -231,7 +226,6 @@ const Cart = () => {
                 </CardContent>
               </Card>
 
-              {/* Order Summary */}
               <Card>
                 <CardHeader>
                   <CardTitle>Order Summary</CardTitle>
@@ -271,7 +265,6 @@ const Cart = () => {
                     </Button>
                   </Link>
 
-                  {/* Shipping Info */}
                   <div className="space-y-3 mt-6 pt-6 border-t">
                     <div className="flex items-center gap-3 text-sm">
                       <Truck className="h-4 w-4 text-muted-foreground" />

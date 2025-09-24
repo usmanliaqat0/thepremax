@@ -58,7 +58,6 @@ const ProductDetail = () => {
   const productId = params.id as string;
   const product = getProductById(productId);
 
-  // Scroll to top when component mounts
   useScrollToTop();
 
   const [selectedSize, setSelectedSize] = useState("");
@@ -71,7 +70,6 @@ const ProductDetail = () => {
     notFound();
   }
 
-  // Get related products from the same category
   const relatedProducts = products
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
@@ -88,16 +86,13 @@ const ProductDetail = () => {
     setIsBuyingNow(true);
 
     try {
-      // Add to cart first
       addToCart(product, selectedSize, selectedColor, quantity);
 
-      // Show success toast
       toast({
         title: "Processing your order",
         description: `${product.name} has been added to your cart. Redirecting to checkout...`,
       });
 
-      // Navigate to checkout page after a brief delay
       setTimeout(() => {
         router.push("/checkout");
         setIsBuyingNow(false);

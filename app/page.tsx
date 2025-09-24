@@ -65,7 +65,6 @@ export default function Home() {
     },
   ];
 
-  // Structured data for SEO
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [

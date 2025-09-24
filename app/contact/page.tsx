@@ -41,16 +41,13 @@ const Contact = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
     if (!formData.name || !formData.email || !formData.message) {
       toast.error("Please fill in all required fields");
       return;
     }
 
-    // Simulate form submission
     toast.success("Message sent successfully! We'll get back to you soon.");
 
-    // Reset form
     setFormData({
       name: "",
       email: "",

@@ -96,7 +96,6 @@ const Profile = () => {
       return;
     }
 
-    // Redirect admin users to admin dashboard instead of profile
     if (state.isAuthenticated && state.user?.role === "admin") {
       router.push("/admin");
       return;
@@ -113,7 +112,6 @@ const Profile = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       toast({
         title: "Invalid file type",
@@ -123,7 +121,6 @@ const Profile = () => {
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: "File too large",
@@ -135,7 +132,6 @@ const Profile = () => {
 
     setSelectedFile(file);
 
-    // Create preview URL
     const reader = new FileReader();
     reader.onload = (e) => {
       setPreviewUrl(e.target?.result as string);
