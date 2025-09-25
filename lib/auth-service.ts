@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import crypto from "crypto";
 import { AuthUser, SigninData, SignupData } from "./types";
 import User, { IUser } from "./models/User";
 import connectDB from "./db";
@@ -180,6 +181,17 @@ export class AvatarUtils {
   }
 }
 
+export class VerificationUtils {
+  static generateVerificationToken(): string {
+    return crypto.randomBytes(32).toString("hex");
+  }
+
+  static getVerificationExpiry(): Date {
+    // No expiry - codes never expire
+    return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now
+  }
+}
+
 export class AuthService {
   static async signin(data: SigninData): Promise<{
     success: boolean;
@@ -274,6 +286,9 @@ export class AuthService {
         };
       }
 
+      // Check if email is verified - don't block login, just mark as requiring verification
+      // This will be handled on the frontend
+
       const userData: AuthUser = {
         id: user._id.toString(),
         email: user.email,
@@ -282,6 +297,7 @@ export class AuthService {
         gender: user.gender,
         avatar: user.avatar,
         role: user.role,
+        isEmailVerified: user.isEmailVerified,
       };
 
       const accessToken = TokenUtils.generateAccessToken(userData);
@@ -351,6 +367,12 @@ export class AuthService {
       // Hash password
       const hashedPassword = await PasswordUtils.hash(password);
 
+      // Generate email verification token
+      const emailVerificationToken =
+        VerificationUtils.generateVerificationToken();
+      const emailVerificationExpires =
+        VerificationUtils.getVerificationExpiry();
+
       // Create user
       const newUser = new (User as mongoose.Model<IUser>)({
         email: normalizedEmail,
@@ -360,6 +382,9 @@ export class AuthService {
         phone: phone?.trim(),
         gender,
         avatar: AvatarUtils.getDefaultAvatar(gender),
+        isEmailVerified: false, // Explicitly set to false
+        emailVerificationToken,
+        emailVerificationExpires,
         preferences: {
           currency: "USD",
           language: "en",
@@ -379,15 +404,20 @@ export class AuthService {
         gender: savedUser.gender,
         avatar: savedUser.avatar,
         role: savedUser.role,
+        isEmailVerified: savedUser.isEmailVerified,
       };
 
       // Generate tokens
       const accessToken = TokenUtils.generateAccessToken(userData);
       const refreshToken = TokenUtils.generateRefreshToken(userData);
 
-      // Send welcome email (don't await to avoid blocking the response)
-      EmailService.sendWelcomeEmail(email, firstName).catch((error) => {
-        console.error("Failed to send welcome email:", error);
+      // Send email verification email (don't await to avoid blocking the response)
+      EmailService.sendEmailVerificationEmail(
+        email,
+        firstName,
+        emailVerificationToken
+      ).catch((error) => {
+        console.error("Failed to send email verification email:", error);
       });
 
       return {
@@ -395,7 +425,8 @@ export class AuthService {
         user: userData,
         accessToken,
         refreshToken,
-        message: "Account created successfully",
+        message:
+          "Account created successfully. Please check your email to verify your account.",
       };
     } catch (error) {
       console.error("Signup error:", error);
@@ -437,6 +468,7 @@ export class AuthService {
         gender: user.gender,
         avatar: user.avatar,
         role: user.role,
+        isEmailVerified: user.isEmailVerified,
       };
 
       // Generate new tokens
@@ -482,6 +514,7 @@ export class AuthService {
         gender: user.gender,
         avatar: user.avatar,
         role: user.role,
+        isEmailVerified: user.isEmailVerified,
       };
 
       return {
@@ -493,6 +526,127 @@ export class AuthService {
       return {
         success: false,
         message: "Failed to get user data",
+      };
+    }
+  }
+
+  static async verifyEmail(token: string): Promise<{
+    success: boolean;
+    message?: string;
+  }> {
+    try {
+      await connectDB();
+
+      // Check if token is a 6-character code or full token
+      let user;
+      if (token.length === 6) {
+        // 6-character code - find user where token starts with this code (case insensitive)
+        const upperCode = token.toUpperCase();
+        console.log("Looking for user with code:", upperCode);
+
+        // Escape special regex characters
+        const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+        user = await User.findOne({
+          emailVerificationToken: { $regex: `^${escapedCode}`, $options: "i" },
+        });
+
+        console.log("Found user:", user ? "Yes" : "No");
+        if (user) {
+          console.log(
+            "User token starts with:",
+            user.emailVerificationToken?.substring(0, 6)
+          );
+        }
+      } else {
+        // Full token
+        user = await User.findOne({
+          emailVerificationToken: token,
+        });
+      }
+
+      if (!user) {
+        return {
+          success: false,
+          message: "Invalid verification code",
+        };
+      }
+
+      // Update user to mark email as verified
+      user.isEmailVerified = true;
+      user.emailVerificationToken = undefined;
+      user.emailVerificationExpires = undefined;
+      await user.save();
+
+      return {
+        success: true,
+        message: "Email verified successfully",
+      };
+    } catch (error) {
+      console.error("Email verification error:", error);
+      return {
+        success: false,
+        message: "Failed to verify email",
+      };
+    }
+  }
+
+  static async resendVerificationEmail(email: string): Promise<{
+    success: boolean;
+    message?: string;
+  }> {
+    try {
+      await connectDB();
+
+      const user = await User.findOne({ email: email.toLowerCase() });
+      if (!user) {
+        return {
+          success: false,
+          message: "User not found",
+        };
+      }
+
+      if (user.isEmailVerified) {
+        return {
+          success: false,
+          message: "Email is already verified",
+        };
+      }
+
+      // Generate new verification token
+      const emailVerificationToken =
+        VerificationUtils.generateVerificationToken();
+      const emailVerificationExpires =
+        VerificationUtils.getVerificationExpiry();
+
+      // Update user with new token
+      user.emailVerificationToken = emailVerificationToken;
+      user.emailVerificationExpires = emailVerificationExpires;
+      await user.save();
+
+      // Send verification email
+      const emailResult = await EmailService.sendEmailVerificationEmail(
+        user.email,
+        user.firstName,
+        emailVerificationToken
+      );
+
+      if (emailResult.success) {
+        return {
+          success: true,
+          message: "Verification email sent successfully",
+        };
+      } else {
+        return {
+          success: false,
+          message: "Failed to send verification email",
+        };
+      }
+    } catch (error) {
+      console.error("Resend verification email error:", error);
+      return {
+        success: false,
+        message: "Failed to resend verification email",
       };
     }
   }

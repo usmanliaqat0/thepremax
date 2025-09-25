@@ -34,6 +34,7 @@ export interface AuthUser {
   avatar?: string;
   dateOfBirth?: string;
   role: "customer" | "admin" | "staff";
+  isEmailVerified?: boolean;
   addresses?: Address[];
   preferences?: UserPreferences;
 }
@@ -57,6 +58,7 @@ export interface AuthResponse {
   message: string;
   user?: AuthUser;
   token?: string;
+  requiresVerification?: boolean;
 }
 
 export interface UserPreferences {

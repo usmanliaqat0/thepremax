@@ -13,6 +13,8 @@ export interface IUser extends Document {
   gender?: "male" | "female" | "other";
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
   role: "customer" | "admin" | "staff";
   status: "active" | "inactive" | "pending" | "archived";
   preferences: {
@@ -92,6 +94,14 @@ const UserSchema = new Schema<IUser>(
     isPhoneVerified: {
       type: Boolean,
       default: false,
+    },
+    emailVerificationToken: {
+      type: String,
+      default: null,
+    },
+    emailVerificationExpires: {
+      type: Date,
+      default: null,
     },
     role: {
       type: String,

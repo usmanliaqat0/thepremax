@@ -11,12 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { ArrowLeft, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 const ResetPasswordForm = () => {
@@ -27,8 +27,6 @@ const ResetPasswordForm = () => {
   const [isValidToken, setIsValidToken] = useState(false);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [email, setEmail] = useState("");
 
   const searchParams = useSearchParams();
@@ -227,31 +225,15 @@ const ResetPasswordForm = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="password">New Password</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter new password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={isLoading}
-                    minLength={6}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
+                <PasswordInput
+                  id="password"
+                  placeholder="Enter new password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  minLength={6}
+                />
                 <p className="text-xs text-gray-500">
                   Password must be at least 6 characters long
                 </p>
@@ -259,31 +241,15 @@ const ResetPasswordForm = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirm new password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    disabled={isLoading}
-                    minLength={6}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
+                <PasswordInput
+                  id="confirmPassword"
+                  placeholder="Confirm new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  minLength={6}
+                />
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>

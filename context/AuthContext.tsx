@@ -176,6 +176,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           payload: { user: result.user, token: result.token },
         });
 
+        // Check if email verification is required
+        if (!result.user.isEmailVerified) {
+          // Store email for verification page
+          localStorage.setItem("pending_verification_email", result.user.email);
+
+          // Redirect to verification page
+          window.location.href = `/verify-code?email=${encodeURIComponent(
+            result.user.email
+          )}`;
+          return { success: true };
+        }
+
         showSuccessMessage("Welcome back!");
         return { success: true };
       } else {
@@ -206,17 +218,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const result: AuthResponse = await response.json();
 
-      if (result.success && result.user && result.token) {
-        localStorage.setItem("auth_token", result.token);
-        localStorage.setItem("user_data", JSON.stringify(result.user));
+      if (result.success && result.user) {
+        if (result.requiresVerification && result.token) {
+          // User is auto-logged in but needs email verification
+          localStorage.setItem("auth_token", result.token);
+          localStorage.setItem("user_data", JSON.stringify(result.user));
 
-        dispatch({
-          type: "AUTH_SUCCESS",
-          payload: { user: result.user, token: result.token },
-        });
+          dispatch({
+            type: "AUTH_SUCCESS",
+            payload: { user: result.user, token: result.token },
+          });
 
-        showSuccessMessage("Account created successfully!");
-        return { success: true };
+          // Store email for verification page
+          localStorage.setItem("pending_verification_email", result.user.email);
+
+          // Redirect to verification page
+          window.location.href = `/verify-code?email=${encodeURIComponent(
+            result.user.email
+          )}`;
+          return { success: true };
+        } else if (result.token) {
+          localStorage.setItem("auth_token", result.token);
+          localStorage.setItem("user_data", JSON.stringify(result.user));
+
+          dispatch({
+            type: "AUTH_SUCCESS",
+            payload: { user: result.user, token: result.token },
+          });
+
+          showSuccessMessage("Account created successfully!");
+          return { success: true };
+        } else {
+          // User created but no token provided
+          return { success: true };
+        }
       } else {
         dispatch({ type: "AUTH_FAILURE" });
         const apiErrors = handleApiError(result, "Sign up failed");

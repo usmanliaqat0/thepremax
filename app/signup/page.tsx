@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
@@ -192,9 +193,8 @@ const Signup = () => {
                   >
                     Password
                   </Label>
-                  <Input
+                  <PasswordInput
                     id="password"
-                    type="password"
                     value={formData.password}
                     onChange={(e) =>
                       handleInputChange("password", e.target.value)
@@ -218,9 +218,8 @@ const Signup = () => {
                   >
                     Confirm Password
                   </Label>
-                  <Input
+                  <PasswordInput
                     id="confirmPassword"
-                    type="password"
                     value={formData.confirmPassword}
                     onChange={(e) =>
                       handleInputChange("confirmPassword", e.target.value)

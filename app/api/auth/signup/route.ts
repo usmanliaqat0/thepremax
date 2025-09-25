@@ -8,16 +8,19 @@ export async function POST(req: NextRequest) {
     const result = await AuthService.signup(body);
 
     if (result.success) {
+      // Set cookies for auto-login but mark as requiring verification
       const response = NextResponse.json<AuthResponse>(
         {
           success: true,
           message: result.message!,
           user: result.user!,
           token: result.accessToken!,
+          requiresVerification: true,
         },
         { status: 201 }
       );
 
+      // Set authentication cookies for auto-login
       response.cookies.set("accessToken", result.accessToken!, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",

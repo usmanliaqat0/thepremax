@@ -25,6 +25,7 @@ import Footer from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { BeautifulLoader } from "@/components/ui/loader";
 import { useToast } from "@/hooks/use-toast";
+import { EmailVerificationBanner } from "@/components/EmailVerificationBanner";
 import {
   User,
   MapPin,
@@ -55,14 +56,7 @@ interface AvatarOption {
 }
 
 const Profile = () => {
-  const {
-    state,
-    logout,
-    updateProfile,
-    uploadAvatar,
-    resetAvatar,
-    refreshUser,
-  } = useAuth();
+  const { state, logout, updateProfile, uploadAvatar, resetAvatar } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -108,11 +102,12 @@ const Profile = () => {
       return;
     }
 
-    // Refresh user data to get latest addresses and other profile info
-    if (state.isAuthenticated && state.user) {
-      refreshUser();
+    // Check email verification status
+    if (state.isAuthenticated && state.user && !state.user.isEmailVerified) {
+      router.push(`/verify-code?email=${encodeURIComponent(state.user.email)}`);
+      return;
     }
-  }, [state.isAuthenticated, state.isLoading, state.user, router, refreshUser]);
+  }, [state.isAuthenticated, state.isLoading, state.user, router]);
 
   useEffect(() => {
     if (state.user?.avatar) {
@@ -295,6 +290,9 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
+
+      {/* Email Verification Banner */}
+      <EmailVerificationBanner />
 
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Profile Header */}

@@ -6,6 +6,7 @@ export interface AuthenticatedRequest extends NextRequest {
     id: string;
     email: string;
     role: string;
+    isEmailVerified?: boolean;
   };
 }
 
@@ -15,7 +16,12 @@ export class AuthMiddleware {
    */
   static async verifyRequest(req: NextRequest): Promise<{
     success: boolean;
-    user?: { id: string; email: string; role: string };
+    user?: {
+      id: string;
+      email: string;
+      role: string;
+      isEmailVerified?: boolean;
+    };
     error?: string;
   }> {
     try {
