@@ -123,6 +123,171 @@ export class EmailService {
     }
   }
 
+  // Send password reset verification email
+  static async sendPasswordResetVerificationEmail(
+    email: string,
+    firstName: string,
+    verificationToken: string
+  ): Promise<{
+    success: boolean;
+    message?: string;
+  }> {
+    try {
+      if (typeof window !== "undefined") {
+        return {
+          success: false,
+          message: "Email service can only be used on server-side",
+        };
+      }
+
+      if (!apiInstance) {
+        return {
+          success: false,
+          message:
+            "Email service is not configured. Please set BREVO_API_KEY environment variable.",
+        };
+      }
+
+      const verificationCode = verificationToken.substring(0, 6).toUpperCase();
+      console.log(
+        "Generated password reset verification code:",
+        verificationCode
+      );
+      console.log("Full token:", verificationToken);
+
+      const resetUrl = `${
+        process.env.NEXT_PUBLIC_APP_URL
+      }/reset-password-verify?email=${encodeURIComponent(
+        email
+      )}&code=${verificationCode}`;
+
+      const emailData = {
+        to: [{ email, name: firstName }],
+        templateId: parseInt(
+          process.env.BREVO_PASSWORD_RESET_TEMPLATE_ID || "0"
+        ),
+        params: {
+          firstName,
+          verificationCode,
+          resetUrl,
+          companyName: process.env.NEXT_PUBLIC_APP_NAME || "ThePreMax",
+        },
+      };
+
+      await apiInstance.sendTransacEmail(emailData);
+
+      return {
+        success: true,
+        message: "Password reset verification email sent successfully",
+      };
+    } catch (error) {
+      console.error("Send password reset verification email error:", error);
+
+      // Fallback to basic email if template fails
+      try {
+        const verificationCode = verificationToken
+          .substring(0, 6)
+          .toUpperCase();
+        const resetUrl = `${
+          process.env.NEXT_PUBLIC_APP_URL
+        }/reset-password-verify?email=${encodeURIComponent(
+          email
+        )}&code=${verificationCode}`;
+
+        const companyName = process.env.NEXT_PUBLIC_APP_NAME || "ThePreMax";
+
+        const htmlContent = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Reset Your Password - ${companyName}</title>
+          </head>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <h1 style="color: white; margin: 0; font-size: 28px;">Reset Your Password</h1>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e9ecef;">
+              <h2 style="color: #333; margin-top: 0;">Hello ${firstName},</h2>
+              
+              <p>We received a request to reset your password for your <strong>${companyName}</strong> account. To complete the password reset process, please use the verification code below:</p>
+              
+              <div style="background: #fff; border: 2px solid #667eea; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+                <h3 style="color: #667eea; margin: 0; font-size: 24px; letter-spacing: 3px;">${verificationCode}</h3>
+              </div>
+              
+              <p>Or click the button below to reset your password:</p>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${resetUrl}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; display: inline-block; font-weight: bold;">Reset Password</a>
+              </div>
+              
+              <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0; color: #856404;"><strong>Important:</strong> This verification code is unique to your account. Keep it secure and don't share it with anyone.</p>
+              </div>
+              
+              <p>If you didn't request a password reset, please ignore this email. Your password will remain unchanged.</p>
+              
+              <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
+              
+              <div style="text-align: center; color: #6c757d; font-size: 14px;">
+                <p>Best regards,<br><strong>${companyName}</strong><br>
+                If you have any questions, please contact our <a href="mailto:support@thepremax.com">support team</a></p>
+              </div>
+            </div>
+          </body>
+          </html>
+        `;
+
+        const textContent = `
+          Reset Your Password - ${companyName}
+          
+          Hello ${firstName},
+          
+          We received a request to reset your password for your ${companyName} account. To complete the password reset process, please use the verification code below:
+          
+          Verification Code: ${verificationCode}
+          
+          Or visit this link: ${resetUrl}
+          
+          Important: This verification code is unique to your account. Keep it secure and don't share it with anyone.
+          
+          If you didn't request a password reset, please ignore this email. Your password will remain unchanged.
+          
+          Best regards,
+          The ${companyName} Team
+        `;
+
+        const fallbackResult = await this.sendEmail(
+          [{ email, name: firstName }],
+          `Reset Your Password - ${companyName}`,
+          htmlContent,
+          textContent
+        );
+
+        if (fallbackResult.success) {
+          return {
+            success: true,
+            message:
+              "Password reset verification email sent successfully (fallback method)",
+          };
+        }
+      } catch (fallbackError) {
+        console.error(
+          "Fallback password reset verification error:",
+          fallbackError
+        );
+      }
+
+      return {
+        success: false,
+        message: "Failed to send password reset verification email",
+      };
+    }
+  }
+
   // Send email verification email
   static async sendEmailVerificationEmail(
     email: string,

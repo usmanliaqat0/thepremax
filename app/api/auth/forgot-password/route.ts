@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PasswordResetService } from "@/lib/password-reset-service";
 import { EmailService } from "@/lib/email-service";
+import { VerificationUtils } from "@/lib/auth-service";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
 
@@ -27,39 +27,58 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    // Get user details for email personalization
+    // Check if user exists and is active
     const user = await User.findOne({ email: email.toLowerCase() }).select(
       "firstName email status"
     );
 
-    // Always return success to prevent email enumeration attacks
-    // But only send email if user exists and is active
-    if (user && user.status === "active") {
-      // Create password reset token
-      const resetResult = await PasswordResetService.createPasswordReset(email);
-
-      if (resetResult.success && resetResult.token) {
-        // Send password reset email
-        const emailResult = await EmailService.sendPasswordResetEmail(
-          email,
-          user.firstName,
-          resetResult.token
-        );
-
-        if (!emailResult.success) {
-          console.error(
-            "Failed to send password reset email:",
-            emailResult.message
-          );
-        }
-      }
+    if (!user) {
+      return NextResponse.json(
+        { success: false, message: "No account found with this email address" },
+        { status: 404 }
+      );
     }
 
-    // Always return success message to prevent email enumeration
+    if (user.status !== "active") {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Account is not active. Please contact support.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Generate password reset verification token
+    const passwordResetToken = VerificationUtils.generateVerificationToken();
+    const passwordResetExpires = VerificationUtils.getVerificationExpiry();
+
+    // Update user with password reset token
+    user.passwordResetToken = passwordResetToken;
+    user.passwordResetExpires = passwordResetExpires;
+    await user.save();
+
+    // Send password reset verification email
+    const emailResult = await EmailService.sendPasswordResetVerificationEmail(
+      email,
+      user.firstName,
+      passwordResetToken
+    );
+
+    if (!emailResult.success) {
+      console.error(
+        "Failed to send password reset verification email:",
+        emailResult.message
+      );
+      return NextResponse.json(
+        { success: false, message: "Failed to send verification email" },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
-      message:
-        "If an account with that email exists, we've sent a password reset link.",
+      message: "Password reset verification code sent to your email.",
     });
   } catch (error) {
     console.error("Forgot password error:", error);

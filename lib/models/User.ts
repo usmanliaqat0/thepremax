@@ -15,6 +15,8 @@ export interface IUser extends Document {
   isPhoneVerified: boolean;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
   role: "customer" | "admin" | "staff";
   status: "active" | "inactive" | "pending" | "archived";
   preferences: {
@@ -100,6 +102,14 @@ const UserSchema = new Schema<IUser>(
       default: null,
     },
     emailVerificationExpires: {
+      type: Date,
+      default: null,
+    },
+    passwordResetToken: {
+      type: String,
+      default: null,
+    },
+    passwordResetExpires: {
       type: Date,
       default: null,
     },
