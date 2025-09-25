@@ -19,11 +19,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { User } from "@/lib/types";
+import { RefreshCw } from "lucide-react";
 
 interface UserEditDialogProps {
   user: User;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  loading?: boolean;
   onUserUpdated: (user: User) => void;
 }
 
@@ -31,9 +33,9 @@ export default function UserEditDialog({
   user,
   open,
   onOpenChange,
+  loading = false,
   onUserUpdated,
 }: UserEditDialogProps) {
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: user.firstName,
     lastName: user.lastName,
@@ -48,7 +50,6 @@ export default function UserEditDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     try {
       const updatedUser: User = {
         ...user,
@@ -65,8 +66,6 @@ export default function UserEditDialog({
       onOpenChange(false);
     } catch (error) {
       console.error("Error updating user:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -224,7 +223,14 @@ export default function UserEditDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Updating..." : "Update User"}
+              {loading ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Updating...
+                </>
+              ) : (
+                "Update User"
+              )}
             </Button>
           </DialogFooter>
         </form>

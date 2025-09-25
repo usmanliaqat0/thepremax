@@ -42,6 +42,7 @@ import { User } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
 import UserEditDialog from "@/components/admin/UserEditDialog";
 import UserViewDialog from "@/components/admin/UserViewDialog";
+import { showSuccessMessage, showErrorMessage } from "@/lib/error-handler";
 
 export default function UsersManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -53,41 +54,62 @@ export default function UsersManagement() {
   const [filterStatus, setFilterStatus] = useState<
     "all" | "active" | "inactive"
   >("all");
+  const [actionLoading, setActionLoading] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const [refreshLoading, setRefreshLoading] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  const fetchUsers = async () => {
-    setLoading(true);
+  const fetchUsers = async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshLoading(true);
+    } else {
+      setLoading(true);
+    }
     try {
       const res = await fetch("/api/admin/users?limit=1000");
       const data = await res.json();
       if (data.success) {
         setUsers(data.data.users);
+        if (isRefresh) {
+          showSuccessMessage("Users refreshed successfully");
+        }
       } else {
         setUsers([]);
+        showErrorMessage("Failed to fetch users");
       }
     } catch (error) {
       setUsers([]);
       console.error("Error fetching users:", error);
+      showErrorMessage("Failed to fetch users. Please try again.");
     } finally {
       setLoading(false);
+      setRefreshLoading(false);
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
+    setActionLoading((prev) => ({ ...prev, [`delete-${userId}`]: true }));
     try {
       const res = await fetch(`/api/admin/users/${userId}`, {
         method: "DELETE",
       });
-      if (res.ok) {
+      const data = await res.json();
+      if (res.ok && data.success) {
         setUsers(users.filter((user) => user.id !== userId));
+        showSuccessMessage("User deleted successfully");
       } else {
-        console.error("Failed to delete user");
+        showErrorMessage(data.message || "Failed to delete user");
       }
     } catch (error) {
       console.error("Error deleting user:", error);
+      showErrorMessage("Failed to delete user. Please try again.");
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [`delete-${userId}`]: false }));
     }
   };
 
@@ -95,23 +117,33 @@ export default function UsersManagement() {
     userId: string,
     newStatus: "active" | "inactive"
   ) => {
+    setActionLoading((prev) => ({ ...prev, [`toggle-${userId}`]: true }));
     try {
       const res = await fetch(`/api/admin/users/${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
-      if (res.ok) {
+      const data = await res.json();
+      if (res.ok && data.success) {
         setUsers(
           users.map((user) =>
             user.id === userId ? { ...user, status: newStatus } : user
           )
         );
+        showSuccessMessage(
+          `User ${
+            newStatus === "active" ? "activated" : "deactivated"
+          } successfully`
+        );
       } else {
-        console.error("Failed to update user status");
+        showErrorMessage(data.message || "Failed to update user status");
       }
     } catch (error) {
       console.error("Error updating user status:", error);
+      showErrorMessage("Failed to update user status. Please try again.");
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [`toggle-${userId}`]: false }));
     }
   };
 
@@ -154,9 +186,15 @@ export default function UsersManagement() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={fetchUsers}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
+          <Button
+            variant="outline"
+            onClick={() => fetchUsers(true)}
+            disabled={refreshLoading}
+          >
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${refreshLoading ? "animate-spin" : ""}`}
+            />
+            {refreshLoading ? "Refreshing..." : "Refresh"}
           </Button>
           <Button variant="outline">
             <Download className="h-4 w-4 mr-2" />
@@ -364,8 +402,11 @@ export default function UsersManagement() {
                               user.status === "active" ? "inactive" : "active"
                             )
                           }
+                          disabled={actionLoading[`toggle-${user.id}`]}
                         >
-                          {user.status === "active" ? (
+                          {actionLoading[`toggle-${user.id}`] ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : user.status === "active" ? (
                             <UserX className="h-4 w-4 text-red-600" />
                           ) : (
                             <UserCheck className="h-4 w-4 text-green-600" />
@@ -373,8 +414,16 @@ export default function UsersManagement() {
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <Trash2 className="h-4 w-4 text-red-600" />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              disabled={actionLoading[`delete-${user.id}`]}
+                            >
+                              {actionLoading[`delete-${user.id}`] ? (
+                                <RefreshCw className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              )}
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
@@ -390,8 +439,16 @@ export default function UsersManagement() {
                               <AlertDialogAction
                                 onClick={() => handleDeleteUser(user.id)}
                                 className="bg-red-600 hover:bg-red-700"
+                                disabled={actionLoading[`delete-${user.id}`]}
                               >
-                                Delete
+                                {actionLoading[`delete-${user.id}`] ? (
+                                  <>
+                                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                    Deleting...
+                                  </>
+                                ) : (
+                                  "Delete"
+                                )}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
@@ -418,24 +475,30 @@ export default function UsersManagement() {
             user={selectedUser}
             open={editDialogOpen}
             onOpenChange={setEditDialogOpen}
+            loading={editLoading}
             onUserUpdated={async (updatedUser) => {
               // Update user in DB
+              setEditLoading(true);
               try {
                 const res = await fetch(`/api/admin/users/${updatedUser.id}`, {
                   method: "PUT",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify(updatedUser),
                 });
-                if (res.ok) {
-                  const data = await res.json();
+                const data = await res.json();
+                if (res.ok && data.success) {
                   setUsers(
                     users.map((u) => (u.id === updatedUser.id ? data.data : u))
                   );
+                  showSuccessMessage("User updated successfully");
                 } else {
-                  console.error("Failed to update user");
+                  showErrorMessage(data.message || "Failed to update user");
                 }
               } catch (error) {
                 console.error("Error updating user:", error);
+                showErrorMessage("Failed to update user. Please try again.");
+              } finally {
+                setEditLoading(false);
               }
             }}
           />
