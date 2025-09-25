@@ -30,11 +30,11 @@ export async function GET(req: NextRequest) {
       success: true,
       wishlist: wishlist
         ? {
-            id: (wishlist as any)._id?.toString(), // eslint-disable-line @typescript-eslint/no-explicit-any
-            userId: wishlist.userId,
-            items: wishlist.items || [],
-            createdAt: wishlist.createdAt,
-            updatedAt: wishlist.updatedAt,
+            id: (wishlist as Record<string, unknown>)._id?.toString(),
+            userId: (wishlist as Record<string, unknown>).userId,
+            items: (wishlist as Record<string, unknown>).items || [],
+            createdAt: (wishlist as Record<string, unknown>).createdAt,
+            updatedAt: (wishlist as Record<string, unknown>).updatedAt,
           }
         : {
             id: "",
@@ -89,7 +89,8 @@ export async function POST(req: NextRequest) {
     if (action === "add" && item) {
       // Check if item already exists
       const existingItemIndex = wishlist.items.findIndex(
-        (existingItem: any) => existingItem.productId === item.productId // eslint-disable-line @typescript-eslint/no-explicit-any
+        (existingItem: Record<string, unknown>) =>
+          existingItem.productId === item.productId
       );
 
       if (existingItemIndex === -1) {
@@ -109,7 +110,7 @@ export async function POST(req: NextRequest) {
     } else if (action === "remove" && productId) {
       // Remove item
       wishlist.items = wishlist.items.filter(
-        (item: any) => item.productId !== productId // eslint-disable-line @typescript-eslint/no-explicit-any
+        (item: Record<string, unknown>) => item.productId !== productId
       );
     }
 

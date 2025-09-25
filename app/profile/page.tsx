@@ -55,7 +55,14 @@ interface AvatarOption {
 }
 
 const Profile = () => {
-  const { state, logout, updateProfile, uploadAvatar, resetAvatar } = useAuth();
+  const {
+    state,
+    logout,
+    updateProfile,
+    uploadAvatar,
+    resetAvatar,
+    refreshUser,
+  } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -100,7 +107,12 @@ const Profile = () => {
       router.push("/admin");
       return;
     }
-  }, [state.isAuthenticated, state.isLoading, state.user?.role, router]);
+
+    // Refresh user data to get latest addresses and other profile info
+    if (state.isAuthenticated && state.user) {
+      refreshUser();
+    }
+  }, [state.isAuthenticated, state.isLoading, state.user, router, refreshUser]);
 
   useEffect(() => {
     if (state.user?.avatar) {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import Order, { IOrder } from "@/lib/models/Order";
+import Order from "@/lib/models/Order";
 import { TokenUtils } from "@/lib/auth-service";
 
 // Get user orders
@@ -55,9 +55,9 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      orders: orders.map((order: IOrder & { _id: string }) => ({
+      orders: orders.map((order: Record<string, unknown>) => ({
         ...order,
-        id: order._id?.toString(),
+        id: (order._id as string)?.toString(),
       })),
       pagination: {
         currentPage: page,
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       success: true,
       order: {
         ...order,
-        id: (order as any)._id?.toString(), // eslint-disable-line @typescript-eslint/no-explicit-any
+        id: (order as Record<string, unknown>)._id?.toString(),
       },
     });
   } catch (error) {

@@ -1,24 +1,30 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import { AuthUser, SigninData, SignupData } from "./types";
-import User from "./models/User";
+import User, { IUser } from "./models/User";
 import connectDB from "./db";
+import { EmailService } from "./email-service";
 
 interface JWTPayload {
   id: string;
   email: string;
+  role: string;
   type: string;
   iat?: number;
   exp?: number;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET!;
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key-here";
+const JWT_REFRESH_SECRET =
+  process.env.JWT_REFRESH_SECRET || "your-super-secret-refresh-key-here";
 const TOKEN_EXPIRY = process.env.JWT_EXPIRES_IN || "7d";
 const REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_EXPIRES_IN || "30d";
 
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is required");
+if (!process.env.JWT_SECRET) {
+  console.warn(
+    "⚠️  JWT_SECRET environment variable not found. Using default secret (not recommended for production)."
+  );
 }
 
 const REFRESH_TOKENS_ENABLED = !!JWT_REFRESH_SECRET;
@@ -346,7 +352,7 @@ export class AuthService {
       const hashedPassword = await PasswordUtils.hash(password);
 
       // Create user
-      const newUser = new User({
+      const newUser = new (User as mongoose.Model<IUser>)({
         email: normalizedEmail,
         password: hashedPassword,
         firstName: firstName.trim(),
@@ -378,6 +384,11 @@ export class AuthService {
       // Generate tokens
       const accessToken = TokenUtils.generateAccessToken(userData);
       const refreshToken = TokenUtils.generateRefreshToken(userData);
+
+      // Send welcome email (don't await to avoid blocking the response)
+      EmailService.sendWelcomeEmail(email, firstName).catch((error) => {
+        console.error("Failed to send welcome email:", error);
+      });
 
       return {
         success: true,

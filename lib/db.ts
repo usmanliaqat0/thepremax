@@ -1,10 +1,11 @@
 import mongoose, { type Mongoose } from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI!;
+const MONGODB_URI =
+  process.env.MONGODB_URI || "mongodb://localhost:27017/thepremax";
 
-if (!MONGODB_URI) {
-  throw new Error(
-    "Please define the MONGODB_URI environment variable inside .env file"
+if (!process.env.MONGODB_URI) {
+  console.warn(
+    "⚠️  MONGODB_URI environment variable not found. Using default local MongoDB connection."
   );
 }
 
