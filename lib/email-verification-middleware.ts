@@ -24,8 +24,8 @@ export async function requireEmailVerification(
       return null; // User not found, let auth middleware handle it
     }
 
-    // If email is not verified, redirect to verification page
-    if (!user.isEmailVerified) {
+    // If email is not verified, redirect to verification page (skip for admin users)
+    if (!user.isEmailVerified && user.role !== "admin") {
       const verificationUrl = `/verify-code?email=${encodeURIComponent(
         user.email
       )}`;

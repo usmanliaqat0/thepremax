@@ -12,11 +12,12 @@ export function EmailVerificationBanner() {
   const [isResending, setIsResending] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
-  // Don't show banner if user is not authenticated or email is verified
+  // Don't show banner if user is not authenticated, email is verified, or user is admin
   if (
     !state.isAuthenticated ||
     !state.user ||
     state.user.isEmailVerified ||
+    state.user.role === "admin" ||
     isDismissed
   ) {
     return null;

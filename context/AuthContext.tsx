@@ -176,8 +176,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           payload: { user: result.user, token: result.token },
         });
 
-        // Check if email verification is required
-        if (!result.user.isEmailVerified) {
+        // Check if email verification is required (skip for admin users)
+        if (!result.user.isEmailVerified && result.user.role !== "admin") {
           // Store email for verification page
           localStorage.setItem("pending_verification_email", result.user.email);
 

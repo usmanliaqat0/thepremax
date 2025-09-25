@@ -235,6 +235,7 @@ export class AuthService {
             lastName: "Admin",
             role: "admin",
             avatar: AvatarUtils.getDefaultAvatar(),
+            isEmailVerified: true, // Admin users don't need email verification
           };
 
           const accessToken = TokenUtils.generateAccessToken(adminUserData);
