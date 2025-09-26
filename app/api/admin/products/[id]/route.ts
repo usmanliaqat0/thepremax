@@ -4,12 +4,6 @@ import Product from "@/lib/models/Product";
 import Category from "@/lib/models/Category";
 import { AdminMiddleware } from "@/lib/admin-middleware";
 
-// Ensure models are registered before use
-if (typeof window === "undefined") {
-  require("@/lib/models/Product");
-  require("@/lib/models/Category");
-}
-
 // GET /api/admin/products/[id] - Get a specific product
 export async function GET(
   request: NextRequest,

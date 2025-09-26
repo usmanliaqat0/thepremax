@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Category from "@/lib/models/Category";
-import Product from "@/lib/models/Product";
-
-// Ensure models are registered before use
-if (typeof window === "undefined") {
-  require("@/lib/models/Product");
-  require("@/lib/models/Category");
-}
 
 // GET /api/categories - Get all active categories for frontend
 export async function GET(request: NextRequest) {

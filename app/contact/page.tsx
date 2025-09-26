@@ -73,7 +73,7 @@ const Contact = () => {
         // Handle validation errors
         if (data.details && Array.isArray(data.details)) {
           const errorMessages = data.details
-            .map((detail: any) => detail.message)
+            .map((detail: { message: string }) => detail.message)
             .join(", ");
           toast.error(errorMessages);
         } else {
@@ -407,8 +407,8 @@ const Contact = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      Yes! Once your order ships, you'll receive a tracking
-                      number via email to monitor your package's progress.
+                      Yes! Once your order ships, you&apos;ll receive a tracking
+                      number via email to monitor your package&apos;s progress.
                     </p>
                   </CardContent>
                 </Card>
@@ -483,8 +483,8 @@ const Contact = () => {
                     Still have questions?
                   </h3>
                   <p className="text-muted-foreground mb-6">
-                    Can't find what you're looking for? Our support team is here
-                    to help!
+                    Can&apos;t find what you&apos;re looking for? Our support
+                    team is here to help!
                   </p>
                   <Button asChild>
                     <a href="#contact-form">Contact Us</a>

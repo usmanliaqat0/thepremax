@@ -82,8 +82,6 @@ const CategoryPage = () => {
           return b.price - a.price;
         case "name":
           return a.name.localeCompare(b.name);
-        case "brand":
-          return a.brand.localeCompare(b.brand);
         case "rating":
           return b.rating - a.rating;
         case "featured":

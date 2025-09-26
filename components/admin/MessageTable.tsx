@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Eye, Trash2, MessageSquare, X, Edit } from "lucide-react";
+import { Eye, Trash2, MessageSquare, X } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import AdminTable, {

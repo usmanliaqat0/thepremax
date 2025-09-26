@@ -1,7 +1,6 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Eye, Edit, Trash2, Star, TrendingUp, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";

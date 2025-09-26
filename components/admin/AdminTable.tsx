@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Search, X, MoreHorizontal } from "lucide-react";
 
-export interface TableColumn<T = any> {
+export interface TableColumn<T = Record<string, unknown>> {
   key: string;
   header: string;
   width?: string;
@@ -51,7 +51,7 @@ export interface FilterOption {
   options: { value: string; label: string }[];
 }
 
-export interface ActionItem<T = any> {
+export interface ActionItem<T = Record<string, unknown>> {
   key: string;
   label: string | ((item: T) => string);
   icon?: ReactNode | ((item: T) => ReactNode);
@@ -60,7 +60,7 @@ export interface ActionItem<T = any> {
   disabled?: (item: T) => boolean;
 }
 
-export interface AdminTableProps<T = any> {
+export interface AdminTableProps<T = Record<string, unknown>> {
   data: T[];
   columns: TableColumn<T>[];
   actions?: ActionItem<T>[];
@@ -86,7 +86,7 @@ export interface AdminTableProps<T = any> {
   };
 }
 
-export default function AdminTable<T = any>({
+export default function AdminTable<T = Record<string, unknown>>({
   data,
   columns,
   actions = [],
@@ -99,11 +99,15 @@ export default function AdminTable<T = any>({
   onFilter,
   onDelete,
   deleteTitle = "Delete Item",
-  deleteDescription = (item) => `Are you sure you want to delete this item?`,
+  deleteDescription = () => `Are you sure you want to delete this item?`,
   searchValue = "",
   filterValues = {},
   className = "",
-  rowKey = (item: any) => item._id || item.id,
+  rowKey = (item: T) =>
+    String(
+      (item as Record<string, unknown>)._id ||
+        (item as Record<string, unknown>).id
+    ),
   pagination,
 }: AdminTableProps<T>) {
   const [deleteItem, setDeleteItem] = useState<T | null>(null);
@@ -248,7 +252,10 @@ export default function AdminTable<T = any>({
                       <div className="text-sm">
                         {column.render
                           ? column.render(item, index)
-                          : (item as any)[column.key]}
+                          : String(
+                              (item as Record<string, unknown>)[column.key] ||
+                                ""
+                            )}
                       </div>
                     </div>
                   ))}
@@ -314,7 +321,10 @@ export default function AdminTable<T = any>({
                       <div className="text-sm">
                         {column.render
                           ? column.render(item, index)
-                          : (item as any)[column.key]}
+                          : String(
+                              (item as Record<string, unknown>)[column.key] ||
+                                ""
+                            )}
                       </div>
                     </div>
                   ))}
@@ -354,7 +364,10 @@ export default function AdminTable<T = any>({
                       <TableCell key={column.key} className="whitespace-nowrap">
                         {column.render
                           ? column.render(item, index)
-                          : (item as any)[column.key]}
+                          : String(
+                              (item as Record<string, unknown>)[column.key] ||
+                                ""
+                            )}
                       </TableCell>
                     ))}
                     {actions.length > 0 && (

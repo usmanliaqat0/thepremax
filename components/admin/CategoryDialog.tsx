@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -236,9 +237,11 @@ export default function CategoryDialog({
               </div>
               {formData.image && (
                 <div className="mt-2">
-                  <img
+                  <Image
                     src={formData.image}
                     alt="Category preview"
+                    width={80}
+                    height={80}
                     className="w-20 h-20 object-cover rounded border"
                   />
                 </div>

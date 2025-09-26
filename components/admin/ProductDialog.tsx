@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -671,9 +672,11 @@ export default function ProductDialog({
                 {formData.images.map((image) => (
                   <div key={image.id} className="relative group">
                     <div className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200">
-                      <img
+                      <Image
                         src={image.url}
                         alt={image.alt}
+                        width={200}
+                        height={200}
                         className="w-full h-full object-cover"
                       />
                       {image.isPrimary && (

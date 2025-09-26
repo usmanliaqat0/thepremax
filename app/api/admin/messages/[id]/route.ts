@@ -8,6 +8,8 @@ import { z } from "zod";
 const updateMessageSchema = z.object({
   status: z.enum(["new", "read", "replied", "closed"]).optional(),
   adminNotes: z.string().max(1000, "Admin notes too long").optional(),
+  repliedAt: z.date().optional(),
+  closedAt: z.date().optional(),
 });
 
 // GET /api/admin/messages/[id] - Get single message

@@ -1,13 +1,6 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -186,19 +179,15 @@ export default function CategoryTable({
       }}
       onDelete={handleDelete}
       deleteTitle="Delete Category"
-      deleteDescription={(category) => (
-        <>
-          Are you sure you want to delete &quot;{category.name}&quot;? This
-          action cannot be undone.
-          {category.productCount && category.productCount > 0 && (
-            <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800">
-              <strong>Warning:</strong> This category has{" "}
-              {category.productCount} products. You must move or delete these
-              products first.
-            </div>
-          )}
-        </>
-      )}
+      deleteDescription={(category) =>
+        `Are you sure you want to delete "${
+          category.name
+        }"? This action cannot be undone.${
+          category.productCount && category.productCount > 0
+            ? ` Warning: This category has ${category.productCount} products. You must move or delete these products first.`
+            : ""
+        }`
+      }
       searchValue={searchTerm}
       filterValues={{ status: statusFilter }}
       pagination={

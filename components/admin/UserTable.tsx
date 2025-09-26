@@ -1,7 +1,6 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
@@ -42,7 +41,6 @@ interface UserTableProps {
 
 export default function UserTable({
   users,
-  onRefresh,
   onSearch,
   onStatusFilter,
   onView,

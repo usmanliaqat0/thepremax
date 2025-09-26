@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Category from "@/lib/models/Category";
-import Product from "@/lib/models/Product";
 import { AdminMiddleware } from "@/lib/admin-middleware";
-
-// Ensure Product model is registered before use
-if (typeof window === "undefined") {
-  require("@/lib/models/Product");
-}
 
 // GET /api/admin/categories - Get all categories with pagination and filtering
 export async function GET(request: NextRequest) {
