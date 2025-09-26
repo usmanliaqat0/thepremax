@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -24,8 +24,7 @@ const ForgotPassword = () => {
   const [error, setError] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
 
-  // Countdown timer effect
-  useEffect(() => {
+useEffect(() => {
     let interval: NodeJS.Timeout;
     if (resendCooldown > 0) {
       interval = setInterval(() => {
@@ -69,8 +68,8 @@ const ForgotPassword = () => {
       const result = await response.json();
 
       if (result.success) {
-        setResendCooldown(120); // 2 minutes = 120 seconds
-        // Redirect to password reset verification page
+        setResendCooldown(120);
+
         window.location.href = `/reset-password-verify?email=${encodeURIComponent(
           email
         )}`;

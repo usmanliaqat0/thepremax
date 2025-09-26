@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect } from "react";
 import Navigation from "@/components/Navigation";
@@ -43,7 +43,7 @@ const OrderSuccess = () => {
       <Navigation />
 
       <div className="container mx-auto px-4 py-16">
-        {/* Success Message */}
+        {}
         <div className="max-w-2xl mx-auto text-center mb-12">
           <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="h-12 w-12 text-green-600" />
@@ -58,7 +58,7 @@ const OrderSuccess = () => {
         </div>
 
         <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Order Details */}
+          {}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -103,7 +103,7 @@ const OrderSuccess = () => {
             </CardContent>
           </Card>
 
-          {/* Contact Information */}
+          {}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -148,17 +148,17 @@ const OrderSuccess = () => {
           </Card>
         </div>
 
-        {/* Order Timeline */}
+        {}
         <Card className="max-w-4xl mx-auto mt-8">
           <CardHeader>
             <CardTitle>Order Timeline</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row justify-between relative">
-              {/* Timeline Line */}
+              {}
               <div className="hidden md:block absolute top-8 left-0 right-0 h-0.5 bg-muted" />
 
-              {/* Steps */}
+              {}
               <div className="flex flex-col md:flex-row justify-between w-full relative z-10">
                 <div className="flex flex-col items-center text-center mb-6 md:mb-0">
                   <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center mb-2">
@@ -196,7 +196,7 @@ const OrderSuccess = () => {
           </CardContent>
         </Card>
 
-        {/* Actions */}
+        {}
         <div className="max-w-4xl mx-auto mt-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link href="/profile">
@@ -215,7 +215,7 @@ const OrderSuccess = () => {
           </div>
         </div>
 
-        {/* Support */}
+        {}
         <Card className="max-w-4xl mx-auto mt-8">
           <CardContent className="text-center py-8">
             <h3 className="font-semibold mb-2">Need Help?</h3>

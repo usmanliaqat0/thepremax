@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import ContactMessage from "@/lib/models/ContactMessage";
 import { z } from "zod";
 
-// Validation schema for contact form
 const contactSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name is too long"),
   email: z.string().email("Invalid email address"),
@@ -20,8 +19,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // Validate the request body
-    const validationResult = contactSchema.safeParse(body);
+const validationResult = contactSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
         {
@@ -35,8 +33,7 @@ export async function POST(request: NextRequest) {
 
     const { name, email, subject, message } = validationResult.data;
 
-    // Create new contact message
-    const contactMessage = new ContactMessage({
+const contactMessage = new ContactMessage({
       name,
       email,
       subject: subject || "",

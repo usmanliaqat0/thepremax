@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { AdminMiddleware } from "@/lib/admin-middleware";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
 
-// GET - Fetch all users (Admin only)
 export const GET = AdminMiddleware.requireAdmin(
   async (request: NextRequest) => {
     try {
@@ -16,8 +15,7 @@ export const GET = AdminMiddleware.requireAdmin(
       const status = searchParams.get("status") || "";
       const role = searchParams.get("role") || "";
 
-      // Build filter query
-      const filter: Record<string, unknown> = {};
+const filter: Record<string, unknown> = {};
 
       if (search) {
         filter.$or = [
@@ -35,11 +33,9 @@ export const GET = AdminMiddleware.requireAdmin(
         filter.role = role;
       }
 
-      // Calculate pagination
-      const skip = (page - 1) * limit;
+const skip = (page - 1) * limit;
 
-      // Fetch users with pagination
-      const [users, totalUsers] = await Promise.all([
+const [users, totalUsers] = await Promise.all([
         User.find(filter)
           .select("-password")
           .sort({ createdAt: -1 })
@@ -76,7 +72,6 @@ export const GET = AdminMiddleware.requireAdmin(
   }
 );
 
-// POST - Create new user (Admin only)
 export const POST = AdminMiddleware.requireAdmin(
   async (request: NextRequest) => {
     try {
@@ -91,8 +86,7 @@ export const POST = AdminMiddleware.requireAdmin(
         status = "active",
       } = body;
 
-      // Validate required fields
-      if (!email || !firstName || !lastName) {
+if (!email || !firstName || !lastName) {
         return NextResponse.json(
           {
             success: false,
@@ -104,8 +98,7 @@ export const POST = AdminMiddleware.requireAdmin(
 
       await connectDB();
 
-      // Check if user already exists
-      const existingUser = await User.findOne({ email: email.toLowerCase() });
+const existingUser = await User.findOne({ email: email.toLowerCase() });
       if (existingUser) {
         return NextResponse.json(
           {
@@ -116,8 +109,7 @@ export const POST = AdminMiddleware.requireAdmin(
         );
       }
 
-      // Create new user
-      const newUser = await User.create({
+const newUser = await User.create({
         email: email.toLowerCase(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),

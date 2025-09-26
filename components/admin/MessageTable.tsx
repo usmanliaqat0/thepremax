@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -205,7 +205,7 @@ export default function MessageTable({
       key: "delete",
       label: "Delete",
       icon: <Trash2 className="mr-2 h-4 w-4" />,
-      onClick: () => {}, // Will be handled by AdminTable
+      onClick: () => {},
       variant: "destructive",
     },
   ];
@@ -236,7 +236,7 @@ export default function MessageTable({
         }}
       />
 
-      {/* View Message Dialog */}
+      {}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>

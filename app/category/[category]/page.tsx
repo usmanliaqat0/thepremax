@@ -32,16 +32,13 @@ const CategoryPage = () => {
 
   const category = categories.find((cat) => cat.id === categoryId);
 
-  // Scroll to top when navigating to category page
   useScrollToTop();
 
-  // Filter and sort products
   useEffect(() => {
     let filtered = products.filter(
       (product) => product.category === categoryId
     );
 
-    // Search filter
     if (searchTerm.trim()) {
       const lowercaseSearch = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -51,7 +48,6 @@ const CategoryPage = () => {
       );
     }
 
-    // Price range filter
     if (priceRange !== "all") {
       switch (priceRange) {
         case "under-15":
@@ -73,7 +69,6 @@ const CategoryPage = () => {
       }
     }
 
-    // Sort products
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "price-low":

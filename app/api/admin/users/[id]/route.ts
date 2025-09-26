@@ -3,7 +3,6 @@ import { AdminMiddleware, AdminUser } from "@/lib/admin-middleware";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
 
-// GET - Fetch specific user (Admin only)
 export const GET = AdminMiddleware.requireAdmin(
   async (request: NextRequest, adminUser: AdminUser, ...args: unknown[]) => {
     const { params } = await (args[0] as { params: Promise<{ id: string }> });
@@ -38,7 +37,6 @@ export const GET = AdminMiddleware.requireAdmin(
   }
 );
 
-// PUT - Update user (Admin only)
 export const PUT = AdminMiddleware.requireAdmin(
   async (request: NextRequest, adminUser: AdminUser, ...args: unknown[]) => {
     const { params } = await (args[0] as { params: Promise<{ id: string }> });
@@ -71,7 +69,6 @@ export const PUT = AdminMiddleware.requireAdmin(
         );
       }
 
-      // Check if email is being changed and if it conflicts with another user
       if (email && email !== user.email) {
         const existingUser = await User.findOne({
           email: email.toLowerCase(),
@@ -88,7 +85,6 @@ export const PUT = AdminMiddleware.requireAdmin(
         }
       }
 
-      // Update user fields
       const updateData: Record<string, unknown> = {};
 
       if (firstName !== undefined) updateData.firstName = firstName.trim();
@@ -128,7 +124,6 @@ export const PUT = AdminMiddleware.requireAdmin(
   }
 );
 
-// DELETE - Delete user (Admin only)
 export const DELETE = AdminMiddleware.requireAdmin(
   async (request: NextRequest, adminUser: AdminUser, ...args: unknown[]) => {
     const { params } = await (args[0] as { params: Promise<{ id: string }> });
@@ -148,7 +143,6 @@ export const DELETE = AdminMiddleware.requireAdmin(
         );
       }
 
-      // Prevent admin from deleting themselves
       if (id === adminUser.id) {
         return NextResponse.json(
           {

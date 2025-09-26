@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
@@ -32,8 +32,7 @@ const ResetPasswordForm = () => {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
-  // Verify token on component mount
-  useEffect(() => {
+useEffect(() => {
     const verifyToken = async () => {
       if (!token) {
         setError("Invalid reset link. Please request a new password reset.");
@@ -66,8 +65,7 @@ const ResetPasswordForm = () => {
     e.preventDefault();
     setError("");
 
-    // Validate passwords
-    if (password.length < 6) {
+if (password.length < 6) {
       setError("Password must be at least 6 characters long");
       return;
     }

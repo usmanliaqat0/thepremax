@@ -1,10 +1,9 @@
-import * as brevo from "@getbrevo/brevo";
+﻿import * as brevo from "@getbrevo/brevo";
 
-// Initialize Brevo API client
 let apiInstance: brevo.TransactionalEmailsApi;
 
 if (typeof window === "undefined") {
-  // Server-side only
+
   const apiKey = process.env.BREVO_API_KEY;
   if (apiKey) {
     apiInstance = new brevo.TransactionalEmailsApi();
@@ -17,7 +16,7 @@ if (typeof window === "undefined") {
 }
 
 export class EmailService {
-  // Send password reset email
+
   static async sendPasswordResetEmail(
     email: string,
     firstName: string,
@@ -71,8 +70,7 @@ export class EmailService {
     }
   }
 
-  // Send custom email using Brevo
-  static async sendEmail(
+static async sendEmail(
     to: { email: string; name?: string }[],
     subject: string,
     htmlContent: string,
@@ -123,8 +121,7 @@ export class EmailService {
     }
   }
 
-  // Send password reset verification email
-  static async sendPasswordResetVerificationEmail(
+static async sendPasswordResetVerificationEmail(
     email: string,
     firstName: string,
     verificationToken: string
@@ -183,8 +180,7 @@ export class EmailService {
     } catch (error) {
       console.error("Send password reset verification email error:", error);
 
-      // Fallback to basic email if template fails
-      try {
+try {
         const verificationCode = verificationToken
           .substring(0, 6)
           .toUpperCase();
@@ -288,8 +284,7 @@ export class EmailService {
     }
   }
 
-  // Send email verification email
-  static async sendEmailVerificationEmail(
+static async sendEmailVerificationEmail(
     email: string,
     firstName: string,
     verificationToken: string
@@ -345,8 +340,7 @@ export class EmailService {
     } catch (error) {
       console.error("Send email verification email error:", error);
 
-      // Fallback to custom email if template fails
-      try {
+try {
         const verificationCode = verificationToken
           .substring(0, 6)
           .toUpperCase();
@@ -613,8 +607,7 @@ export class EmailService {
     }
   }
 
-  // Send welcome email
-  static async sendWelcomeEmail(
+static async sendWelcomeEmail(
     email: string,
     firstName: string
   ): Promise<{

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -12,8 +12,7 @@ export function EmailVerificationBanner() {
   const [isResending, setIsResending] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
-  // Don't show banner if user is not authenticated, email is verified, or user is admin
-  if (
+if (
     !state.isAuthenticated ||
     !state.user ||
     state.user.isEmailVerified ||

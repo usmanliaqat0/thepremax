@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -35,8 +35,7 @@ const PersonalInfoSection = () => {
     dateOfBirth: "",
   });
 
-  // Sync form data with user state when it changes
-  useEffect(() => {
+useEffect(() => {
     if (state.user) {
       setFormData({
         firstName: state.user.firstName || "",
@@ -57,7 +56,7 @@ const PersonalInfoSection = () => {
   };
 
   const handleSave = async () => {
-    // Validate phone number if provided
+
     if (formData.phone && formData.phone.length !== 10) {
       toast.error("Phone number must be exactly 10 digits");
       return;
@@ -134,7 +133,7 @@ const PersonalInfoSection = () => {
 
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* First Name */}
+          {}
           <div className="space-y-2">
             <Label htmlFor="firstName" className="mb-2 block">
               First Name
@@ -153,7 +152,7 @@ const PersonalInfoSection = () => {
             )}
           </div>
 
-          {/* Last Name */}
+          {}
           <div className="space-y-2">
             <Label htmlFor="lastName" className="mb-2 block">
               Last Name
@@ -172,7 +171,7 @@ const PersonalInfoSection = () => {
             )}
           </div>
 
-          {/* Email */}
+          {}
           <div className="space-y-2">
             <Label htmlFor="email" className="mb-2 block">
               Email Address
@@ -185,7 +184,7 @@ const PersonalInfoSection = () => {
             </div>
           </div>
 
-          {/* Phone */}
+          {}
           <div className="space-y-2">
             <Label htmlFor="phone" className="mb-2 block">
               Phone Number (US)
@@ -207,9 +206,9 @@ const PersonalInfoSection = () => {
                         : formData.phone
                     }
                     onChange={(e) => {
-                      // Remove all non-digits
+
                       let value = e.target.value.replace(/\D/g, "");
-                      // Limit to 10 digits
+
                       if (value.length > 10) value = value.slice(0, 10);
                       handleInputChange("phone", value);
                     }}
@@ -245,7 +244,7 @@ const PersonalInfoSection = () => {
             </p>
           </div>
 
-          {/* Gender */}
+          {}
           <div className="space-y-2">
             <Label htmlFor="gender" className="mb-2 block">
               Gender
@@ -271,7 +270,7 @@ const PersonalInfoSection = () => {
             )}
           </div>
 
-          {/* Date of Birth */}
+          {}
           <div className="space-y-2">
             <Label htmlFor="dateOfBirth" className="mb-2 block">
               Date of Birth
@@ -297,7 +296,7 @@ const PersonalInfoSection = () => {
           </div>
         </div>
 
-        {/* Account Status */}
+        {}
         <div className="pt-6 border-t">
           <h4 className="font-medium text-gray-900 mb-4">Account Status</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

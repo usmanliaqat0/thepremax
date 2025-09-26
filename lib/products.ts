@@ -1,4 +1,4 @@
-const productCache = new Map();
+﻿const productCache = new Map();
 
 export interface Product {
   id: string;
@@ -303,8 +303,7 @@ export const products: Product[] = [
     sourceUrl: "https://www.ebay.com/itm/365694756236",
   },
 
-  // Tools & Equipment Products
-  {
+{
     id: "10",
     name: 'Fieldpiece HR3B Ball Valve Refrigerant Hose Set (3) with Color Tags - 1/4" x 1/4" (5\')',
     price: 89.99,
@@ -391,8 +390,7 @@ export const products: Product[] = [
     reviewCount: 134,
   },
 
-  // Automotive Products
-  {
+{
     id: "13",
     name: "Can-Am OEM Clutch Drive Belt, 422280366",
     price: 85.99,
@@ -511,8 +509,7 @@ export const products: Product[] = [
     reviewCount: 145,
   },
 
-  // Sports & Recreation Products
-  {
+{
     id: "17",
     name: "Molten Standard Volleyball Size 5 Competition Train Students Volleyball V5M4500",
     price: 32.99,
@@ -604,7 +601,6 @@ export const products: Product[] = [
   },
 ];
 
-// Helper functions
 export const getProductById = (id: string): Product | undefined => {
   const cacheKey = `product-${id}`;
   if (!productCache.has(cacheKey)) {
@@ -616,7 +612,6 @@ export const getProductById = (id: string): Product | undefined => {
   return productCache.get(cacheKey);
 };
 
-// Memoized product filters for better performance
 export const getProductsByCategory = (category: string): Product[] => {
   const cacheKey = `category-${category}`;
   if (!productCache.has(cacheKey)) {
@@ -704,7 +699,6 @@ export const categories = [
   },
 ];
 
-// Get price range
 export const getPriceRange = () => {
   if (!productCache.has("priceRange")) {
     const prices = products.map((product) => product.price);

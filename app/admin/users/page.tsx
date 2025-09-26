@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -165,19 +165,19 @@ export default function UsersManagement() {
 
   const handleSearch = (search: string) => {
     setSearchTerm(search);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   };
 
   const handleStatusFilter = (status: string) => {
     setFilterStatus(status as "all" | "active" | "inactive");
-    setCurrentPage(1); // Reset to first page when filtering
+    setCurrentPage(1);
   };
 
-  const filteredUsers = users; // No need for client-side filtering since we're using server-side pagination
+  const filteredUsers = users;
 
   return (
     <div className="space-y-3 sm:space-y-4 lg:space-y-6">
-      {/* Header */}
+      {}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
@@ -206,7 +206,7 @@ export default function UsersManagement() {
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardContent className="p-3 sm:p-2">
@@ -262,7 +262,7 @@ export default function UsersManagement() {
         </Card>
       </div>
 
-      {/* Users Table */}
+      {}
       <Card>
         <CardHeader>
           <CardTitle>Users ({filteredUsers.length})</CardTitle>
@@ -294,7 +294,7 @@ export default function UsersManagement() {
         </CardContent>
       </Card>
 
-      {/* Dialogs */}
+      {}
       {selectedUser && (
         <>
           <UserViewDialog
@@ -308,7 +308,7 @@ export default function UsersManagement() {
             onOpenChange={setEditDialogOpen}
             loading={editLoading}
             onUserUpdated={async (updatedUser) => {
-              // Update user in DB
+
               setEditLoading(true);
               try {
                 const res = await fetch(`/api/admin/users/${updatedUser.id}`, {

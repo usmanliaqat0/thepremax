@@ -1,4 +1,4 @@
-import { Product } from "./products";
+﻿import { Product } from "./products";
 
 export type SortOption =
   | "name"
@@ -42,9 +42,6 @@ export function searchProducts(
   );
 }
 
-/**
- * Filter products based on multiple criteria
- */
 export function filterProducts(
   products: Product[],
   filters: FilterOptions
@@ -54,48 +51,41 @@ export function filterProducts(
       return false;
     }
 
-    // Price range filter
-    if (filters.priceRange) {
+if (filters.priceRange) {
       const { min, max } = filters.priceRange;
       if (product.price < min || product.price > max) {
         return false;
       }
     }
 
-    // Size filter
-    if (filters.sizes && filters.sizes.length > 0) {
+if (filters.sizes && filters.sizes.length > 0) {
       if (!filters.sizes.some((size) => product.sizes.includes(size))) {
         return false;
       }
     }
 
-    // Color filter
-    if (filters.colors && filters.colors.length > 0) {
+if (filters.colors && filters.colors.length > 0) {
       if (!filters.colors.some((color) => product.colors.includes(color))) {
         return false;
       }
     }
 
-    // Stock filter
-    if (filters.inStock !== undefined && product.inStock !== filters.inStock) {
+if (filters.inStock !== undefined && product.inStock !== filters.inStock) {
       return false;
     }
 
-    // Sale filter
-    if (filters.onSale !== undefined && product.sale !== filters.onSale) {
+if (filters.onSale !== undefined && product.sale !== filters.onSale) {
       return false;
     }
 
-    // Featured filter
-    if (
+if (
       filters.featured !== undefined &&
       product.featured !== filters.featured
     ) {
       return false;
     }
 
-    // Top rated filter
-    if (
+if (
       filters.topRated !== undefined &&
       product.topRated !== filters.topRated
     ) {
@@ -106,9 +96,6 @@ export function filterProducts(
   });
 }
 
-/**
- * Sort products by specified criteria
- */
 export function sortProducts(
   products: Product[],
   sortBy: SortOption
@@ -133,11 +120,11 @@ export function sortProducts(
       });
 
     case "newest":
-      // Assuming newer products have higher IDs (you might want to add a createdAt field)
+
       return sorted.sort((a, b) => parseInt(b.id) - parseInt(a.id));
 
     case "popular":
-      // Sort by featured and top rated first, then by name
+
       return sorted.sort((a, b) => {
         const aScore = (a.featured ? 2 : 0) + (a.topRated ? 1 : 0);
         const bScore = (b.featured ? 2 : 0) + (b.topRated ? 1 : 0);
@@ -150,9 +137,6 @@ export function sortProducts(
   }
 }
 
-/**
- * Get available filter values from a product array
- */
 export function getAvailableFilters(products: Product[]) {
   const categories = [...new Set(products.map((p) => p.category))];
   const sizes = [...new Set(products.flatMap((p) => p.sizes))];
@@ -171,9 +155,6 @@ export function getAvailableFilters(products: Product[]) {
   };
 }
 
-/**
- * Calculate discount percentage
- */
 export function getDiscountPercentage(
   price: number,
   originalPrice?: number
@@ -182,16 +163,10 @@ export function getDiscountPercentage(
   return Math.round(((originalPrice - price) / originalPrice) * 100);
 }
 
-/**
- * Check if product has discount
- */
 export function hasDiscount(product: Product): boolean {
   return !!(product.originalPrice && product.originalPrice > product.price);
 }
 
-/**
- * Get product badges
- */
 export function getProductBadges(product: Product) {
   const badges = [];
 
@@ -228,9 +203,6 @@ export function getProductBadges(product: Product) {
   return badges;
 }
 
-/**
- * Combine search, filter, and sort operations
- */
 export function processProducts(
   products: Product[],
   searchTerm?: string,
@@ -239,25 +211,19 @@ export function processProducts(
 ): Product[] {
   let result = [...products];
 
-  // Apply search
-  if (searchTerm) {
+if (searchTerm) {
     result = searchProducts(result, searchTerm);
   }
 
-  // Apply filters
-  if (filters) {
+if (filters) {
     result = filterProducts(result, filters);
   }
 
-  // Apply sorting
-  result = sortProducts(result, sortBy);
+result = sortProducts(result, sortBy);
 
   return result;
 }
 
-/**
- * Get related products (same category, excluding current product)
- */
 export function getRelatedProducts(
   products: Product[],
   currentProduct: Product,
@@ -271,9 +237,6 @@ export function getRelatedProducts(
     .slice(0, limit);
 }
 
-/**
- * Get recently viewed products (this would typically use localStorage or user data)
- */
 export function getRecentlyViewed(
   productIds: string[],
   allProducts: Product[]

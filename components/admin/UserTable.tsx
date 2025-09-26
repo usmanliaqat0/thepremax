@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -33,7 +33,7 @@ interface UserTableProps {
   statusFilter: string;
   isLoading: boolean;
   actionLoading: { [key: string]: boolean };
-  // Pagination props
+
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;

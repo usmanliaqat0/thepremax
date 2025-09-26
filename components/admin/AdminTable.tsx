@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, ReactNode } from "react";
 import {
@@ -78,7 +78,7 @@ export interface AdminTableProps<T = Record<string, unknown>> {
   filterValues?: Record<string, string>;
   className?: string;
   rowKey?: (item: T) => string;
-  // Pagination props
+
   pagination?: {
     currentPage: number;
     totalPages: number;
@@ -171,7 +171,7 @@ export default function AdminTable<T = Record<string, unknown>>({
 
   return (
     <div className={`space-y-4 ${className}`}>
-      {/* Search and Filters */}
+      {}
       {(onSearch || filters.length > 0) && (
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row gap-2">
@@ -229,7 +229,7 @@ export default function AdminTable<T = Record<string, unknown>>({
         </div>
       )}
 
-      {/* Mobile Card View */}
+      {}
       <div className="block md:hidden space-y-3">
         {isLoading ? (
           Array.from({ length: loadingRows }).map((_, i) => (
@@ -339,7 +339,7 @@ export default function AdminTable<T = Record<string, unknown>>({
         )}
       </div>
 
-      {/* Desktop Table View */}
+      {}
       <div className="hidden md:block border rounded-lg overflow-x-auto">
         <Table className="min-w-full">
           <TableHeader>
@@ -429,7 +429,7 @@ export default function AdminTable<T = Record<string, unknown>>({
         </Table>
       </div>
 
-      {/* Delete Confirmation Dialog */}
+      {}
       {onDelete && (
         <AlertDialog
           open={!!deleteItem}
@@ -458,7 +458,7 @@ export default function AdminTable<T = Record<string, unknown>>({
         </AlertDialog>
       )}
 
-      {/* Pagination */}
+      {}
       {pagination && (
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-sm text-muted-foreground">

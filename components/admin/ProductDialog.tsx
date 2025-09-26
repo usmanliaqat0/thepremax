@@ -1,7 +1,6 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -20,8 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, X, Plus, Upload, Trash2 } from "lucide-react";
+import { Loader2, X, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 interface Category {
@@ -122,13 +120,11 @@ export default function ProductDialog({
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [newSpec, setNewSpec] = useState("");
   const [newSize, setNewSize] = useState("");
   const [newColor, setNewColor] = useState("");
 
-  // Reset form when dialog opens/closes or product changes
   useEffect(() => {
     if (open) {
       if (product) {
@@ -293,68 +289,6 @@ export default function ProductDialog({
     );
   };
 
-  const handleImageUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    try {
-      const uploadFormData = new FormData();
-      uploadFormData.append("file", file);
-      uploadFormData.append("folder", "uploads/products");
-
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: uploadFormData,
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // Add the uploaded image to the images array
-        const newImage = {
-          id: Date.now().toString(),
-          url: data.data.url,
-          alt: file.name,
-          isPrimary: formData.images.length === 0, // First image is primary
-          order: formData.images.length,
-        };
-
-        handleInputChange("images", [...formData.images, newImage]);
-        toast.success("Image uploaded successfully");
-      } else {
-        toast.error(data.error || "Failed to upload image");
-      }
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast.error("Failed to upload image");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const removeImage = (imageId: string) => {
-    const updatedImages = formData.images.filter((img) => img.id !== imageId);
-    // If we removed the primary image, make the first remaining image primary
-    if (
-      updatedImages.length > 0 &&
-      !updatedImages.some((img) => img.isPrimary)
-    ) {
-      updatedImages[0].isPrimary = true;
-    }
-    handleInputChange("images", updatedImages);
-  };
-
-  const setPrimaryImage = (imageId: string) => {
-    const updatedImages = formData.images.map((img) => ({
-      ...img,
-      isPrimary: img.id === imageId,
-    }));
-    handleInputChange("images", updatedImages);
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -365,7 +299,7 @@ export default function ProductDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Information */}
+          {}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Basic Information</h3>
 
@@ -395,7 +329,7 @@ export default function ProductDialog({
             </div>
           </div>
 
-          {/* Pricing */}
+          {}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Pricing</h3>
 
@@ -439,7 +373,7 @@ export default function ProductDialog({
             </div>
           </div>
 
-          {/* Category and Status */}
+          {}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Category & Status</h3>
 
@@ -485,7 +419,7 @@ export default function ProductDialog({
             </div>
           </div>
 
-          {/* Tags */}
+          {}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Tags</h3>
 
@@ -524,7 +458,7 @@ export default function ProductDialog({
             )}
           </div>
 
-          {/* Specifications */}
+          {}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Specifications</h3>
 
@@ -563,7 +497,7 @@ export default function ProductDialog({
             )}
           </div>
 
-          {/* Sizes and Colors */}
+          {}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Sizes & Colors</h3>
 
@@ -642,77 +576,15 @@ export default function ProductDialog({
             </div>
           </div>
 
-          {/* Images Section */}
+          {}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Product Images</h3>
 
             <div>
-              <input
-                type="file"
-                id="image-upload"
-                accept="image/*"
-                onChange={handleImageUpload}
-                disabled={isUploading}
-                className="hidden"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => document.getElementById("image-upload")?.click()}
-                disabled={isUploading}
-                className="w-full"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                {isUploading ? "Uploading..." : "Upload Image"}
-              </Button>
+              <input type="file" id="image-upload" accept="image/*" />
             </div>
-
-            {formData.images.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {formData.images.map((image) => (
-                  <div key={image.id} className="relative group">
-                    <div className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200">
-                      <Image
-                        src={image.url}
-                        alt={image.alt}
-                        width={200}
-                        height={200}
-                        className="w-full h-full object-cover"
-                      />
-                      {image.isPrimary && (
-                        <div className="absolute top-2 left-2">
-                          <Badge variant="default" className="text-xs">
-                            Primary
-                          </Badge>
-                        </div>
-                      )}
-                    </div>
-                    <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => setPrimaryImage(image.id)}
-                        disabled={image.isPrimary}
-                      >
-                        {image.isPrimary ? "Primary" : "Set Primary"}
-                      </Button>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => removeImage(image.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
-          {/* Flags */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Product Flags</h3>
 
@@ -763,7 +635,7 @@ export default function ProductDialog({
             </div>
           </div>
 
-          {/* SEO Settings */}
+          {}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">SEO Settings</h3>
 

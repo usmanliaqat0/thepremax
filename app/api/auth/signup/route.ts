@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { AuthService } from "@/lib/auth-service";
 import { SignupData, AuthResponse } from "@/lib/types";
 
@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     const result = await AuthService.signup(body);
 
     if (result.success) {
-      // Set cookies for auto-login but mark as requiring verification
+
       const response = NextResponse.json<AuthResponse>(
         {
           success: true,
@@ -20,8 +20,7 @@ export async function POST(req: NextRequest) {
         { status: 201 }
       );
 
-      // Set authentication cookies for auto-login
-      response.cookies.set("accessToken", result.accessToken!, {
+response.cookies.set("accessToken", result.accessToken!, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",

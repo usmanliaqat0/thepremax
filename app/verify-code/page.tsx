@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -61,11 +61,9 @@ function VerifyCodeContent() {
           setMessage(result.message);
           toast.success("Email verified successfully!");
 
-          // Clear pending verification email
-          localStorage.removeItem("pending_verification_email");
+localStorage.removeItem("pending_verification_email");
 
-          // Redirect to login after 3 seconds
-          setTimeout(() => {
+setTimeout(() => {
             router.push("/login");
           }, 3000);
         } else {
@@ -109,11 +107,9 @@ function VerifyCodeContent() {
         setMessage(result.message);
         toast.success("Email verified successfully!");
 
-        // Clear pending verification email
-        localStorage.removeItem("pending_verification_email");
+localStorage.removeItem("pending_verification_email");
 
-        // Redirect to login after 3 seconds
-        setTimeout(() => {
+setTimeout(() => {
           router.push("/login");
         }, 3000);
       } else {
@@ -154,10 +150,9 @@ function VerifyCodeContent() {
         setMessage("A new verification email has been sent to your inbox.");
         setVerificationStatus("pending");
 
-        // Set 2-minute cooldown
-        const cooldownTime = Date.now() + 2 * 60 * 1000; // 2 minutes from now
+const cooldownTime = Date.now() + 2 * 60 * 1000;
         localStorage.setItem("resend_cooldown", cooldownTime.toString());
-        setResendCooldown(120); // 2 minutes in seconds
+        setResendCooldown(120);
       } else {
         toast.error(result.message);
         setMessage(result.message);
@@ -171,7 +166,7 @@ function VerifyCodeContent() {
   };
 
   useEffect(() => {
-    // Get email from URL params or localStorage
+
     const emailParam = searchParams.get("email");
     const storedEmail = localStorage.getItem("pending_verification_email");
 
@@ -182,17 +177,15 @@ function VerifyCodeContent() {
       setEmail(storedEmail);
     }
 
-    // If token is provided, verify automatically
-    if (token) {
+if (token) {
       verifyEmailWithToken(token);
     } else {
-      // If code is provided in URL, auto-fill it
+
       if (codeFromUrl) {
         setVerificationCode(codeFromUrl);
       }
 
-      // Check if there's a cooldown timer in localStorage
-      const storedCooldown = localStorage.getItem("resend_cooldown");
+const storedCooldown = localStorage.getItem("resend_cooldown");
       if (storedCooldown) {
         const cooldownTime = parseInt(storedCooldown);
         const remainingTime = Math.max(0, cooldownTime - Date.now());
@@ -201,20 +194,18 @@ function VerifyCodeContent() {
         }
       }
 
-      // Mark cooldown as checked
-      setIsCooldownChecked(true);
+setIsCooldownChecked(true);
     }
   }, [searchParams, token, codeFromUrl, verifyEmailWithToken]);
 
-  // Cooldown timer for resend button
-  useEffect(() => {
+useEffect(() => {
     if (resendCooldown > 0) {
       const timer = setTimeout(() => {
         setResendCooldown(resendCooldown - 1);
       }, 1000);
       return () => clearTimeout(timer);
     } else if (resendCooldown === 0) {
-      // Clear the cooldown from localStorage when it expires
+
       localStorage.removeItem("resend_cooldown");
     }
   }, [resendCooldown]);

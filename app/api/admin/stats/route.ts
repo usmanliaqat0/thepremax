@@ -1,9 +1,8 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { AdminMiddleware } from "@/lib/admin-middleware";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
 
-// GET - Fetch admin dashboard stats (Admin only)
 export const GET = AdminMiddleware.requireAdmin(
   async () => {
     try {
@@ -29,8 +28,7 @@ export const GET = AdminMiddleware.requireAdmin(
           .lean(),
       ]);
 
-      // Calculate growth (mock data for now - in production, compare with previous period)
-      const userGrowth = "+12%";
+const userGrowth = "+12%";
       const emailVerificationRate = totalUsers > 0 ? Math.round((verifiedEmails / totalUsers) * 100) : 0;
       const phoneVerificationRate = totalUsers > 0 ? Math.round((verifiedPhones / totalUsers) * 100) : 0;
 

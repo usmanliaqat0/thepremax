@@ -4,7 +4,6 @@ import ContactMessage from "@/lib/models/ContactMessage";
 import { AdminMiddleware } from "@/lib/admin-middleware";
 import { z } from "zod";
 
-// Validation schema for message updates
 const updateMessageSchema = z.object({
   status: z.enum(["new", "read", "replied", "closed"]).optional(),
   adminNotes: z.string().max(1000, "Admin notes too long").optional(),
@@ -12,13 +11,11 @@ const updateMessageSchema = z.object({
   closedAt: z.date().optional(),
 });
 
-// GET /api/admin/messages/[id] - Get single message
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Check admin authentication
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -59,13 +56,11 @@ export async function GET(
   }
 }
 
-// PUT /api/admin/messages/[id] - Update message
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Check admin authentication
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -79,7 +74,6 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
 
-    // Validate the request body
     const validationResult = updateMessageSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
@@ -94,7 +88,6 @@ export async function PUT(
 
     const updateData = validationResult.data;
 
-    // Add timestamps for status changes
     if (updateData.status === "replied" && !updateData.repliedAt) {
       updateData.repliedAt = new Date();
     }
@@ -135,13 +128,11 @@ export async function PUT(
   }
 }
 
-// DELETE /api/admin/messages/[id] - Delete message
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Check admin authentication
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(

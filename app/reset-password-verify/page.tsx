@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -57,8 +57,7 @@ function ResetPasswordVerifyContent() {
     }
   }, [searchParams]);
 
-  // Countdown timer effect
-  useEffect(() => {
+useEffect(() => {
     let interval: NodeJS.Timeout;
     if (resendCooldown > 0) {
       interval = setInterval(() => {
@@ -120,8 +119,7 @@ function ResetPasswordVerifyContent() {
         setMessage(result.message);
         toast.success("Password reset successfully!");
 
-        // Redirect to login after 3 seconds
-        setTimeout(() => {
+setTimeout(() => {
           router.push("/login");
         }, 3000);
       } else {
@@ -168,7 +166,7 @@ function ResetPasswordVerifyContent() {
 
       if (result.success) {
         toast.success("Verification code sent again!");
-        setResendCooldown(120); // 2 minutes = 120 seconds
+        setResendCooldown(120);
       } else {
         toast.error(result.message || "Failed to resend verification code");
       }

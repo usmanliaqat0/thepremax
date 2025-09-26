@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Product from "@/lib/models/Product";
 
-// GET /api/products/[id] - Get a specific product for frontend
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
@@ -46,7 +46,7 @@ const Cart = () => {
 
   const subtotal = getCartTotal();
   const discount = appliedPromo ? subtotal * 0.1 : 0;
-  const shipping = subtotal > 50 ? 0 : 10; // Free shipping over $50, otherwise $10
+  const shipping = subtotal > 50 ? 0 : 10;
   const tax = (subtotal - discount) * 0.08;
   const total = subtotal - discount + shipping + tax;
 

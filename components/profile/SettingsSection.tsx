@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -107,7 +107,7 @@ const SettingsSection = () => {
 
   return (
     <div className="space-y-6">
-      {/* Change Password */}
+      {}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -166,7 +166,7 @@ const SettingsSection = () => {
         </CardContent>
       </Card>
 
-      {/* Account Management */}
+      {}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">

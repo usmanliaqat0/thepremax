@@ -143,7 +143,6 @@ const ProductDetail = () => {
     }
   };
 
-  // Use the images array from product data, fallback to main image if no additional images
   const productImages =
     product.images && product.images.length > 0
       ? product.images

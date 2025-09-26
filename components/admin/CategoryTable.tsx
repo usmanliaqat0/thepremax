@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2 } from "lucide-react";
@@ -35,7 +35,7 @@ interface CategoryTableProps {
   searchTerm: string;
   statusFilter: string;
   isLoading: boolean;
-  // Pagination props
+
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
@@ -159,7 +159,7 @@ export default function CategoryTable({
       key: "delete",
       label: "Delete",
       icon: <Trash2 className="mr-2 h-4 w-4" />,
-      onClick: () => {}, // Will be handled by AdminTable
+      onClick: () => {},
       variant: "destructive",
     },
   ];

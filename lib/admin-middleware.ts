@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { TokenUtils } from "./auth-service";
 
 interface JWTPayload {
@@ -25,7 +25,7 @@ export class AdminMiddleware {
     error?: string;
   } {
     try {
-      // Get token from Authorization header or cookies
+
       let token = request.headers.get("authorization")?.replace("Bearer ", "");
 
       if (!token) {
@@ -39,19 +39,16 @@ export class AdminMiddleware {
         };
       }
 
-      // Verify token
-      const decoded = TokenUtils.verifyAccessToken(token) as JWTPayload;
+const decoded = TokenUtils.verifyAccessToken(token) as JWTPayload;
 
-      // Check if user is admin
-      if (decoded.role !== "admin") {
+if (decoded.role !== "admin") {
         return {
           success: false,
           error: "Insufficient permissions. Admin access required.",
         };
       }
 
-      // Return admin user data
-      return {
+return {
         success: true,
         user: {
           id: decoded.id,
@@ -92,8 +89,7 @@ export class AdminMiddleware {
         );
       }
 
-      // Call the handler with admin user
-      return handler(request, verification.user, ...args);
+return handler(request, verification.user, ...args);
     };
   }
 
@@ -128,12 +124,10 @@ export class AdminMiddleware {
   }
 }
 
-// Helper function to check if user is admin on client side
 export function isAdmin(userRole?: string): boolean {
   return userRole === "admin";
 }
 
-// Hook for admin authentication in React components
 export function useAdminAuth() {
   const checkAdminAccess = (userRole?: string) => {
     return isAdmin(userRole);

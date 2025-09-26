@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -54,7 +54,6 @@ export interface SpinnerProps extends VariantProps<typeof spinnerVariants> {
   variant?: "default" | "light" | "dark" | "muted";
 }
 
-// Simple circular loader
 export const Loader = ({ variant, size, className, ...props }: LoaderProps) => {
   return (
     <div
@@ -64,7 +63,6 @@ export const Loader = ({ variant, size, className, ...props }: LoaderProps) => {
   );
 };
 
-// SVG-based spinner with better animation
 export const Spinner = ({
   size,
   variant = "default",
@@ -107,7 +105,6 @@ export const Spinner = ({
   );
 };
 
-// Dots loader animation
 export const DotsLoader = ({
   size = "default",
   variant = "default",
@@ -151,7 +148,6 @@ export const DotsLoader = ({
   );
 };
 
-// Loading overlay for pages/sections
 export const LoadingOverlay = ({
   isLoading,
   children,
@@ -182,7 +178,6 @@ export const LoadingOverlay = ({
   );
 };
 
-// Button loading state component
 export const ButtonLoader = ({
   size = "sm",
   variant = "light",
@@ -197,7 +192,6 @@ export const ButtonLoader = ({
   );
 };
 
-// Beautiful comprehensive loader with text and animations
 export const BeautifulLoader = ({
   size = "default",
   variant = "default",
@@ -237,7 +231,7 @@ export const BeautifulLoader = ({
     >
       <div className="relative">
         <Spinner size={size} variant={variant} />
-        {/* Pulse ring animation */}
+        {}
         <div
           className={cn(
             "absolute inset-0 rounded-full border-2 border-gray-200 animate-ping opacity-20",
@@ -267,7 +261,6 @@ export const BeautifulLoader = ({
   );
 };
 
-// Full page beautiful loader
 export const FullPageLoader = ({
   message = "Loading",
   subtitle,

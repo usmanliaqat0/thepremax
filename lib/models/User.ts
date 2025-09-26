@@ -1,6 +1,5 @@
-import mongoose, { Document, Schema, Types } from "mongoose";
+﻿import mongoose, { Document, Schema, Types } from "mongoose";
 
-// User document interface for Mongoose
 export interface IUser extends Document {
   _id: Types.ObjectId;
   email: string;
@@ -42,7 +41,6 @@ export interface IUser extends Document {
   updatedAt: Date;
 }
 
-// User schema
 const UserSchema = new Schema<IUser>(
   {
     email: {
@@ -154,18 +152,16 @@ const UserSchema = new Schema<IUser>(
   }
 );
 
-// Create indexes (email index is already created by unique: true)
 UserSchema.index({ createdAt: -1 });
 UserSchema.index({ status: 1 });
 
-// Export the model - only create if we're on the server side
 let User: mongoose.Model<IUser> | Record<string, never>;
 
 if (typeof window === "undefined") {
-  // Server-side only
+
   User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
 } else {
-  // Client-side - export empty object to prevent errors
+
   User = {};
 }
 

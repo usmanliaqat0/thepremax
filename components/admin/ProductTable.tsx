@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Badge } from "@/components/ui/badge";
 import { Eye, Edit, Trash2, Star, TrendingUp, DollarSign } from "lucide-react";
@@ -85,7 +85,7 @@ interface ProductTableProps {
   saleFilter: string;
   stockFilter: string;
   isLoading: boolean;
-  // Pagination props
+
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
@@ -290,7 +290,7 @@ export default function ProductTable({
       label: "Category",
       value: categoryFilter,
       options: [
-        // Categories will be populated by parent component
+
       ],
     },
     {
@@ -327,7 +327,7 @@ export default function ProductTable({
       key: "view",
       label: "View",
       icon: <Eye className="mr-2 h-4 w-4" />,
-      onClick: () => {}, // Handle view action
+      onClick: () => {},
     },
     {
       key: "edit",
@@ -339,7 +339,7 @@ export default function ProductTable({
       key: "delete",
       label: "Delete",
       icon: <Trash2 className="mr-2 h-4 w-4" />,
-      onClick: () => {}, // Will be handled by AdminTable
+      onClick: () => {},
       variant: "destructive",
     },
   ];

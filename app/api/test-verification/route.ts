@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import User from "@/lib/models/User";
 import connectDB from "@/lib/db";
 
@@ -18,8 +18,7 @@ export async function GET(req: NextRequest) {
 
     console.log("Testing verification code:", code);
 
-    // Find all users with verification tokens
-    const users = await User.find({
+const users = await User.find({
       emailVerificationToken: { $exists: true, $ne: null },
       isEmailVerified: false,
     }).select("email emailVerificationToken");

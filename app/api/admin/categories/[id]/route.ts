@@ -4,13 +4,11 @@ import Category from "@/lib/models/Category";
 import Product from "@/lib/models/Product";
 import { AdminMiddleware } from "@/lib/admin-middleware";
 
-// GET /api/admin/categories/[id] - Get a specific category
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Check admin authentication
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -46,13 +44,11 @@ export async function GET(
   }
 }
 
-// PUT /api/admin/categories/[id] - Update a category
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Check admin authentication
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -83,7 +79,6 @@ export async function PUT(
       );
     }
 
-    // Validate required fields
     if (name && !name.trim()) {
       return NextResponse.json(
         { success: false, error: "Name is required" },
@@ -91,7 +86,6 @@ export async function PUT(
       );
     }
 
-    // Check if category with same name already exists (excluding current category)
     if (name && name !== category.name) {
       const existingCategory = await Category.findOne({
         name: { $regex: new RegExp(`^${name}$`, "i") },
@@ -105,13 +99,11 @@ export async function PUT(
         );
       }
 
-      // Generate new slug
       const slug = name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
 
-      // Check if new slug already exists
       const existingSlug = await Category.findOne({
         slug,
         _id: { $ne: id },
@@ -126,7 +118,6 @@ export async function PUT(
       category.slug = slug;
     }
 
-    // Update fields
     if (name !== undefined) category.name = name;
     if (description !== undefined) category.description = description;
     if (image !== undefined) category.image = image;
@@ -137,7 +128,6 @@ export async function PUT(
 
     await category.save();
 
-    // Populate the updated category
     const updatedCategory = await Category.findById(category._id)
       .populate("subcategories")
       .populate("productCount")
@@ -157,13 +147,11 @@ export async function PUT(
   }
 }
 
-// DELETE /api/admin/categories/[id] - Delete a category
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Check admin authentication
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -183,7 +171,6 @@ export async function DELETE(
       );
     }
 
-    // Check if category has products
     const products = await Product.find({ categoryId: id });
     if (products.length > 0) {
       return NextResponse.json(

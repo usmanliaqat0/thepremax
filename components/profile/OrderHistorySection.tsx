@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -78,8 +78,7 @@ const OrderHistorySection = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  // Fetch orders from API
-  useEffect(() => {
+useEffect(() => {
     const fetchOrders = async () => {
       if (!state.token) return;
 
@@ -150,17 +149,17 @@ const OrderHistorySection = () => {
   });
 
   const handleTrackOrder = (trackingNumber: string) => {
-    // Simulate opening tracking page
+
     window.open(`https://example-tracking.com/${trackingNumber}`, "_blank");
   };
 
   const handleDownloadInvoice = (orderNumber: string) => {
-    // Simulate downloading invoice
+
     console.log(`Downloading invoice for order ${orderNumber}`);
   };
 
   const handleReorder = (order: Order) => {
-    // Simulate reordering
+
     console.log(`Reordering items from order ${order.orderNumber}`);
   };
 
@@ -177,7 +176,7 @@ const OrderHistorySection = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-              {/* Search */}
+              {}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
@@ -188,7 +187,7 @@ const OrderHistorySection = () => {
                 />
               </div>
 
-              {/* Status Filter */}
+              {}
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-full sm:w-40">
                   <SelectValue placeholder="Filter by status" />
@@ -227,7 +226,7 @@ const OrderHistorySection = () => {
                   className="border rounded-lg p-6 hover:shadow-md transition-shadow"
                 >
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-                    {/* Order Info */}
+                    {}
                     <div className="space-y-2">
                       <div className="flex items-center space-x-4">
                         <h3 className="font-semibold text-lg">
@@ -266,7 +265,7 @@ const OrderHistorySection = () => {
                       </div>
                     </div>
 
-                    {/* Order Items Preview */}
+                    {}
                     <div className="flex -space-x-2">
                       {order.items.slice(0, 3).map((item, index) => (
                         <div
@@ -290,7 +289,7 @@ const OrderHistorySection = () => {
                       )}
                     </div>
 
-                    {/* Actions */}
+                    {}
                     <div className="flex flex-wrap gap-2">
                       <Dialog>
                         <DialogTrigger asChild>
@@ -317,7 +316,7 @@ const OrderHistorySection = () => {
 
                           {selectedOrder && (
                             <div className="space-y-6">
-                              {/* Order Status */}
+                              {}
                               <div className="flex items-center space-x-2">
                                 <Badge
                                   className={`flex items-center space-x-1 ${getStatusColor(
@@ -345,7 +344,7 @@ const OrderHistorySection = () => {
                                 )}
                               </div>
 
-                              {/* Order Items */}
+                              {}
                               <div>
                                 <h4 className="font-medium mb-3">
                                   Items Ordered
@@ -393,7 +392,7 @@ const OrderHistorySection = () => {
                                 </div>
                               </div>
 
-                              {/* Order Summary */}
+                              {}
                               <div className="border-t pt-4">
                                 <div className="space-y-2">
                                   <div className="flex justify-between">
@@ -421,7 +420,7 @@ const OrderHistorySection = () => {
                                 </div>
                               </div>
 
-                              {/* Shipping Address */}
+                              {}
                               <div>
                                 <h4 className="font-medium mb-2">
                                   Shipping Address

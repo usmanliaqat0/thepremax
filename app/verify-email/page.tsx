@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -48,8 +48,7 @@ function VerifyEmailContent() {
           setMessage(result.message);
           toast.success("Email verified successfully!");
 
-          // Redirect to login after 3 seconds
-          setTimeout(() => {
+setTimeout(() => {
             router.push("/login");
           }, 3000);
         } else {

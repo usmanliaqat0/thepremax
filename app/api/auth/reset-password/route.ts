@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { PasswordResetService } from "@/lib/password-reset-service";
 
 export async function POST(req: NextRequest) {
   try {
     const { token, password } = await req.json();
 
-    // Validate input
-    if (!token || typeof token !== "string") {
+if (!token || typeof token !== "string") {
       return NextResponse.json(
         { success: false, message: "Reset token is required" },
         { status: 400 }
@@ -20,8 +19,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate password strength
-    if (password.length < 6) {
+if (password.length < 6) {
       return NextResponse.json(
         {
           success: false,
@@ -31,8 +29,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Reset password
-    const resetResult = await PasswordResetService.resetPassword(
+const resetResult = await PasswordResetService.resetPassword(
       token,
       password
     );
@@ -58,7 +55,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Verify reset token endpoint
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);

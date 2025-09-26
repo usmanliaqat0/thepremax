@@ -1,6 +1,5 @@
-import mongoose, { Document, Schema, Types } from "mongoose";
+﻿import mongoose, { Document, Schema, Types } from "mongoose";
 
-// Product variant interface
 export interface IProductVariant {
   id: string;
   size: string;
@@ -11,7 +10,6 @@ export interface IProductVariant {
   images?: string[];
 }
 
-// Product image interface
 export interface IProductImage {
   id: string;
   url: string;
@@ -24,7 +22,6 @@ export interface IProductImage {
   };
 }
 
-// Product document interface for Mongoose
 export interface IProduct extends Document {
   _id: Types.ObjectId;
   name: string;
@@ -55,7 +52,6 @@ export interface IProduct extends Document {
   publishedAt?: Date;
 }
 
-// Product schema
 const ProductSchema = new Schema<IProduct>(
   {
     name: {
@@ -198,7 +194,6 @@ const ProductSchema = new Schema<IProduct>(
   }
 );
 
-// Create indexes
 ProductSchema.index({ name: 1 });
 ProductSchema.index({ slug: 1 });
 ProductSchema.index({ categoryId: 1, status: 1 });
@@ -210,7 +205,6 @@ ProductSchema.index({ inStock: 1, status: 1 });
 ProductSchema.index({ tags: 1 });
 ProductSchema.index({ createdAt: -1 });
 
-// Virtual for category
 ProductSchema.virtual("category", {
   ref: "Category",
   localField: "categoryId",
@@ -218,7 +212,6 @@ ProductSchema.virtual("category", {
   justOne: true,
 });
 
-// Virtual for discount percentage
 ProductSchema.virtual("discountPercentage").get(function () {
   if (this.compareAtPrice && this.compareAtPrice > this.basePrice) {
     return Math.round(
@@ -228,18 +221,15 @@ ProductSchema.virtual("discountPercentage").get(function () {
   return 0;
 });
 
-// Virtual for is on sale
 ProductSchema.virtual("isOnSale").get(function () {
   return (
     this.onSale || (this.compareAtPrice && this.compareAtPrice > this.basePrice)
   );
 });
 
-// Ensure virtual fields are serialized
 ProductSchema.set("toJSON", { virtuals: true });
 ProductSchema.set("toObject", { virtuals: true });
 
-// Pre-save middleware to generate slug
 ProductSchema.pre("save", function (next) {
   if (this.isModified("name") && !this.slug) {
     this.slug = this.name
@@ -248,8 +238,7 @@ ProductSchema.pre("save", function (next) {
       .replace(/(^-|-$)/g, "");
   }
 
-  // Set publishedAt when status changes to active
-  if (
+if (
     this.isModified("status") &&
     this.status === "active" &&
     !this.publishedAt
@@ -260,16 +249,15 @@ ProductSchema.pre("save", function (next) {
   next();
 });
 
-// Export the model - only create if we're on the server side
 let Product: mongoose.Model<IProduct> | Record<string, never>;
 
 if (typeof window === "undefined") {
-  // Server-side only
+
   Product =
     mongoose.models.Product ||
     mongoose.model<IProduct>("Product", ProductSchema);
 } else {
-  // Client-side - export empty object to prevent errors
+
   Product = {};
 }
 

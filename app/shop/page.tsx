@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
@@ -97,7 +97,7 @@ const ShopContent = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      {/* Header */}
+      {}
       <Section variant="muted" size="lg">
         <Container>
           <SectionHeader
@@ -107,12 +107,12 @@ const ShopContent = () => {
         </Container>
       </Section>
 
-      {/* Filters and Search */}
+      {}
       <section className="py-8 border-b border-border">
         <div className="container mx-auto px-4">
-          {/* Search and Sort Controls */}
+          {}
           <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center mb-6">
-            {/* Search */}
+            {}
             <div className="relative flex-1 lg:max-w-md w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
@@ -124,7 +124,7 @@ const ShopContent = () => {
               />
             </div>
 
-            {/* Filters */}
+            {}
             <div className="flex flex-wrap gap-4 items-center">
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger className="w-40">
@@ -184,7 +184,7 @@ const ShopContent = () => {
             </div>
           </div>
 
-          {/* Active Filters Display */}
+          {}
           {activeFiltersCount > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
               {searchTerm.trim() && (
@@ -214,7 +214,7 @@ const ShopContent = () => {
         </div>
       </section>
 
-      {/* Results Count */}
+      {}
       <section className="py-6">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
@@ -230,7 +230,7 @@ const ShopContent = () => {
         </div>
       </section>
 
-      {/* Products Grid */}
+      {}
       {isLoading ? (
         <Section>
           <Container>

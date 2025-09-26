@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Order from "@/lib/models/Order";
 import { TokenUtils } from "@/lib/auth-service";
 
-// Get user orders
 export async function GET(req: NextRequest) {
   try {
     const authHeader = req.headers.get("authorization");
@@ -19,8 +18,7 @@ export async function GET(req: NextRequest) {
 
     await connectDB();
 
-    // Get query parameters for pagination and filtering
-    const url = new URL(req.url);
+const url = new URL(req.url);
     const page = parseInt(url.searchParams.get("page") || "1");
     const limit = parseInt(url.searchParams.get("limit") || "10");
     const status = url.searchParams.get("status");
@@ -28,8 +26,7 @@ export async function GET(req: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    // Build query
-    const query: Record<string, unknown> = { userId: decoded.id };
+const query: Record<string, unknown> = { userId: decoded.id };
 
     if (status && status !== "all") {
       query.status = status;
@@ -42,15 +39,13 @@ export async function GET(req: NextRequest) {
       ];
     }
 
-    // Get orders with pagination
-    const orders = await Order.find(query)
+const orders = await Order.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
 
-    // Get total count for pagination
-    const totalOrders = await Order.countDocuments(query);
+const totalOrders = await Order.countDocuments(query);
     const totalPages = Math.ceil(totalOrders / limit);
 
     return NextResponse.json({
@@ -85,7 +80,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// Get single order by ID
 export async function POST(req: NextRequest) {
   try {
     const authHeader = req.headers.get("authorization");

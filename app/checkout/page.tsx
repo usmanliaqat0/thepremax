@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
@@ -126,7 +126,7 @@ const Checkout = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      {/* Header */}
+      {}
       <section className="py-12 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
@@ -150,9 +150,9 @@ const Checkout = () => {
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Checkout Form */}
+          {}
           <div className="space-y-8">
-            {/* Shipping Information */}
+            {}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -261,7 +261,7 @@ const Checkout = () => {
               </CardContent>
             </Card>
 
-            {/* Payment Information */}
+            {}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -271,7 +271,7 @@ const Checkout = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {/* Payment Method Selection */}
+                  {}
                   <div>
                     <Label>Payment Method</Label>
                     <div className="grid grid-cols-2 gap-4 mt-2">
@@ -362,7 +362,7 @@ const Checkout = () => {
             </Card>
           </div>
 
-          {/* Order Summary */}
+          {}
           <div>
             <Card className="sticky top-8">
               <CardHeader>
@@ -370,7 +370,7 @@ const Checkout = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {/* Order Items */}
+                  {}
                   <div className="space-y-3">
                     {state.items.map((item) => (
                       <div
@@ -416,7 +416,7 @@ const Checkout = () => {
 
                   <Separator />
 
-                  {/* Order Totals */}
+                  {}
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Subtotal ({getCartItemsCount()} items)</span>

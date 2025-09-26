@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+﻿import mongoose, { Schema } from "mongoose";
 
 export interface IOrderItem {
   productId: string;
@@ -107,7 +107,6 @@ const OrderSchema = new Schema<IOrder>(
   }
 );
 
-// Create indexes
 OrderSchema.index({ userId: 1, createdAt: -1 });
 OrderSchema.index({ status: 1 });
 

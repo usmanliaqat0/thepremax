@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
@@ -17,8 +17,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate password strength
-    if (newPassword.length < 8) {
+if (newPassword.length < 8) {
       return NextResponse.json(
         {
           success: false,
@@ -30,15 +29,13 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    // Check if code is a 6-character code or full token
-    let user;
+let user;
     if (code.length === 6) {
-      // 6-character code - find user where token starts with this code (case insensitive)
+
       const upperCode = code.toUpperCase();
       console.log("Looking for user with password reset code:", upperCode);
 
-      // Escape special regex characters
-      const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
       user = await User.findOne({
         passwordResetToken: { $regex: `^${escapedCode}`, $options: "i" },
@@ -53,7 +50,7 @@ export async function POST(req: NextRequest) {
         );
       }
     } else {
-      // Full token
+
       user = await User.findOne({
         passwordResetToken: code,
         passwordResetExpires: { $gt: new Date() },
@@ -67,11 +64,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
+const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-    // Update user password and clear reset token
-    user.password = hashedPassword;
+user.password = hashedPassword;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save();

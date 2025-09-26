@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Category from "@/lib/models/Category";
 import { AdminMiddleware } from "@/lib/admin-middleware";
 
-// GET /api/admin/categories - Get all categories with pagination and filtering
 export async function GET(request: NextRequest) {
   try {
-    // Check admin authentication
+
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -25,8 +24,7 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    // Build filter object
-    const filter: Record<string, unknown> = {};
+const filter: Record<string, unknown> = {};
 
     if (search) {
       filter.$or = [
@@ -40,11 +38,9 @@ export async function GET(request: NextRequest) {
       filter.status = status;
     }
 
-    // Get total count
-    const total = await Category.countDocuments(filter);
+const total = await Category.countDocuments(filter);
 
-    // Get categories with population
-    const categories = await Category.find(filter)
+const categories = await Category.find(filter)
       .populate("productCount")
       .sort({ order: 1, createdAt: -1 })
       .skip(skip)
@@ -74,10 +70,9 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/admin/categories - Create a new category
 export async function POST(request: NextRequest) {
   try {
-    // Check admin authentication
+
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -99,16 +94,14 @@ export async function POST(request: NextRequest) {
       seoDescription,
     } = body;
 
-    // Validate required fields
-    if (!name) {
+if (!name) {
       return NextResponse.json(
         { success: false, error: "Name is required" },
         { status: 400 }
       );
     }
 
-    // Check if category with same name already exists
-    const existingCategory = await Category.findOne({
+const existingCategory = await Category.findOne({
       name: { $regex: new RegExp(`^${name}$`, "i") },
     });
 
@@ -119,14 +112,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate slug
-    const slug = name
+const slug = name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
-    // Check if slug already exists
-    const existingSlug = await Category.findOne({ slug });
+const existingSlug = await Category.findOne({ slug });
     if (existingSlug) {
       return NextResponse.json(
         { success: false, error: "Category with this slug already exists" },
@@ -134,8 +125,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create new category
-    const category = await Category.create({
+const category = await Category.create({
       name,
       slug,
       description,
@@ -146,8 +136,7 @@ export async function POST(request: NextRequest) {
       seoDescription,
     });
 
-    // Populate the created category
-    const populatedCategory = await Category.findById(category._id)
+const populatedCategory = await Category.findById(category._id)
       .populate("productCount")
       .lean();
 

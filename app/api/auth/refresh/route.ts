@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { AuthService } from "@/lib/auth-service";
 import { AuthResponse } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
   try {
-    // Check if refresh tokens are enabled
+
     if (!process.env.JWT_REFRESH_SECRET) {
       return NextResponse.json<AuthResponse>(
         { success: false, message: "Token refresh not available" },
@@ -12,8 +12,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get refresh token from cookies or body
-    let refreshToken = req.cookies.get("refreshToken")?.value;
+let refreshToken = req.cookies.get("refreshToken")?.value;
 
     if (!refreshToken) {
       const body = await req.json();
@@ -39,29 +38,27 @@ export async function POST(req: NextRequest) {
         { status: 200 }
       );
 
-      // Update cookies with new tokens
-      response.cookies.set("accessToken", result.accessToken!, {
+response.cookies.set("accessToken", result.accessToken!, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60, // 7 days
+        maxAge: 7 * 24 * 60 * 60,
         path: "/",
       });
 
-      // Only set refresh token cookie if refresh token is available
-      if (result.refreshToken) {
+if (result.refreshToken) {
         response.cookies.set("refreshToken", result.refreshToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "strict",
-          maxAge: 30 * 24 * 60 * 60, // 30 days
+          maxAge: 30 * 24 * 60 * 60,
           path: "/",
         });
       }
 
       return response;
     } else {
-      // Clear invalid tokens
+
       const response = NextResponse.json<AuthResponse>(
         { success: false, message: result.message! },
         { status: 401 }

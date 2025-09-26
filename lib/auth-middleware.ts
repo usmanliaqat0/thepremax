@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+﻿import { NextRequest } from "next/server";
 import { TokenUtils } from "@/lib/auth-service";
 
 export interface AuthenticatedRequest extends NextRequest {
@@ -11,9 +11,7 @@ export interface AuthenticatedRequest extends NextRequest {
 }
 
 export class AuthMiddleware {
-  /**
-   * Extract and verify JWT token from request
-   */
+  
   static async verifyRequest(req: NextRequest): Promise<{
     success: boolean;
     user?: {
@@ -25,7 +23,7 @@ export class AuthMiddleware {
     error?: string;
   }> {
     try {
-      // Get token from Authorization header or cookies
+
       let token = this.extractTokenFromHeader(req);
 
       if (!token) {
@@ -39,8 +37,7 @@ export class AuthMiddleware {
         };
       }
 
-      // Verify token
-      const decoded = TokenUtils.verifyAccessToken(token);
+const decoded = TokenUtils.verifyAccessToken(token);
 
       return {
         success: true,
@@ -70,10 +67,7 @@ export class AuthMiddleware {
     }
   }
 
-  /**
-   * Extract token from Authorization header
-   */
-  private static extractTokenFromHeader(req: NextRequest): string | null {
+private static extractTokenFromHeader(req: NextRequest): string | null {
     const authHeader = req.headers.get("authorization");
 
     if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -83,17 +77,11 @@ export class AuthMiddleware {
     return null;
   }
 
-  /**
-   * Extract token from cookies
-   */
-  private static extractTokenFromCookies(req: NextRequest): string | null {
+private static extractTokenFromCookies(req: NextRequest): string | null {
     return req.cookies.get("accessToken")?.value || null;
   }
 
-  /**
-   * Check if user has required role
-   */
-  static hasRole(
+static hasRole(
     user: { role: string },
     requiredRole: string | string[]
   ): boolean {
@@ -101,17 +89,11 @@ export class AuthMiddleware {
     return roles.includes(user.role);
   }
 
-  /**
-   * Check if user is admin
-   */
-  static isAdmin(user: { role: string }): boolean {
+static isAdmin(user: { role: string }): boolean {
     return user.role === "admin";
   }
 
-  /**
-   * Check if user owns the resource or is admin
-   */
-  static canAccessResource(
+static canAccessResource(
     user: { id: string; role: string },
     resourceUserId: string
   ): boolean {

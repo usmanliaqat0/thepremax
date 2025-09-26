@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { EmailService } from "@/lib/email-service";
 
 export async function POST(req: NextRequest) {
@@ -12,8 +12,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Send test email using Brevo
-    const testResult = await EmailService.sendEmail(
+const testResult = await EmailService.sendEmail(
       [{ email, name: "Test User" }],
       "Test Email from ThePreMax",
       `

@@ -1,6 +1,5 @@
-import mongoose, { Document, Schema, Types } from "mongoose";
+﻿import mongoose, { Document, Schema, Types } from "mongoose";
 
-// Category document interface for Mongoose
 export interface ICategory extends Document {
   _id: Types.ObjectId;
   name: string;
@@ -15,7 +14,6 @@ export interface ICategory extends Document {
   updatedAt: Date;
 }
 
-// Category schema
 const CategorySchema = new Schema<ICategory>(
   {
     name: {
@@ -65,12 +63,10 @@ const CategorySchema = new Schema<ICategory>(
   }
 );
 
-// Create indexes
 CategorySchema.index({ name: 1 });
 CategorySchema.index({ slug: 1 });
 CategorySchema.index({ status: 1, order: 1 });
 
-// Virtual for product count
 CategorySchema.virtual("productCount", {
   ref: "Product",
   localField: "_id",
@@ -78,11 +74,9 @@ CategorySchema.virtual("productCount", {
   count: true,
 });
 
-// Ensure virtual fields are serialized
 CategorySchema.set("toJSON", { virtuals: true });
 CategorySchema.set("toObject", { virtuals: true });
 
-// Pre-save middleware to generate slug
 CategorySchema.pre("save", function (next) {
   if (this.isModified("name") && !this.slug) {
     this.slug = this.name
@@ -93,16 +87,15 @@ CategorySchema.pre("save", function (next) {
   next();
 });
 
-// Export the model - only create if we're on the server side
 let Category: mongoose.Model<ICategory> | Record<string, never>;
 
 if (typeof window === "undefined") {
-  // Server-side only
+
   Category =
     mongoose.models.Category ||
     mongoose.model<ICategory>("Category", CategorySchema);
 } else {
-  // Client-side - export empty object to prevent errors
+
   Category = {};
 }
 

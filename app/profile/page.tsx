@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -102,7 +101,6 @@ const Profile = () => {
       return;
     }
 
-    // Check email verification status
     if (state.isAuthenticated && state.user && !state.user.isEmailVerified) {
       router.push(`/verify-code?email=${encodeURIComponent(state.user.email)}`);
       return;
@@ -114,37 +112,6 @@ const Profile = () => {
       setCurrentAvatar(state.user.avatar);
     }
   }, [state.user?.avatar]);
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      toast({
-        title: "Invalid file type",
-        description: "Please select an image file.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Please select an image smaller than 5MB.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSelectedFile(file);
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreviewUrl(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
 
   const handleUpload = async () => {
     if (!selectedFile) return;
@@ -291,11 +258,11 @@ const Profile = () => {
     <div className="min-h-screen bg-gray-50">
       <Navigation />
 
-      {/* Email Verification Banner */}
+      {}
       <EmailVerificationBanner />
 
       <div className="container mx-auto px-4 py-6 max-w-7xl">
-        {/* Profile Header */}
+        {}
         <Card className="mb-6">
           <CardContent className="p-6">
             <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
@@ -339,121 +306,8 @@ const Profile = () => {
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"
-                  onChange={handleFileSelect}
-                  className="hidden"
+                  style={{ display: "none" }}
                 />
-
-                <Dialog
-                  open={showAvatarDialog}
-                  onOpenChange={setShowAvatarDialog}
-                >
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Update Profile Picture</DialogTitle>
-                      <DialogDescription>
-                        Upload a new photo or choose from default avatars
-                      </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-6">
-                      {/* Upload Section */}
-                      <div className="space-y-4">
-                        <h4 className="font-medium">Upload Custom Picture</h4>
-
-                        {selectedFile ? (
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-center">
-                              <Avatar className="w-24 h-24">
-                                <AvatarImage src={previewUrl} alt="Preview" />
-                                <AvatarFallback>
-                                  <User className="w-8 h-8" />
-                                </AvatarFallback>
-                              </Avatar>
-                            </div>
-
-                            <div className="text-sm text-gray-600 text-center">
-                              {selectedFile.name} (
-                              {(selectedFile.size / 1024 / 1024).toFixed(1)} MB)
-                            </div>
-
-                            <div className="flex space-x-2">
-                              <Button
-                                onClick={handleUpload}
-                                disabled={isUploading}
-                                className="flex-1"
-                              >
-                                {isUploading ? (
-                                  <>
-                                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                                    Uploading...
-                                  </>
-                                ) : (
-                                  <>
-                                    <Check className="w-4 h-4 mr-2" />
-                                    Upload
-                                  </>
-                                )}
-                              </Button>
-                              <Button variant="outline" onClick={cancelUpload}>
-                                <X className="w-4 h-4 mr-2" />
-                                Cancel
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div
-                            onClick={triggerFileInput}
-                            className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
-                          >
-                            <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                            <p className="text-sm font-medium text-gray-700 mb-1">
-                              Click to upload a photo
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              PNG, JPG, GIF up to 5MB
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Default Avatars */}
-                      {!selectedFile && (
-                        <div className="space-y-4">
-                          <h4 className="font-medium">Choose Default Avatar</h4>
-
-                          <div className="grid grid-cols-3 gap-4">
-                            {defaultAvatars.map((avatar) => (
-                              <div
-                                key={avatar.id}
-                                className={`cursor-pointer rounded-lg p-3 border-2 transition-all ${
-                                  currentAvatar === avatar.src
-                                    ? "border-blue-500 bg-blue-50"
-                                    : "border-gray-200 hover:border-gray-300"
-                                }`}
-                                onClick={() =>
-                                  handleDefaultAvatarSelect(avatar)
-                                }
-                              >
-                                <Avatar className="w-16 h-16 mx-auto mb-2">
-                                  <AvatarImage
-                                    src={avatar.src}
-                                    alt={avatar.name}
-                                  />
-                                  <AvatarFallback>
-                                    <User className="w-6 h-6" />
-                                  </AvatarFallback>
-                                </Avatar>
-                                <p className="text-xs text-center text-gray-600">
-                                  {avatar.name}
-                                </p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </DialogContent>
-                </Dialog>
               </div>
 
               <div className="text-center sm:text-left flex-1 min-w-0">
@@ -498,7 +352,7 @@ const Profile = () => {
           </CardContent>
         </Card>
 
-        {/* Profile Content */}
+        {}
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
@@ -523,7 +377,7 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Tab Contents */}
+          {}
           <TabsContent value="personal" className="space-y-4">
             <PersonalInfoSection />
           </TabsContent>
@@ -547,6 +401,100 @@ const Profile = () => {
       </div>
 
       <Footer />
+
+      <Dialog open={showAvatarDialog} onOpenChange={setShowAvatarDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change Profile Picture</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <h4 className="font-medium">Upload Custom Picture</h4>
+
+            {selectedFile ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-center">
+                  <Avatar className="w-24 h-24">
+                    <AvatarImage src={previewUrl} alt="Preview" />
+                    <AvatarFallback>
+                      <User className="w-8 h-8" />
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+
+                <div className="text-sm text-gray-600 text-center">
+                  {selectedFile.name} (
+                  {(selectedFile.size / 1024 / 1024).toFixed(1)} MB)
+                </div>
+
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={handleUpload}
+                    disabled={isUploading}
+                    className="flex-1"
+                  >
+                    {isUploading ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="w-4 h-4 mr-2" />
+                        Upload
+                      </>
+                    )}
+                  </Button>
+                  <Button variant="outline" onClick={cancelUpload}>
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div
+                onClick={triggerFileInput}
+                className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
+              >
+                <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                <p className="text-sm font-medium text-gray-700 mb-1">
+                  Click to upload a photo
+                </p>
+                <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+              </div>
+            )}
+
+            {!selectedFile && (
+              <div className="space-y-4">
+                <h4 className="font-medium">Choose Default Avatar</h4>
+
+                <div className="grid grid-cols-3 gap-4">
+                  {defaultAvatars.map((avatar) => (
+                    <div
+                      key={avatar.id}
+                      className={`cursor-pointer rounded-lg p-3 border-2 transition-all ${
+                        currentAvatar === avatar.src
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                      onClick={() => handleDefaultAvatarSelect(avatar)}
+                    >
+                      <Avatar className="w-16 h-16 mx-auto mb-2">
+                        <AvatarImage src={avatar.src} alt={avatar.name} />
+                        <AvatarFallback>
+                          <User className="w-6 h-6" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <p className="text-xs text-center text-gray-600">
+                        {avatar.name}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

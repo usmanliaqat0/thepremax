@@ -1,4 +1,4 @@
-import crypto from "crypto";
+﻿import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import connectDB from "./db";
@@ -6,13 +6,12 @@ import User from "./models/User";
 import PasswordReset, { IPasswordReset } from "./models/PasswordReset";
 
 export class PasswordResetService {
-  // Generate a secure random token
+
   static generateResetToken(): string {
     return crypto.randomBytes(32).toString("hex");
   }
 
-  // Create a password reset record
-  static async createPasswordReset(email: string): Promise<{
+static async createPasswordReset(email: string): Promise<{
     success: boolean;
     token?: string;
     message?: string;
@@ -20,8 +19,7 @@ export class PasswordResetService {
     try {
       await connectDB();
 
-      // Check if user exists
-      const user = await User.findOne({ email: email.toLowerCase() });
+const user = await User.findOne({ email: email.toLowerCase() });
       if (!user) {
         return {
           success: false,
@@ -29,26 +27,22 @@ export class PasswordResetService {
         };
       }
 
-      // Check if user is active
-      if (user.status !== "active") {
+if (user.status !== "active") {
         return {
           success: false,
           message: "Account is not active. Please contact support.",
         };
       }
 
-      // Invalidate any existing reset tokens for this email
-      await PasswordReset.updateMany(
+await PasswordReset.updateMany(
         { email: email.toLowerCase(), used: false },
         { used: true }
       );
 
-      // Generate new reset token
-      const token = this.generateResetToken();
-      const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
+const token = this.generateResetToken();
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-      // Create new password reset record
-      const passwordReset =
+const passwordReset =
         new (PasswordReset as mongoose.Model<IPasswordReset>)({
           email: email.toLowerCase(),
           token,
@@ -72,8 +66,7 @@ export class PasswordResetService {
     }
   }
 
-  // Verify reset token
-  static async verifyResetToken(token: string): Promise<{
+static async verifyResetToken(token: string): Promise<{
     success: boolean;
     email?: string;
     message?: string;
@@ -108,8 +101,7 @@ export class PasswordResetService {
     }
   }
 
-  // Reset password with token
-  static async resetPassword(
+static async resetPassword(
     token: string,
     newPassword: string
   ): Promise<{
@@ -119,8 +111,7 @@ export class PasswordResetService {
     try {
       await connectDB();
 
-      // Verify token
-      const tokenVerification = await this.verifyResetToken(token);
+const tokenVerification = await this.verifyResetToken(token);
       if (!tokenVerification.success) {
         return {
           success: false,
@@ -128,11 +119,9 @@ export class PasswordResetService {
         };
       }
 
-      // Hash new password
-      const hashedPassword = await bcrypt.hash(newPassword, 12);
+const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-      // Update user password
-      const user = await User.findOneAndUpdate(
+const user = await User.findOneAndUpdate(
         { email: tokenVerification.email },
         { password: hashedPassword },
         { new: true }
@@ -145,8 +134,7 @@ export class PasswordResetService {
         };
       }
 
-      // Mark token as used
-      await PasswordReset.findOneAndUpdate({ token }, { used: true });
+await PasswordReset.findOneAndUpdate({ token }, { used: true });
 
       return {
         success: true,
@@ -161,8 +149,7 @@ export class PasswordResetService {
     }
   }
 
-  // Clean up expired tokens (can be called periodically)
-  static async cleanupExpiredTokens(): Promise<void> {
+static async cleanupExpiredTokens(): Promise<void> {
     try {
       await connectDB();
       await PasswordReset.deleteMany({

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -62,7 +62,7 @@ export default function AdminSidebar({
 
   return (
     <>
-      {/* Mobile overlay */}
+      {}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -70,7 +70,7 @@ export default function AdminSidebar({
         />
       )}
 
-      {/* Sidebar */}
+      {}
       <div
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-300 ease-in-out",
@@ -79,7 +79,7 @@ export default function AdminSidebar({
         )}
       >
         <div className="flex flex-col h-full overflow-hidden">
-          {/* Header with close button for mobile */}
+          {}
           <div className="flex items-center justify-between px-6 py-6 border-b border-border">
             <div className="flex items-center gap-3">
               <Image

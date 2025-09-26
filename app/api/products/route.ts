@@ -1,8 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Product from "@/lib/models/Product";
 
-// GET /api/products - Get all active products for frontend
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
@@ -20,9 +19,8 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    // Build filter object
-    const filter: Record<string, unknown> = {
-      status: "active", // Only show active products
+const filter: Record<string, unknown> = {
+      status: "active",
     };
 
     if (search) {
@@ -49,8 +47,7 @@ export async function GET(request: NextRequest) {
       filter.inStock = true;
     }
 
-    // Build sort object
-    const sort: Record<string, 1 | -1> = {};
+const sort: Record<string, 1 | -1> = {};
     if (sortBy === "price") {
       sort.basePrice = sortOrder === "asc" ? 1 : -1;
     } else if (sortBy === "name") {
@@ -61,11 +58,9 @@ export async function GET(request: NextRequest) {
       sort[sortBy] = sortOrder === "asc" ? 1 : -1;
     }
 
-    // Get total count
-    const total = await Product.countDocuments(filter);
+const total = await Product.countDocuments(filter);
 
-    // Get products with population
-    const products = await Product.find(filter)
+const products = await Product.find(filter)
       .populate("category", "name slug")
       .sort(sort)
       .skip(skip)

@@ -1,17 +1,16 @@
-import nodemailer from "nodemailer";
+﻿import nodemailer from "nodemailer";
 
-// Create SMTP transporter for Hostinger
 let transporter: nodemailer.Transporter;
 
 if (typeof window === "undefined") {
-  // Server-side only
+
   const smtpConfig = {
     host: process.env.SMTP_HOST || "smtp.hostinger.com",
     port: parseInt(process.env.SMTP_PORT || "587"),
-    secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
+    secure: process.env.SMTP_SECURE === "true",
     auth: {
-      user: process.env.SMTP_USER, // your email@yourdomain.com
-      pass: process.env.SMTP_PASS, // your email password or app password
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
     },
   };
 
@@ -19,7 +18,7 @@ if (typeof window === "undefined") {
 }
 
 export class SMTPEmailService {
-  // Send password reset email
+
   static async sendPasswordResetEmail(
     email: string,
     firstName: string,
@@ -134,8 +133,7 @@ export class SMTPEmailService {
     }
   }
 
-  // Send welcome email
-  static async sendWelcomeEmail(
+static async sendWelcomeEmail(
     email: string,
     firstName: string
   ): Promise<{
@@ -252,8 +250,7 @@ export class SMTPEmailService {
     }
   }
 
-  // Send custom email
-  static async sendEmail(
+static async sendEmail(
     to: string | string[],
     subject: string,
     htmlContent: string,
@@ -295,8 +292,7 @@ export class SMTPEmailService {
     }
   }
 
-  // Test SMTP connection
-  static async testConnection(): Promise<{
+static async testConnection(): Promise<{
     success: boolean;
     message?: string;
   }> {

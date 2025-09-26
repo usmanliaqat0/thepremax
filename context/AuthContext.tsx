@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, {
   createContext,
@@ -176,13 +176,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           payload: { user: result.user, token: result.token },
         });
 
-        // Check if email verification is required (skip for admin users)
-        if (!result.user.isEmailVerified && result.user.role !== "admin") {
-          // Store email for verification page
+if (!result.user.isEmailVerified && result.user.role !== "admin") {
+
           localStorage.setItem("pending_verification_email", result.user.email);
 
-          // Redirect to verification page
-          window.location.href = `/verify-code?email=${encodeURIComponent(
+window.location.href = `/verify-code?email=${encodeURIComponent(
             result.user.email
           )}`;
           return { success: true };
@@ -220,7 +218,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (result.success && result.user) {
         if (result.requiresVerification && result.token) {
-          // User is auto-logged in but needs email verification
+
           localStorage.setItem("auth_token", result.token);
           localStorage.setItem("user_data", JSON.stringify(result.user));
 
@@ -229,11 +227,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             payload: { user: result.user, token: result.token },
           });
 
-          // Store email for verification page
-          localStorage.setItem("pending_verification_email", result.user.email);
+localStorage.setItem("pending_verification_email", result.user.email);
 
-          // Redirect to verification page
-          window.location.href = `/verify-code?email=${encodeURIComponent(
+window.location.href = `/verify-code?email=${encodeURIComponent(
             result.user.email
           )}`;
           return { success: true };
@@ -249,7 +245,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           showSuccessMessage("Account created successfully!");
           return { success: true };
         } else {
-          // User created but no token provided
+
           return { success: true };
         }
       } else {

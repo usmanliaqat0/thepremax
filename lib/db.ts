@@ -1,4 +1,4 @@
-import mongoose, { type Mongoose } from "mongoose";
+﻿import mongoose, { type Mongoose } from "mongoose";
 
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/thepremax";
@@ -14,7 +14,6 @@ interface MongooseConnection {
   promise: Promise<Mongoose> | null;
 }
 
-// Type assertion helper to access mongoose static properties
 const mongooseStatic = mongoose as typeof mongoose & {
   connect: (
     uri: string,
@@ -32,13 +31,11 @@ const mongooseStatic = mongoose as typeof mongoose & {
   };
 };
 
-// Global variable to cache the connection
 declare global {
   var mongooseCache: MongooseConnection | undefined;
 }
 
-// eslint-disable-next-line prefer-const
-let cached: MongooseConnection = global.mongooseCache || {
+const cached: MongooseConnection = global.mongooseCache || {
   conn: null,
   promise: null,
 };
@@ -47,7 +44,6 @@ if (!global.mongooseCache) {
   global.mongooseCache = cached;
 }
 
-// Type guard for MongoDB errors
 interface MongoError extends Error {
   code?: number;
 }
@@ -56,7 +52,6 @@ function isMongoError(error: unknown): error is MongoError {
   return error instanceof Error && "code" in error;
 }
 
-// Helper function to get readable connection state
 function getConnectionState(state: number): string {
   const states = {
     0: "disconnected",
@@ -67,36 +62,25 @@ function getConnectionState(state: number): string {
   return states[state as keyof typeof states] || "unknown";
 }
 
-/**
- * Global function to connect to MongoDB using Mongoose
- * Handles connection caching and error management
- */
 async function connectDB(): Promise<Mongoose> {
-  // Return existing connection if available
   if (cached.conn && mongooseStatic.connection.readyState === 1) {
     return cached.conn;
   }
 
-  // Don't create multiple connection promises
   if (!cached.promise) {
     const connectionOptions = {
-      // Connection pool settings
       maxPoolSize: 10,
       minPoolSize: 2,
       maxIdleTimeMS: 30000,
 
-      // Connection timeout settings
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
       connectTimeoutMS: 10000,
 
-      // Performance settings
       bufferCommands: false,
 
-      // Authentication
       authSource: "admin",
 
-      // Other options for mongoose 8+
       retryWrites: true,
       w: "majority",
     };
@@ -110,7 +94,6 @@ async function connectDB(): Promise<Mongoose> {
 
     console.log("✅ Connected to MongoDB successfully");
 
-    // Log connection details
     const connection = mongooseStatic.connection;
     console.log(
       `📍 Database: ${connection.name || connection.db?.databaseName || "N/A"}`
@@ -118,12 +101,10 @@ async function connectDB(): Promise<Mongoose> {
     console.log(`🔗 Host: ${connection.host}:${connection.port}`);
     console.log(`📊 Ready State: ${getConnectionState(connection.readyState)}`);
 
-    // Set up connection event handlers
     setupConnectionEventHandlers();
 
     return cached.conn!;
   } catch (error: unknown) {
-    // Reset promise on failure to allow retry
     cached.promise = null;
 
     const errorMessage =
@@ -134,7 +115,6 @@ async function connectDB(): Promise<Mongoose> {
       MONGODB_URI.replace(/:[^:@]*@/, ":***@")
     );
 
-    // Provide specific error guidance
     if (isMongoError(error)) {
       if (error.code === 18) {
         console.error("💡 Authentication failed. Please check:");
@@ -152,13 +132,9 @@ async function connectDB(): Promise<Mongoose> {
   }
 }
 
-/**
- * Set up connection event handlers for monitoring
- */
 function setupConnectionEventHandlers(): void {
   const connection = mongooseStatic.connection;
 
-  // Remove existing listeners to avoid duplicates
   connection.removeAllListeners("connected");
   connection.removeAllListeners("error");
   connection.removeAllListeners("disconnected");
@@ -174,7 +150,7 @@ function setupConnectionEventHandlers(): void {
 
   connection.on("disconnected", () => {
     console.log("🔌 MongoDB disconnected");
-    // Clear the cached connection on disconnect
+
     cached.conn = null;
   });
 
@@ -183,9 +159,6 @@ function setupConnectionEventHandlers(): void {
   });
 }
 
-/**
- * Gracefully close the database connection
- */
 export async function disconnectDB(): Promise<void> {
   try {
     if (cached.conn) {
@@ -200,9 +173,6 @@ export async function disconnectDB(): Promise<void> {
   }
 }
 
-/**
- * Get the current connection status
- */
 export function getConnectionStatus(): {
   isConnected: boolean;
   readyState: number;

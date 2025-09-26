@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -46,7 +46,7 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
     <header className="bg-card border-b border-border shadow-sm flex-shrink-0">
       <div className="flex items-center justify-between px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
         <div className="flex items-center gap-2 sm:gap-4">
-          {/* Mobile menu button */}
+          {}
           <Button
             variant="ghost"
             size="sm"

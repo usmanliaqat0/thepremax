@@ -1,6 +1,5 @@
-import mongoose, { Document, Schema, Types } from "mongoose";
+﻿import mongoose, { Document, Schema, Types } from "mongoose";
 
-// Contact message document interface for Mongoose
 export interface IContactMessage extends Document {
   _id: Types.ObjectId;
   name: string;
@@ -15,7 +14,6 @@ export interface IContactMessage extends Document {
   updatedAt: Date;
 }
 
-// Contact message schema
 const ContactMessageSchema = new Schema<IContactMessage>(
   {
     name: {
@@ -67,12 +65,10 @@ const ContactMessageSchema = new Schema<IContactMessage>(
   }
 );
 
-// Create indexes
 ContactMessageSchema.index({ status: 1 });
 ContactMessageSchema.index({ createdAt: -1 });
 ContactMessageSchema.index({ email: 1 });
 
-// Export the model
 const ContactMessage =
   mongoose.models.ContactMessage ||
   mongoose.model<IContactMessage>("ContactMessage", ContactMessageSchema);

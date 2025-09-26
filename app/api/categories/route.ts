@@ -1,8 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Category from "@/lib/models/Category";
 
-// GET /api/categories - Get all active categories for frontend
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
@@ -10,15 +9,13 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const includeInactive = searchParams.get("includeInactive") === "true";
 
-    // Build filter object
-    const filter: Record<string, unknown> = {};
+const filter: Record<string, unknown> = {};
 
     if (!includeInactive) {
       filter.status = "active";
     }
 
-    // Get categories with population
-    const categories = await Category.find(filter)
+const categories = await Category.find(filter)
       .populate("productCount")
       .sort({ order: 1, createdAt: -1 })
       .lean();

@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import ContactMessage from "@/lib/models/ContactMessage";
 import { AdminMiddleware } from "@/lib/admin-middleware";
 
-// GET /api/admin/messages - Get all contact messages with pagination and filtering
 export async function GET(request: NextRequest) {
   try {
-    // Check admin authentication
+
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -25,8 +24,7 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    // Build filter object
-    const filter: Record<string, unknown> = {};
+const filter: Record<string, unknown> = {};
 
     if (search) {
       filter.$or = [
@@ -41,11 +39,9 @@ export async function GET(request: NextRequest) {
       filter.status = status;
     }
 
-    // Get total count
-    const total = await ContactMessage.countDocuments(filter);
+const total = await ContactMessage.countDocuments(filter);
 
-    // Get messages with sorting
-    const messages = await ContactMessage.find(filter)
+const messages = await ContactMessage.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

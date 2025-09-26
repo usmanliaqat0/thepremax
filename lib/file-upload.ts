@@ -1,4 +1,4 @@
-import { writeFile, mkdir } from "fs/promises";
+﻿import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 
 export interface UploadedFile {
@@ -17,17 +17,14 @@ export async function saveFile(
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  // Ensure folder is within uploads directory
-  const uploadsFolder = folder.startsWith("uploads/")
+const uploadsFolder = folder.startsWith("uploads/")
     ? folder
     : `uploads/${folder}`;
 
-  // Create uploads directory if it doesn't exist
-  const uploadsDir = join(process.cwd(), "public", uploadsFolder);
+const uploadsDir = join(process.cwd(), "public", uploadsFolder);
   await mkdir(uploadsDir, { recursive: true });
 
-  // Generate unique filename
-  const timestamp = Date.now();
+const timestamp = Date.now();
   const randomString = Math.random().toString(36).substring(2, 15);
   const extension = file.name.split(".").pop() || "jpg";
   const filename = `${timestamp}-${randomString}.${extension}`;
@@ -51,7 +48,7 @@ export async function handleMultipleFiles(
   files: File[],
   folder: string = "uploads"
 ): Promise<UploadedFile[]> {
-  // Ensure folder is within uploads directory
+
   const uploadsFolder = folder.startsWith("uploads/")
     ? folder
     : `uploads/${folder}`;
@@ -63,7 +60,7 @@ export function validateImageFile(file: File): {
   valid: boolean;
   error?: string;
 } {
-  const maxSize = 5 * 1024 * 1024; // 5MB
+  const maxSize = 5 * 1024 * 1024;
   const allowedTypes = [
     "image/jpeg",
     "image/jpg",

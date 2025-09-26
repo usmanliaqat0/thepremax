@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -74,7 +74,6 @@ const AvatarSection = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       toast({
         title: "Invalid file type",
@@ -84,7 +83,6 @@ const AvatarSection = () => {
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: "File too large",
@@ -96,7 +94,6 @@ const AvatarSection = () => {
 
     setSelectedFile(file);
 
-    // Create preview URL
     const reader = new FileReader();
     reader.onload = (e) => {
       setPreviewUrl(e.target?.result as string);
@@ -110,14 +107,11 @@ const AvatarSection = () => {
     setIsUploading(true);
 
     try {
-      // Simulate file upload
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // In a real app, you would upload to your server here
       const formData = new FormData();
       formData.append("avatar", selectedFile);
 
-      // For now, we'll use the preview URL
       setCurrentAvatar(previewUrl);
       setShowAvatarDialog(false);
       setSelectedFile(null);
@@ -183,7 +177,7 @@ const AvatarSection = () => {
         </CardHeader>
 
         <CardContent className="space-y-4 sm:space-y-6">
-          {/* Current Avatar Display */}
+          {}
           <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
             <div className="relative mx-auto sm:mx-0">
               <Avatar className="w-24 h-24 sm:w-32 sm:h-32 ring-4 ring-gray-100">
@@ -215,7 +209,7 @@ const AvatarSection = () => {
                   </DialogHeader>
 
                   <div className="space-y-6">
-                    {/* Upload Section */}
+                    {}
                     <div className="space-y-4">
                       <h4 className="font-medium">Upload Custom Picture</h4>
 
@@ -223,67 +217,10 @@ const AvatarSection = () => {
                         ref={fileInputRef}
                         type="file"
                         accept="image/*"
-                        onChange={handleFileSelect}
-                        className="hidden"
+                        style={{ display: "none" }}
                       />
-
-                      {selectedFile ? (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-center">
-                            <Avatar className="w-24 h-24">
-                              <AvatarImage src={previewUrl} alt="Preview" />
-                              <AvatarFallback>
-                                <User className="w-8 h-8" />
-                              </AvatarFallback>
-                            </Avatar>
-                          </div>
-
-                          <div className="text-sm text-gray-600 text-center">
-                            {selectedFile.name} (
-                            {(selectedFile.size / 1024 / 1024).toFixed(1)} MB)
-                          </div>
-
-                          <div className="flex space-x-2">
-                            <Button
-                              onClick={handleUpload}
-                              disabled={isUploading}
-                              className="flex-1"
-                            >
-                              {isUploading ? (
-                                <>
-                                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                                  Uploading...
-                                </>
-                              ) : (
-                                <>
-                                  <Check className="w-4 h-4 mr-2" />
-                                  Upload
-                                </>
-                              )}
-                            </Button>
-                            <Button variant="outline" onClick={cancelUpload}>
-                              <X className="w-4 h-4 mr-2" />
-                              Cancel
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div
-                          onClick={triggerFileInput}
-                          className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
-                        >
-                          <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                          <p className="text-sm font-medium text-gray-700 mb-1">
-                            Click to upload a photo
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            PNG, JPG, GIF up to 5MB
-                          </p>
-                        </div>
-                      )}
                     </div>
 
-                    {/* Default Avatars */}
                     {!selectedFile && (
                       <div className="space-y-4">
                         <h4 className="font-medium">Choose Default Avatar</h4>
@@ -350,7 +287,7 @@ const AvatarSection = () => {
             </div>
           </div>
 
-          {/* Privacy Notice */}
+          {}
           <div className="border-l-4 border-blue-500 bg-blue-50 p-4">
             <div className="flex items-start space-x-3">
               <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">

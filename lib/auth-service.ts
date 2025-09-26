@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+﻿import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import crypto from "crypto";
@@ -187,8 +187,8 @@ export class VerificationUtils {
   }
 
   static getVerificationExpiry(): Date {
-    // No expiry - codes never expire
-    return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now
+
+    return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
   }
 }
 
@@ -235,7 +235,7 @@ export class AuthService {
             lastName: "Admin",
             role: "admin",
             avatar: AvatarUtils.getDefaultAvatar(),
-            isEmailVerified: true, // Admin users don't need email verification
+            isEmailVerified: true,
           };
 
           const accessToken = TokenUtils.generateAccessToken(adminUserData);
@@ -287,10 +287,7 @@ export class AuthService {
         };
       }
 
-      // Check if email is verified - don't block login, just mark as requiring verification
-      // This will be handled on the frontend
-
-      const userData: AuthUser = {
+const userData: AuthUser = {
         id: user._id.toString(),
         email: user.email,
         firstName: user.firstName,
@@ -354,8 +351,7 @@ export class AuthService {
 
       await connectDB();
 
-      // Check if user exists
-      const normalizedEmail = EmailUtils.normalize(email);
+const normalizedEmail = EmailUtils.normalize(email);
       const existingUser = await User.findOne({ email: normalizedEmail });
 
       if (existingUser) {
@@ -365,17 +361,14 @@ export class AuthService {
         };
       }
 
-      // Hash password
-      const hashedPassword = await PasswordUtils.hash(password);
+const hashedPassword = await PasswordUtils.hash(password);
 
-      // Generate email verification token
-      const emailVerificationToken =
+const emailVerificationToken =
         VerificationUtils.generateVerificationToken();
       const emailVerificationExpires =
         VerificationUtils.getVerificationExpiry();
 
-      // Create user
-      const newUser = new (User as mongoose.Model<IUser>)({
+const newUser = new (User as mongoose.Model<IUser>)({
         email: normalizedEmail,
         password: hashedPassword,
         firstName: firstName.trim(),
@@ -383,7 +376,7 @@ export class AuthService {
         phone: phone?.trim(),
         gender,
         avatar: AvatarUtils.getDefaultAvatar(gender),
-        isEmailVerified: false, // Explicitly set to false
+        isEmailVerified: false,
         emailVerificationToken,
         emailVerificationExpires,
         preferences: {
@@ -396,8 +389,7 @@ export class AuthService {
 
       const savedUser = await newUser.save();
 
-      // Prepare user data
-      const userData: AuthUser = {
+const userData: AuthUser = {
         id: savedUser._id.toString(),
         email: savedUser.email,
         firstName: savedUser.firstName,
@@ -408,12 +400,10 @@ export class AuthService {
         isEmailVerified: savedUser.isEmailVerified,
       };
 
-      // Generate tokens
-      const accessToken = TokenUtils.generateAccessToken(userData);
+const accessToken = TokenUtils.generateAccessToken(userData);
       const refreshToken = TokenUtils.generateRefreshToken(userData);
 
-      // Send email verification email (don't await to avoid blocking the response)
-      EmailService.sendEmailVerificationEmail(
+EmailService.sendEmailVerificationEmail(
         email,
         firstName,
         emailVerificationToken
@@ -445,14 +435,12 @@ export class AuthService {
     message?: string;
   }> {
     try {
-      // Verify refresh token
+
       const decoded = TokenUtils.verifyRefreshToken(refreshToken);
 
-      // Connect to database
-      await connectDB();
+await connectDB();
 
-      // Get current user data
-      const user = await User.findById(decoded.id);
+const user = await User.findById(decoded.id);
       if (!user || user.status !== "active") {
         return {
           success: false,
@@ -460,8 +448,7 @@ export class AuthService {
         };
       }
 
-      // Prepare user data
-      const userData: AuthUser = {
+const userData: AuthUser = {
         id: user._id.toString(),
         email: user.email,
         firstName: user.firstName,
@@ -472,8 +459,7 @@ export class AuthService {
         isEmailVerified: user.isEmailVerified,
       };
 
-      // Generate new tokens
-      const newAccessToken = TokenUtils.generateAccessToken(userData);
+const newAccessToken = TokenUtils.generateAccessToken(userData);
       const newRefreshToken = TokenUtils.generateRefreshToken(userData);
 
       return {
@@ -538,15 +524,13 @@ export class AuthService {
     try {
       await connectDB();
 
-      // Check if token is a 6-character code or full token
-      let user;
+let user;
       if (token.length === 6) {
-        // 6-character code - find user where token starts with this code (case insensitive)
+
         const upperCode = token.toUpperCase();
         console.log("Looking for user with code:", upperCode);
 
-        // Escape special regex characters
-        const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
         user = await User.findOne({
           emailVerificationToken: { $regex: `^${escapedCode}`, $options: "i" },
@@ -560,7 +544,7 @@ export class AuthService {
           );
         }
       } else {
-        // Full token
+
         user = await User.findOne({
           emailVerificationToken: token,
         });
@@ -573,8 +557,7 @@ export class AuthService {
         };
       }
 
-      // Update user to mark email as verified
-      user.isEmailVerified = true;
+user.isEmailVerified = true;
       user.emailVerificationToken = undefined;
       user.emailVerificationExpires = undefined;
       await user.save();
@@ -614,19 +597,16 @@ export class AuthService {
         };
       }
 
-      // Generate new verification token
-      const emailVerificationToken =
+const emailVerificationToken =
         VerificationUtils.generateVerificationToken();
       const emailVerificationExpires =
         VerificationUtils.getVerificationExpiry();
 
-      // Update user with new token
-      user.emailVerificationToken = emailVerificationToken;
+user.emailVerificationToken = emailVerificationToken;
       user.emailVerificationExpires = emailVerificationExpires;
       await user.save();
 
-      // Send verification email
-      const emailResult = await EmailService.sendEmailVerificationEmail(
+const emailResult = await EmailService.sendEmailVerificationEmail(
         user.email,
         user.firstName,
         emailVerificationToken

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { saveFile, validateImageFile } from "@/lib/file-upload";
 
 export async function POST(request: NextRequest) {
@@ -14,8 +14,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file
-    const validation = validateImageFile(file);
+const validation = validateImageFile(file);
     if (!validation.valid) {
       return NextResponse.json(
         { success: false, error: validation.error },
@@ -23,8 +22,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Save file
-    const uploadedFile = await saveFile(file, folder);
+const uploadedFile = await saveFile(file, folder);
 
     return NextResponse.json({
       success: true,

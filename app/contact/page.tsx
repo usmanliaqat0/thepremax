@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
@@ -70,7 +70,7 @@ const Contact = () => {
           message: "",
         });
       } else {
-        // Handle validation errors
+
         if (data.details && Array.isArray(data.details)) {
           const errorMessages = data.details
             .map((detail: { message: string }) => detail.message)
@@ -94,7 +94,7 @@ const Contact = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      {/* Header */}
+      {}
       <section className="py-16 bg-gradient-hero">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
@@ -109,7 +109,7 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* Contact Information */}
+      {}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8 mb-16">
@@ -166,9 +166,9 @@ const Contact = () => {
             </Card>
           </div>
 
-          {/* Contact Form and Additional Info */}
+          {}
           <div className="grid lg:grid-cols-2 gap-12">
-            {/* Contact Form */}
+            {}
             <Card id="contact-form" className="border-0 shadow-fashion-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -268,9 +268,9 @@ const Contact = () => {
               </CardContent>
             </Card>
 
-            {/* Additional Information */}
+            {}
             <div className="space-y-8">
-              {/* Business Hours */}
+              {}
               <Card className="border-0 shadow-fashion-product">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -298,7 +298,7 @@ const Contact = () => {
                 </CardContent>
               </Card>
 
-              {/* Customer Support */}
+              {}
               <Card className="border-0 shadow-fashion-product">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -337,7 +337,7 @@ const Contact = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
+      {}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -352,7 +352,7 @@ const Contact = () => {
 
           <div className="max-w-4xl mx-auto">
             <div className="grid md:grid-cols-2 gap-8">
-              {/* Left Column */}
+              {}
               <div className="space-y-6">
                 <Card className="border-0 shadow-fashion-product">
                   <CardHeader>
@@ -414,7 +414,7 @@ const Contact = () => {
                 </Card>
               </div>
 
-              {/* Right Column */}
+              {}
               <div className="space-y-6">
                 <Card className="border-0 shadow-fashion-product">
                   <CardHeader>

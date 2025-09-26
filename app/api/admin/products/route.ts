@@ -1,13 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Product from "@/lib/models/Product";
 import Category from "@/lib/models/Category";
 import { AdminMiddleware } from "@/lib/admin-middleware";
 
-// GET /api/admin/products - Get all products with pagination and filtering
 export async function GET(request: NextRequest) {
   try {
-    // Check admin authentication
+
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -30,8 +29,7 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    // Build filter object
-    const filter: Record<string, unknown> = {};
+const filter: Record<string, unknown> = {};
 
     if (search) {
       filter.$or = [
@@ -61,11 +59,9 @@ export async function GET(request: NextRequest) {
       filter.inStock = inStock === "true";
     }
 
-    // Get total count
-    const total = await Product.countDocuments(filter);
+const total = await Product.countDocuments(filter);
 
-    // Get products with population
-    const products = await Product.find(filter)
+const products = await Product.find(filter)
       .populate("category", "name slug")
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -95,10 +91,9 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/admin/products - Create a new product
 export async function POST(request: NextRequest) {
   try {
-    // Check admin authentication
+
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -135,8 +130,7 @@ export async function POST(request: NextRequest) {
       sourceUrl,
     } = body;
 
-    // Validate required fields
-    if (!name) {
+if (!name) {
       return NextResponse.json(
         { success: false, error: "Name is required" },
         { status: 400 }
@@ -164,8 +158,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if category exists
-    const category = await Category.findById(categoryId);
+const category = await Category.findById(categoryId);
     if (!category) {
       return NextResponse.json(
         { success: false, error: "Category not found" },
@@ -173,8 +166,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if product with same name already exists
-    const existingProduct = await Product.findOne({
+const existingProduct = await Product.findOne({
       name: { $regex: new RegExp(`^${name}$`, "i") },
     });
 
@@ -185,14 +177,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate slug
-    const slug = name
+const slug = name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
-    // Check if slug already exists
-    const existingSlug = await Product.findOne({ slug });
+const existingSlug = await Product.findOne({ slug });
     if (existingSlug) {
       return NextResponse.json(
         { success: false, error: "Product with this slug already exists" },
@@ -200,8 +190,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate variants
-    if (variants.length > 0) {
+if (variants.length > 0) {
       const skus = variants.map((v: { sku: string }) => v.sku).filter(Boolean);
       const uniqueSkus = new Set(skus);
       if (skus.length !== uniqueSkus.size) {
@@ -211,8 +200,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Check if SKUs already exist
-      const existingSkus = await Product.find({
+const existingSkus = await Product.find({
         "variants.sku": { $in: skus },
       });
       if (existingSkus.length > 0) {
@@ -223,8 +211,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Set primary image
-    if (images.length > 0) {
+if (images.length > 0) {
       const hasPrimary = images.some(
         (img: { isPrimary: boolean }) => img.isPrimary
       );
@@ -233,8 +220,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create new product
-    const product = await Product.create({
+const product = await Product.create({
       name,
       slug,
       description,
@@ -261,8 +247,7 @@ export async function POST(request: NextRequest) {
       publishedAt: status === "active" ? new Date() : undefined,
     });
 
-    // Populate the created product
-    const populatedProduct = await Product.findById(product._id)
+const populatedProduct = await Product.findById(product._id)
       .populate("category", "name slug")
       .lean();
 

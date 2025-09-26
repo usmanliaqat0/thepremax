@@ -4,13 +4,11 @@ import Product from "@/lib/models/Product";
 import Category from "@/lib/models/Category";
 import { AdminMiddleware } from "@/lib/admin-middleware";
 
-// GET /api/admin/products/[id] - Get a specific product
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Check admin authentication
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -46,13 +44,11 @@ export async function GET(
   }
 }
 
-// PUT /api/admin/products/[id] - Update a product
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Check admin authentication
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -98,7 +94,6 @@ export async function PUT(
       );
     }
 
-    // Validate required fields
     if (name && !name.trim()) {
       return NextResponse.json(
         { success: false, error: "Name is required" },
@@ -120,7 +115,6 @@ export async function PUT(
       );
     }
 
-    // Check if category exists
     if (categoryId) {
       const category = await Category.findById(categoryId);
       if (!category) {
@@ -131,7 +125,6 @@ export async function PUT(
       }
     }
 
-    // Check if product with same name already exists (excluding current product)
     if (name && name !== product.name) {
       const existingProduct = await Product.findOne({
         name: { $regex: new RegExp(`^${name}$`, "i") },
@@ -145,13 +138,11 @@ export async function PUT(
         );
       }
 
-      // Generate new slug
       const slug = name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
 
-      // Check if new slug already exists
       const existingSlug = await Product.findOne({
         slug,
         _id: { $ne: id },
@@ -166,7 +157,6 @@ export async function PUT(
       product.slug = slug;
     }
 
-    // Validate variants
     if (variants && variants.length > 0) {
       const skus = variants.map((v: { sku: string }) => v.sku).filter(Boolean);
       const uniqueSkus = new Set(skus);
@@ -177,7 +167,6 @@ export async function PUT(
         );
       }
 
-      // Check if SKUs already exist (excluding current product)
       const existingSkus = await Product.find({
         "variants.sku": { $in: skus },
         _id: { $ne: id },
@@ -190,7 +179,6 @@ export async function PUT(
       }
     }
 
-    // Set primary image
     if (images && images.length > 0) {
       const hasPrimary = images.some(
         (img: { isPrimary: boolean }) => img.isPrimary
@@ -200,7 +188,6 @@ export async function PUT(
       }
     }
 
-    // Update fields
     if (name !== undefined) product.name = name;
     if (description !== undefined) product.description = description;
     if (basePrice !== undefined) product.basePrice = basePrice;
@@ -215,7 +202,6 @@ export async function PUT(
     if (onSale !== undefined) product.onSale = onSale;
     if (status !== undefined) {
       product.status = status;
-      // Set publishedAt when status changes to active
       if (status === "active" && !product.publishedAt) {
         product.publishedAt = new Date();
       }
@@ -232,7 +218,6 @@ export async function PUT(
 
     await product.save();
 
-    // Populate the updated product
     const updatedProduct = await Product.findById(product._id)
       .populate("category", "name slug")
       .lean();
@@ -251,13 +236,11 @@ export async function PUT(
   }
 }
 
-// DELETE /api/admin/products/[id] - Delete a product
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Check admin authentication
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -276,10 +259,6 @@ export async function DELETE(
         { status: 404 }
       );
     }
-
-    // TODO: Check if product is in any orders before deleting
-    // For now, we'll allow deletion but this should be implemented
-    // to prevent deleting products that are part of orders
 
     await Product.findByIdAndDelete(id);
 

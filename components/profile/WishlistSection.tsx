@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -60,8 +60,7 @@ const WishlistSection = () => {
   const [filterBy, setFilterBy] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  // Fetch wishlist from API
-  useEffect(() => {
+useEffect(() => {
     const fetchWishlist = async () => {
       if (!state.token) return;
 
@@ -148,7 +147,7 @@ const WishlistSection = () => {
         url: `${window.location.origin}/product/${item.id}`,
       });
     } else {
-      // Fallback to copying link
+
       navigator.clipboard.writeText(
         `${window.location.origin}/product/${item.id}`
       );
@@ -486,7 +485,7 @@ const WishlistSection = () => {
         </CardHeader>
 
         <CardContent>
-          {/* Search and Filters */}
+          {}
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -525,7 +524,7 @@ const WishlistSection = () => {
             </Select>
           </div>
 
-          {/* Wishlist Items */}
+          {}
           {filteredItems.length === 0 ? (
             <div className="text-center py-12">
               <Heart className="w-16 h-16 mx-auto text-gray-300 mb-4" />

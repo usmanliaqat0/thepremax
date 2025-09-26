@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -61,8 +61,7 @@ export default function CategoryDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  // Reset form when dialog opens/closes or category changes
-  useEffect(() => {
+useEffect(() => {
     if (open) {
       if (category) {
         setFormData({
