@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import AdminTable, {
@@ -29,6 +29,7 @@ interface Category {
 interface CategoryTableProps {
   categories: Category[];
   onEdit: (category: Category) => void;
+  onView: (category: Category) => void;
   onRefresh: () => void;
   onSearch: (search: string) => void;
   onStatusFilter: (status: string) => void;
@@ -44,6 +45,7 @@ interface CategoryTableProps {
 export default function CategoryTable({
   categories,
   onEdit,
+  onView,
   onRefresh,
   onSearch,
   onStatusFilter,
@@ -150,6 +152,12 @@ export default function CategoryTable({
 
   const actions: ActionItem<Category>[] = [
     {
+      key: "view",
+      label: "View",
+      icon: <Eye className="mr-2 h-4 w-4" />,
+      onClick: onView,
+    },
+    {
       key: "edit",
       label: "Edit",
       icon: <Edit className="mr-2 h-4 w-4" />,
@@ -159,7 +167,7 @@ export default function CategoryTable({
       key: "delete",
       label: "Delete",
       icon: <Trash2 className="mr-2 h-4 w-4" />,
-      onClick: () => {},
+      onClick: handleDelete,
       variant: "destructive",
     },
   ];

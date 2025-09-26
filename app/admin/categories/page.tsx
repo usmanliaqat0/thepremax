@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Package } from "lucide-react";
 import CategoryDialog from "@/components/admin/CategoryDialog";
+import CategoryViewDialog from "@/components/admin/CategoryViewDialog";
 import CategoryTable from "@/components/admin/CategoryTable";
 import { toast } from "sonner";
 
@@ -28,7 +29,9 @@ export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [viewingCategory, setViewingCategory] = useState<Category | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [pagination, setPagination] = useState({
@@ -86,9 +89,19 @@ export default function CategoriesPage() {
     setIsDialogOpen(true);
   };
 
+  const handleView = (category: Category) => {
+    setViewingCategory(category);
+    setIsViewDialogOpen(true);
+  };
+
   const handleDialogClose = () => {
     setIsDialogOpen(false);
     setEditingCategory(null);
+  };
+
+  const handleViewDialogClose = () => {
+    setIsViewDialogOpen(false);
+    setViewingCategory(null);
   };
 
   const handleSuccess = () => {
@@ -170,6 +183,7 @@ export default function CategoriesPage() {
           <CategoryTable
             categories={categories}
             onEdit={handleEdit}
+            onView={handleView}
             onRefresh={fetchCategories}
             onSearch={handleSearch}
             onStatusFilter={handleStatusFilter}
@@ -188,6 +202,12 @@ export default function CategoriesPage() {
         onOpenChange={handleDialogClose}
         category={editingCategory}
         onSuccess={handleSuccess}
+      />
+
+      <CategoryViewDialog
+        open={isViewDialogOpen}
+        onOpenChange={handleViewDialogClose}
+        category={viewingCategory}
       />
     </div>
   );
