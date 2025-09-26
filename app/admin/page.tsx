@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Package, ShoppingCart, TrendingUp } from "lucide-react";
+import { Users, TrendingUp } from "lucide-react";
 
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
@@ -33,17 +33,17 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="bg-gradient-to-r from-accent/10 to-accent/5 rounded-lg p-6 border border-accent/20">
-        <h1 className="text-2xl font-bold text-foreground mb-2">
+      <div className="bg-gradient-to-r from-accent/10 to-accent/5 rounded-xl p-6 lg:p-8 border border-accent/20 shadow-sm">
+        <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-3">
           Welcome to ThePreMax Admin Panel
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-base lg:text-lg max-w-2xl">
           Manage your e-commerce platform, users, products, and orders from this
           central dashboard.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {loading || !stats ? (
           Array.from({ length: 4 }).map((_, i) => (
             <Card key={i}>
@@ -58,76 +58,80 @@ export default function AdminDashboard() {
           ))
         ) : (
           <>
-            <Card>
+            <Card className="hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   Total Users
                 </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-5 w-5 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.users.total}</div>
-                <div className="flex items-center text-sm">
+                <div className="text-3xl font-bold">{stats.users.total}</div>
+                <div className="flex items-center text-sm mt-2">
                   <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
-                  <span className="text-green-600">{stats.users.growth}</span>
+                  <span className="text-green-600 font-medium">
+                    {stats.users.growth}
+                  </span>
                   <span className="text-muted-foreground ml-1">
                     from last month
                   </span>
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   Active Users
                 </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-5 w-5 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.users.active}</div>
-                <div className="flex items-center text-sm">
+                <div className="text-3xl font-bold">{stats.users.active}</div>
+                <div className="flex items-center text-sm mt-2">
                   <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
-                  <span className="text-green-600">{stats.users.growth}</span>
+                  <span className="text-green-600 font-medium">
+                    {stats.users.growth}
+                  </span>
                   <span className="text-muted-foreground ml-1">
                     from last month
                   </span>
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   Email Verified
                 </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-5 w-5 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-3xl font-bold">
                   {stats.verification.emailVerified}
                 </div>
-                <div className="flex items-center text-sm">
+                <div className="flex items-center text-sm mt-2">
                   <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
-                  <span className="text-green-600">
+                  <span className="text-green-600 font-medium">
                     {stats.verification.emailVerificationRate}%
                   </span>
                   <span className="text-muted-foreground ml-1">verified</span>
                 </div>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
                   Phone Verified
                 </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-5 w-5 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-3xl font-bold">
                   {stats.verification.phoneVerified}
                 </div>
-                <div className="flex items-center text-sm">
+                <div className="flex items-center text-sm mt-2">
                   <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
-                  <span className="text-green-600">
+                  <span className="text-green-600 font-medium">
                     {stats.verification.phoneVerificationRate}%
                   </span>
                   <span className="text-muted-foreground ml-1">verified</span>
@@ -138,9 +142,9 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      <Card>
+      <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle>Recent Users</CardTitle>
+          <CardTitle className="text-xl">Recent Users</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -177,50 +181,6 @@ export default function AdminDashboard() {
           </div>
         </CardContent>
       </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Manage Users
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground text-sm">
-              View, edit, and manage user accounts and permissions.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
-              Manage Products
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground text-sm">
-              Add, edit, and organize your product catalog.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" />
-              Manage Orders
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground text-sm">
-              Process orders, track shipments, and handle returns.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }

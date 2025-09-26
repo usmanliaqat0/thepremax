@@ -109,10 +109,8 @@ export interface EnhancedProduct {
   name: string;
   slug: string;
   description: string;
-  shortDescription?: string;
   basePrice: number;
   compareAtPrice?: number;
-  currency: Currency;
   category: ProductCategory;
   tags: string[];
   variants: ProductVariant[];

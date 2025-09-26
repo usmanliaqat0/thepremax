@@ -19,6 +19,7 @@ export default function AdminLayout({
   const { state } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!state.isLoading) {
@@ -41,7 +42,6 @@ export default function AdminLayout({
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading admin panel...</p>
         </div>
       </div>
     );
@@ -52,11 +52,16 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <AdminSidebar />
-      <div className="pl-64">
-        <AdminHeader />
-        <main className="p-8">{children}</main>
+    <div className="h-screen bg-background flex overflow-hidden">
+      <AdminSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+      <div className="flex-1 flex flex-col lg:ml-0">
+        <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
+        <main className="flex-1 overflow-y-auto bg-background/50">
+          <div className="p-6 lg:p-8">{children}</div>
+        </main>
       </div>
     </div>
   );

@@ -152,15 +152,7 @@ const ProductCard = ({
         </div>
 
         <CardContent className={variantStyles.content}>
-          <div className="flex items-center justify-between">
-            <span
-              className={cn(
-                "text-muted-foreground font-medium",
-                variant === "featured" ? "text-sm" : "text-xs"
-              )}
-            >
-              {product.brand}
-            </span>
+          <div className="flex items-center justify-end">
             <Badge
               variant="outline"
               className={cn(

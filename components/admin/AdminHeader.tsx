@@ -11,11 +11,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/context/AuthContext";
-import { Home, LogOut } from "lucide-react";
+import { Home, LogOut, Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function AdminHeader() {
+interface AdminHeaderProps {
+  onMenuClick?: () => void;
+}
+
+export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
   const { state, logout } = useAuth();
   const pathname = usePathname();
 
@@ -39,22 +43,39 @@ export default function AdminHeader() {
   };
 
   return (
-    <header className="bg-card border-b border-border">
-      <div className="flex items-center justify-between px-8 py-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            {getPageTitle()}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Manage your e-commerce platform
-          </p>
+    <header className="bg-card border-b border-border shadow-sm flex-shrink-0">
+      <div className="flex items-center justify-between px-4 lg:px-8 py-6">
+        <div className="flex items-center gap-4">
+          {/* Mobile menu button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onMenuClick}
+            className="lg:hidden"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+              {getPageTitle()}
+            </h1>
+            <p className="text-sm text-muted-foreground hidden sm:block mt-1">
+              Manage your e-commerce platform
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" asChild>
+        <div className="flex items-center gap-2 lg:gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="hidden sm:flex"
+          >
             <Link href="/">
               <Home className="h-4 w-4 mr-2" />
-              View Website
+              <span className="hidden lg:inline">View Website</span>
             </Link>
           </Button>
 
@@ -62,11 +83,11 @@ export default function AdminHeader() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="relative h-10 w-10 rounded-full"
+                className="relative h-8 w-8 lg:h-10 lg:w-10 rounded-full"
               >
-                <Avatar className="h-10 w-10">
+                <Avatar className="h-8 w-8 lg:h-10 lg:w-10">
                   <AvatarImage src={state.user?.avatar} />
-                  <AvatarFallback className="bg-accent text-accent-foreground">
+                  <AvatarFallback className="bg-accent text-accent-foreground text-xs lg:text-sm">
                     {state.user?.firstName?.charAt(0)}
                     {state.user?.lastName?.charAt(0)}
                   </AvatarFallback>

@@ -16,7 +16,6 @@ export interface Product {
   featured: boolean;
   topRated: boolean;
   sale: boolean;
-  brand: string;
   rating: number;
   reviewCount: number;
   sourceUrl?: string;
@@ -50,7 +49,6 @@ export const products: Product[] = [
     featured: true,
     topRated: true,
     sale: true,
-    brand: "Ryze",
     rating: 4.8,
     reviewCount: 326,
     sourceUrl: "https://www.ebay.com/itm/177019011014",
@@ -78,7 +76,6 @@ export const products: Product[] = [
     featured: true,
     topRated: true,
     sale: true,
-    brand: "Wilson",
     rating: 4.8,
     reviewCount: 49,
     sourceUrl: "https://www.ebay.com/itm/406195052543",
@@ -110,7 +107,6 @@ export const products: Product[] = [
     featured: false,
     topRated: true,
     sale: true,
-    brand: "South Beach",
     rating: 4.2,
     reviewCount: 85,
     sourceUrl: "https://www.ebay.com/itm/388917384745",
@@ -142,7 +138,6 @@ export const products: Product[] = [
     featured: true,
     topRated: true,
     sale: true,
-    brand: "La Mer",
     rating: 5.0,
     reviewCount: 18,
     sourceUrl: "https://www.ebay.com/itm/196359086415",
@@ -176,7 +171,6 @@ export const products: Product[] = [
     featured: false,
     topRated: true,
     sale: true,
-    brand: "La Mer",
     rating: 4.6,
     reviewCount: 178,
     sourceUrl: "https://www.ebay.com/itm/127219424656",
@@ -204,7 +198,6 @@ export const products: Product[] = [
     featured: false,
     topRated: false,
     sale: true,
-    brand: "La Mer",
     rating: 4.5,
     reviewCount: 92,
     sourceUrl: "https://www.ebay.com/itm/267391332247",
@@ -238,7 +231,6 @@ export const products: Product[] = [
     featured: false,
     topRated: true,
     sale: false,
-    brand: "La Mer",
     rating: 5.0,
     reviewCount: 6,
     sourceUrl: "https://www.ebay.com/itm/317049081659",
@@ -274,7 +266,6 @@ export const products: Product[] = [
     featured: false,
     topRated: false,
     sale: false,
-    brand: "La Mer",
     rating: 5.0,
     reviewCount: 13,
     sourceUrl: "https://www.ebay.com/itm/177224545871",
@@ -307,7 +298,6 @@ export const products: Product[] = [
     featured: true,
     topRated: true,
     sale: false,
-    brand: "La Mer",
     rating: 4.8,
     reviewCount: 203,
     sourceUrl: "https://www.ebay.com/itm/365694756236",
@@ -338,7 +328,6 @@ export const products: Product[] = [
     featured: false,
     topRated: true,
     sale: true,
-    brand: "Fieldpiece",
     rating: 4.6,
     reviewCount: 87,
   },
@@ -366,7 +355,6 @@ export const products: Product[] = [
     featured: true,
     topRated: true,
     sale: true,
-    brand: "Mitutoyo",
     rating: 4.9,
     reviewCount: 156,
   },
@@ -399,7 +387,6 @@ export const products: Product[] = [
     featured: false,
     topRated: true,
     sale: true,
-    brand: "Mitutoyo",
     rating: 4.8,
     reviewCount: 134,
   },
@@ -433,7 +420,6 @@ export const products: Product[] = [
     featured: false,
     topRated: true,
     sale: true,
-    brand: "Can-Am",
     rating: 4.7,
     reviewCount: 89,
   },
@@ -461,7 +447,6 @@ export const products: Product[] = [
     featured: false,
     topRated: true,
     sale: true,
-    brand: "Can-Am",
     rating: 4.6,
     reviewCount: 76,
   },
@@ -492,7 +477,6 @@ export const products: Product[] = [
     featured: true,
     topRated: true,
     sale: true,
-    brand: "Can-Am",
     rating: 4.8,
     reviewCount: 112,
   },
@@ -523,7 +507,6 @@ export const products: Product[] = [
     featured: true,
     topRated: true,
     sale: true,
-    brand: "Can-Am",
     rating: 4.9,
     reviewCount: 145,
   },
@@ -556,7 +539,6 @@ export const products: Product[] = [
     featured: false,
     topRated: true,
     sale: true,
-    brand: "Molten",
     rating: 4.5,
     reviewCount: 98,
   },
@@ -587,7 +569,6 @@ export const products: Product[] = [
     featured: true,
     topRated: true,
     sale: true,
-    brand: "Molten",
     rating: 4.7,
     reviewCount: 127,
   },
@@ -618,7 +599,6 @@ export const products: Product[] = [
     featured: true,
     topRated: true,
     sale: true,
-    brand: "Molten",
     rating: 4.8,
     reviewCount: 156,
   },
@@ -685,7 +665,6 @@ export const searchProducts = (query: string): Product[] => {
       product.name.toLowerCase().includes(lowercaseQuery) ||
       product.description.toLowerCase().includes(lowercaseQuery) ||
       product.category.toLowerCase().includes(lowercaseQuery) ||
-      product.brand.toLowerCase().includes(lowercaseQuery) ||
       (product.specifications &&
         product.specifications.some((spec) =>
           spec.toLowerCase().includes(lowercaseQuery)
@@ -724,31 +703,6 @@ export const categories = [
     description: "Auto parts, drive belts, and automotive accessories",
   },
 ];
-
-// Get products by brand
-export const getProductsByBrand = (brand: string): Product[] => {
-  const cacheKey = `brand-${brand}`;
-  if (!productCache.has(cacheKey)) {
-    productCache.set(
-      cacheKey,
-      products.filter(
-        (product) => product.brand.toLowerCase() === brand.toLowerCase()
-      )
-    );
-  }
-  return productCache.get(cacheKey);
-};
-
-// Get all brands
-export const getAllBrands = (): string[] => {
-  if (!productCache.has("allBrands")) {
-    const brands = Array.from(
-      new Set(products.map((product) => product.brand))
-    ).sort();
-    productCache.set("allBrands", brands);
-  }
-  return productCache.get("allBrands");
-};
 
 // Get price range
 export const getPriceRange = () => {

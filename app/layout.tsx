@@ -112,7 +112,10 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#0F172A" />
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
-      <body className={`${poppins.variable} font-sans antialiased`}>
+      <body
+        className={`${poppins.variable} font-sans antialiased`}
+        suppressHydrationWarning
+      >
         <AuthProvider>
           <CartProvider>
             {children}

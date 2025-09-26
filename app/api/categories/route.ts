@@ -1,0 +1,44 @@
+import { NextRequest, NextResponse } from "next/server";
+import connectDB from "@/lib/db";
+import Category from "@/lib/models/Category";
+import Product from "@/lib/models/Product";
+
+// Ensure models are registered before use
+if (typeof window === "undefined") {
+  require("@/lib/models/Product");
+  require("@/lib/models/Category");
+}
+
+// GET /api/categories - Get all active categories for frontend
+export async function GET(request: NextRequest) {
+  try {
+    await connectDB();
+
+    const { searchParams } = new URL(request.url);
+    const includeInactive = searchParams.get("includeInactive") === "true";
+
+    // Build filter object
+    const filter: Record<string, unknown> = {};
+
+    if (!includeInactive) {
+      filter.status = "active";
+    }
+
+    // Get categories with population
+    const categories = await Category.find(filter)
+      .populate("productCount")
+      .sort({ order: 1, createdAt: -1 })
+      .lean();
+
+    return NextResponse.json({
+      success: true,
+      data: categories,
+    });
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch categories" },
+      { status: 500 }
+    );
+  }
+}
