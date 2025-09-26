@@ -17,8 +17,13 @@ export async function saveFile(
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
+  // Ensure folder is within uploads directory
+  const uploadsFolder = folder.startsWith("uploads/")
+    ? folder
+    : `uploads/${folder}`;
+
   // Create uploads directory if it doesn't exist
-  const uploadsDir = join(process.cwd(), "public", folder);
+  const uploadsDir = join(process.cwd(), "public", uploadsFolder);
   await mkdir(uploadsDir, { recursive: true });
 
   // Generate unique filename
@@ -28,7 +33,7 @@ export async function saveFile(
   const filename = `${timestamp}-${randomString}.${extension}`;
 
   const filepath = join(uploadsDir, filename);
-  const url = `/${folder}/${filename}`;
+  const url = `/${uploadsFolder}/${filename}`;
 
   await writeFile(filepath, buffer);
 
@@ -46,7 +51,11 @@ export async function handleMultipleFiles(
   files: File[],
   folder: string = "uploads"
 ): Promise<UploadedFile[]> {
-  const uploadPromises = files.map((file) => saveFile(file, folder));
+  // Ensure folder is within uploads directory
+  const uploadsFolder = folder.startsWith("uploads/")
+    ? folder
+    : `uploads/${folder}`;
+  const uploadPromises = files.map((file) => saveFile(file, uploadsFolder));
   return Promise.all(uploadPromises);
 }
 

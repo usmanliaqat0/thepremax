@@ -144,7 +144,7 @@ export default function CategoryDialog({
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("folder", "categories");
+      formData.append("folder", "uploads/categories");
 
       const response = await fetch("/api/upload", {
         method: "POST",

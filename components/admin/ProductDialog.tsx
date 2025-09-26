@@ -303,7 +303,7 @@ export default function ProductDialog({
     try {
       const uploadFormData = new FormData();
       uploadFormData.append("file", file);
-      uploadFormData.append("folder", "products");
+      uploadFormData.append("folder", "uploads/products");
 
       const response = await fetch("/api/upload", {
         method: "POST",
