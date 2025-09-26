@@ -33,17 +33,17 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="bg-gradient-to-r from-accent/10 to-accent/5 rounded-xl p-6 lg:p-8 border border-accent/20 shadow-sm">
-        <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-3">
+      <div className="bg-gradient-to-r from-accent/10 to-accent/5 rounded-xl p-4 sm:p-6 lg:p-8 border border-accent/20 shadow-sm">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-2 sm:mb-3">
           Welcome to ThePreMax Admin Panel
         </h1>
-        <p className="text-muted-foreground text-base lg:text-lg max-w-2xl">
+        <p className="text-muted-foreground text-sm sm:text-base lg:text-lg max-w-2xl">
           Manage your e-commerce platform, users, products, and orders from this
           central dashboard.
         </p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         {loading || !stats ? (
           Array.from({ length: 4 }).map((_, i) => (
             <Card key={i}>
@@ -144,10 +144,10 @@ export default function AdminDashboard() {
 
       <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle className="text-xl">Recent Users</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Recent Users</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {loading || !stats
               ? Array.from({ length: 5 }).map((_, i) => (
                   <div
@@ -161,17 +161,17 @@ export default function AdminDashboard() {
               : stats.recentUsers.map((user) => (
                   <div
                     key={user.id}
-                    className="flex items-center justify-between border-b border-border pb-3 last:border-b-0"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border pb-3 last:border-b-0"
                   >
-                    <div>
-                      <p className="font-medium text-sm">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">
                         {user.firstName} {user.lastName}
                       </p>
-                      <p className="text-muted-foreground text-xs">
+                      <p className="text-muted-foreground text-xs truncate">
                         {user.email}
                       </p>
                     </div>
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-muted-foreground text-xs flex-shrink-0">
                       {formatDistanceToNow(new Date(user.createdAt), {
                         addSuffix: true,
                       })}

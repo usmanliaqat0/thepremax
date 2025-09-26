@@ -130,14 +130,16 @@ export default function MessagesPage() {
       </div>
 
       {/* Status Overview Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New Messages</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              New Messages
+            </CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-xl sm:text-2xl font-bold text-blue-600">
               {statusCounts.new}
             </div>
             <p className="text-xs text-muted-foreground">Unread messages</p>
@@ -146,11 +148,13 @@ export default function MessagesPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Read</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              Read
+            </CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-600">
+            <div className="text-xl sm:text-2xl font-bold text-gray-600">
               {statusCounts.read}
             </div>
             <p className="text-xs text-muted-foreground">Read messages</p>
@@ -159,11 +163,13 @@ export default function MessagesPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Replied</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              Replied
+            </CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-xl sm:text-2xl font-bold text-green-600">
               {statusCounts.replied}
             </div>
             <p className="text-xs text-muted-foreground">Replied messages</p>
@@ -172,11 +178,13 @@ export default function MessagesPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Closed</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">
+              Closed
+            </CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-xl sm:text-2xl font-bold text-red-600">
               {statusCounts.closed}
             </div>
             <p className="text-xs text-muted-foreground">Closed messages</p>

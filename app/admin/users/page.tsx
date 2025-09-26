@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Mail,
   Phone,
@@ -34,7 +33,7 @@ export default function UsersManagement() {
   const [refreshLoading, setRefreshLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageLimit, setPageLimit] = useState(10);
+  const [pageLimit] = useState(10);
   const [pagination, setPagination] = useState({
     total: 0,
     totalPages: 1,
@@ -206,46 +205,54 @@ export default function UsersManagement() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
         <Card>
-          <CardContent className="p-2">
+          <CardContent className="p-3 sm:p-2">
             <div className="flex flex-col justify-center items-center gap-2">
-              <UserCheck className="h-4 w-4 text-green-600" />
-              <p className="text-sm text-muted-foreground">Active Users</p>
-              <p className="text-2xl font-bold">
+              <UserCheck className="h-5 w-5 text-green-600" />
+              <p className="text-xs sm:text-sm text-muted-foreground text-center">
+                Active Users
+              </p>
+              <p className="text-xl sm:text-2xl font-bold">
                 {users.filter((u) => u.status === "active").length}
               </p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-2">
+          <CardContent className="p-3 sm:p-2">
             <div className="flex flex-col justify-center items-center gap-2">
-              <UserX className="h-4 w-4 text-red-600" />
-              <p className="text-sm text-muted-foreground">Inactive Users</p>
-              <p className="text-2xl font-bold">
+              <UserX className="h-5 w-5 text-red-600" />
+              <p className="text-xs sm:text-sm text-muted-foreground text-center">
+                Inactive Users
+              </p>
+              <p className="text-xl sm:text-2xl font-bold">
                 {users.filter((u) => u.status === "inactive").length}
               </p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-2">
+          <CardContent className="p-3 sm:p-2">
             <div className="flex flex-col justify-center items-center gap-2">
-              <Mail className="h-4 w-4 text-blue-600" />
-              <p className="text-sm text-muted-foreground">Verified Emails</p>
-              <p className="text-2xl font-bold">
+              <Mail className="h-5 w-5 text-blue-600" />
+              <p className="text-xs sm:text-sm text-muted-foreground text-center">
+                Verified Emails
+              </p>
+              <p className="text-xl sm:text-2xl font-bold">
                 {users.filter((u) => u.isEmailVerified).length}
               </p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-2">
+          <CardContent className="p-3 sm:p-2">
             <div className="flex flex-col justify-center items-center gap-2">
-              <Phone className="h-4 w-4 text-purple-600" />
-              <p className="text-sm text-muted-foreground">Verified Phones</p>
-              <p className="text-2xl font-bold">
+              <Phone className="h-5 w-5 text-purple-600" />
+              <p className="text-xs sm:text-sm text-muted-foreground text-center">
+                Verified Phones
+              </p>
+              <p className="text-xl sm:text-2xl font-bold">
                 {users.filter((u) => u.isPhoneVerified).length}
               </p>
             </div>
