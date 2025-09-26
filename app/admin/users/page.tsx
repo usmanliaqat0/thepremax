@@ -176,12 +176,14 @@ export default function UsersManagement() {
   const filteredUsers = users; // No need for client-side filtering since we're using server-side pagination
 
   return (
-    <div className="space-y-4 lg:space-y-6">
+    <div className="space-y-3 sm:space-y-4 lg:space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold">User Management</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
+            User Management
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
             Manage user accounts, permissions, and settings
           </p>
         </div>
@@ -205,7 +207,7 @@ export default function UsersManagement() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardContent className="p-3 sm:p-2">
             <div className="flex flex-col justify-center items-center gap-2">

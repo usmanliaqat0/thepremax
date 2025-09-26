@@ -109,11 +109,13 @@ export default function MessagesPage() {
   const statusCounts = getStatusCounts();
 
   return (
-    <div className="space-y-4 lg:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold">Contact Messages</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
+            Contact Messages
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Manage customer inquiries and support messages
           </p>
         </div>
@@ -130,7 +132,7 @@ export default function MessagesPage() {
       </div>
 
       {/* Status Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-xs sm:text-sm font-medium">

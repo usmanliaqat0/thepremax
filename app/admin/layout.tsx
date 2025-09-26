@@ -60,7 +60,7 @@ export default function AdminLayout({
       <div className="flex-1 flex flex-col lg:ml-0">
         <AdminHeader onMenuClick={() => setSidebarOpen(true)} />
         <main className="flex-1 overflow-y-auto bg-background/50">
-          <div className="p-6 lg:p-8">{children}</div>
+          <div className="p-3 sm:p-4 lg:p-6 xl:p-8">{children}</div>
         </main>
       </div>
     </div>

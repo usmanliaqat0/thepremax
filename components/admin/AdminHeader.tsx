@@ -44,8 +44,8 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
 
   return (
     <header className="bg-card border-b border-border shadow-sm flex-shrink-0">
-      <div className="flex items-center justify-between px-4 lg:px-8 py-6">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Mobile menu button */}
           <Button
             variant="ghost"
@@ -57,10 +57,10 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
           </Button>
 
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
               {getPageTitle()}
             </h1>
-            <p className="text-sm text-muted-foreground hidden sm:block mt-1">
+            <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block mt-1">
               Manage your e-commerce platform
             </p>
           </div>

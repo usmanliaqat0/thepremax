@@ -32,7 +32,7 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div className="bg-gradient-to-r from-accent/10 to-accent/5 rounded-xl p-4 sm:p-6 lg:p-8 border border-accent/20 shadow-sm">
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-2 sm:mb-3">
           Welcome to ThePreMax Admin Panel
@@ -43,7 +43,7 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
         {loading || !stats ? (
           Array.from({ length: 4 }).map((_, i) => (
             <Card key={i}>

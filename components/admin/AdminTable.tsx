@@ -191,7 +191,10 @@ export default function AdminTable<T = any>({
                 className="flex items-center gap-2 text-destructive hover:text-destructive"
               >
                 <X className="h-4 w-4" />
-                Clear ({activeFiltersCount})
+                <span className="hidden sm:inline">
+                  Clear ({activeFiltersCount})
+                </span>
+                <span className="sm:hidden">Clear</span>
               </Button>
             )}
           </div>
@@ -222,8 +225,112 @@ export default function AdminTable<T = any>({
         </div>
       )}
 
-      {/* Table - Responsive wrapper */}
-      <div className="border rounded-lg overflow-x-auto">
+      {/* Mobile Card View */}
+      <div className="block md:hidden space-y-3">
+        {isLoading ? (
+          Array.from({ length: loadingRows }).map((_, i) => (
+            <div key={i} className="border rounded-lg p-4 space-y-3">
+              <div className="h-4 bg-muted animate-pulse rounded w-3/4" />
+              <div className="h-3 bg-muted animate-pulse rounded w-1/2" />
+              <div className="h-3 bg-muted animate-pulse rounded w-1/4" />
+            </div>
+          ))
+        ) : data.length > 0 ? (
+          data.map((item, index) => (
+            <div key={rowKey(item)} className="border rounded-lg p-4 space-y-3">
+              <div className="flex justify-between items-start">
+                <div className="flex-1 min-w-0">
+                  {columns.slice(0, 2).map((column) => (
+                    <div key={column.key} className="mb-2 last:mb-0">
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                        {column.header}
+                      </div>
+                      <div className="text-sm">
+                        {column.render
+                          ? column.render(item, index)
+                          : (item as any)[column.key]}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {actions.length > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {actions.map((action) => {
+                        const label =
+                          typeof action.label === "function"
+                            ? action.label(item)
+                            : action.label;
+                        const icon =
+                          typeof action.icon === "function"
+                            ? action.icon(item)
+                            : action.icon;
+
+                        if (action.key === "delete" && onDelete) {
+                          return (
+                            <DropdownMenuItem
+                              key={action.key}
+                              onClick={() => setDeleteItem(item)}
+                              disabled={action.disabled?.(item)}
+                              className="text-destructive"
+                            >
+                              {icon}
+                              {label}
+                            </DropdownMenuItem>
+                          );
+                        }
+                        return (
+                          <DropdownMenuItem
+                            key={action.key}
+                            onClick={() => action.onClick(item)}
+                            disabled={action.disabled?.(item)}
+                            className={
+                              action.variant === "destructive"
+                                ? "text-destructive"
+                                : ""
+                            }
+                          >
+                            {icon}
+                            {label}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+              {columns.length > 2 && (
+                <div className="grid grid-cols-2 gap-3 pt-2 border-t">
+                  {columns.slice(2).map((column) => (
+                    <div key={column.key}>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
+                        {column.header}
+                      </div>
+                      <div className="text-sm">
+                        {column.render
+                          ? column.render(item, index)
+                          : (item as any)[column.key]}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-8 text-muted-foreground">
+            {emptyMessage}
+          </div>
+        )}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block border rounded-lg overflow-x-auto">
         <Table className="min-w-full">
           <TableHeader>
             <TableRow>
