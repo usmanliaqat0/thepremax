@@ -1,14 +1,14 @@
 ﻿"use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Eye, Edit, Trash2, Star, TrendingUp, DollarSign } from "lucide-react";
-import { toast } from "sonner";
+import { Eye, Edit, Trash2, Star, TrendingUp } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import AdminTable, {
+import Image from "next/image";
+import ClientSideAdminTable, {
   TableColumn,
-  FilterOption,
   ActionItem,
-} from "./AdminTable";
+} from "./ClientSideAdminTable";
+import { FilterOption } from "@/hooks/use-client-pagination";
 
 interface Category {
   _id: string;
@@ -38,7 +38,7 @@ interface ProductImage {
   };
 }
 
-interface Product {
+interface Product extends Record<string, unknown> {
   _id: string;
   name: string;
   slug: string;
@@ -72,203 +72,155 @@ interface ProductTableProps {
   products: Product[];
   onEdit: (product: Product) => void;
   onRefresh: () => void;
-  onSearch: (search: string) => void;
-  onStatusFilter: (status: string) => void;
-  onCategoryFilter: (categoryId: string) => void;
-  onFeaturedFilter: (featured: string) => void;
-  onSaleFilter: (onSale: string) => void;
-  onStockFilter: (inStock: string) => void;
-  searchTerm: string;
-  statusFilter: string;
-  categoryFilter: string;
-  featuredFilter: string;
-  saleFilter: string;
-  stockFilter: string;
+  onDelete: (product: Product) => Promise<void>;
   isLoading: boolean;
-
-  currentPage?: number;
-  totalPages?: number;
-  onPageChange?: (page: number) => void;
+  categories: Category[];
 }
 
 export default function ProductTable({
   products,
   onEdit,
-  onRefresh,
-  onSearch,
-  onStatusFilter,
-  onCategoryFilter,
-  onFeaturedFilter,
-  onSaleFilter,
-  onStockFilter,
-  searchTerm,
-  statusFilter,
-  categoryFilter,
-  featuredFilter,
-  saleFilter,
-  stockFilter,
-  isLoading,
-  currentPage = 1,
-  totalPages = 1,
-  onPageChange,
+  onDelete,
+  categories,
 }: ProductTableProps) {
-  const handleDelete = async (product: Product) => {
-    try {
-      const response = await fetch(`/api/admin/products/${product._id}`, {
-        method: "DELETE",
-      });
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      active: { variant: "default" as const, label: "Active" },
+      inactive: { variant: "secondary" as const, label: "Inactive" },
+      pending: { variant: "outline" as const, label: "Pending" },
+      archived: { variant: "destructive" as const, label: "Archived" },
+    };
 
-      const data = await response.json();
-
-      if (data.success) {
-        toast.success("Product deleted successfully");
-        onRefresh();
-      } else {
-        toast.error(data.error || "Failed to delete product");
-      }
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      toast.error("Failed to delete product");
-    }
+    const config =
+      statusConfig[status as keyof typeof statusConfig] ||
+      statusConfig.inactive;
+    return <Badge variant={config.variant}>{config.label}</Badge>;
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-100 text-green-800";
-      case "inactive":
-        return "bg-gray-100 text-gray-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "archived":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+  const getStockBadge = (inStock: boolean) => {
+    return inStock ? (
+      <Badge variant="default" className="bg-green-100 text-green-800">
+        In Stock
+      </Badge>
+    ) : (
+      <Badge variant="destructive">Out of Stock</Badge>
+    );
   };
 
-  const getDiscountPercentage = (
-    basePrice: number,
-    compareAtPrice?: number
-  ) => {
-    if (compareAtPrice && compareAtPrice > basePrice) {
-      return Math.round(((compareAtPrice - basePrice) / compareAtPrice) * 100);
-    }
-    return 0;
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(price);
   };
 
   const columns: TableColumn<Product>[] = [
     {
-      key: "product",
+      key: "name",
       header: "Product",
+      width: "w-[300px]",
       render: (product) => (
-        <div className="space-y-1">
-          <div className="font-medium line-clamp-1">{product.name}</div>
-          <div className="text-sm text-muted-foreground line-clamp-1">
-            {product.description}
+        <div className="flex items-center space-x-3">
+          <div className="flex-shrink-0 w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+            {product.images && product.images.length > 0 ? (
+              <Image
+                src={product.images[0].url}
+                alt={product.images[0].alt}
+                width={48}
+                height={48}
+                className="w-12 h-12 object-cover rounded-lg"
+              />
+            ) : (
+              <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
+                <span className="text-xs text-muted-foreground">No Image</span>
+              </div>
+            )}
           </div>
-          <div className="text-xs text-muted-foreground">/{product.slug}</div>
+          <div className="min-w-0 flex-1">
+            <div className="font-medium text-sm truncate">{product.name}</div>
+            <div className="text-xs text-muted-foreground truncate">
+              {product.category?.name || "No Category"}
+            </div>
+            <div className="flex items-center space-x-1 mt-1">
+              {product.featured && (
+                <Badge variant="outline" className="text-xs">
+                  <Star className="w-3 h-3 mr-1" />
+                  Featured
+                </Badge>
+              )}
+              {product.onSale && (
+                <Badge variant="outline" className="text-xs text-orange-600">
+                  <TrendingUp className="w-3 h-3 mr-1" />
+                  On Sale
+                </Badge>
+              )}
+            </div>
+          </div>
         </div>
       ),
     },
     {
-      key: "category",
-      header: "Category",
-      render: (product) => (
-        <span className="text-sm text-muted-foreground">
-          {product.category?.name || "Unknown"}
-        </span>
-      ),
-    },
-    {
-      key: "price",
+      key: "basePrice",
       header: "Price",
-      render: (product) => {
-        const discountPercentage = getDiscountPercentage(
-          product.basePrice,
-          product.compareAtPrice
-        );
-        return (
-          <div className="space-y-1">
-            <div className="font-medium">${product.basePrice.toFixed(2)}</div>
-            {product.compareAtPrice &&
-              product.compareAtPrice > product.basePrice && (
-                <div className="text-sm text-muted-foreground line-through">
-                  ${product.compareAtPrice.toFixed(2)}
-                </div>
-              )}
-            {discountPercentage > 0 && (
-              <div className="text-xs text-green-600 font-medium">
-                -{discountPercentage}%
+      width: "w-[120px]",
+      render: (product) => (
+        <div className="text-sm">
+          <div className="font-medium">{formatPrice(product.basePrice)}</div>
+          {product.compareAtPrice &&
+            product.compareAtPrice > product.basePrice && (
+              <div className="text-xs text-muted-foreground line-through">
+                {formatPrice(product.compareAtPrice)}
               </div>
             )}
-          </div>
-        );
-      },
+        </div>
+      ),
     },
     {
       key: "status",
       header: "Status",
-      render: (product) => (
-        <Badge className={getStatusColor(product.status)}>
-          {product.status}
-        </Badge>
-      ),
+      width: "w-[100px]",
+      render: (product) => getStatusBadge(product.status),
     },
     {
-      key: "flags",
-      header: "Flags",
-      render: (product) => (
-        <div className="flex flex-wrap gap-1">
-          {product.featured && (
-            <Badge variant="secondary" className="text-xs">
-              <Star className="h-3 w-3 mr-1" />
-              Featured
-            </Badge>
-          )}
-          {product.topRated && (
-            <Badge variant="secondary" className="text-xs">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              Top Rated
-            </Badge>
-          )}
-          {product.onSale && (
-            <Badge variant="secondary" className="text-xs">
-              <DollarSign className="h-3 w-3 mr-1" />
-              On Sale
-            </Badge>
-          )}
-        </div>
-      ),
-    },
-    {
-      key: "stock",
+      key: "inStock",
       header: "Stock",
+      width: "w-[100px]",
+      render: (product) => getStockBadge(product.inStock),
+    },
+    {
+      key: "totalSold",
+      header: "Sold",
+      width: "w-[80px]",
       render: (product) => (
-        <div className="flex items-center gap-2">
-          <Badge
-            variant={product.inStock ? "default" : "destructive"}
-            className="text-xs"
-          >
-            {product.inStock ? "In Stock" : "Out of Stock"}
-          </Badge>
-          {product.totalSold > 0 && (
-            <span className="text-xs text-muted-foreground">
-              ({product.totalSold} sold)
-            </span>
-          )}
+        <div className="text-sm font-medium">{product.totalSold}</div>
+      ),
+    },
+    {
+      key: "rating",
+      header: "Rating",
+      width: "w-[100px]",
+      render: (product) => (
+        <div className="flex items-center space-x-1">
+          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+          <span className="text-sm font-medium">
+            {product.rating.toFixed(1)}
+          </span>
+          <span className="text-xs text-muted-foreground">
+            ({product.reviewCount})
+          </span>
         </div>
       ),
     },
     {
       key: "createdAt",
       header: "Created",
+      width: "w-[120px]",
       render: (product) => (
-        <span className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground">
           {formatDistanceToNow(new Date(product.createdAt), {
             addSuffix: true,
           })}
-        </span>
+        </div>
       ),
     },
   ];
@@ -277,7 +229,6 @@ export default function ProductTable({
     {
       key: "status",
       label: "Status",
-      value: statusFilter,
       options: [
         { value: "active", label: "Active" },
         { value: "inactive", label: "Inactive" },
@@ -286,35 +237,34 @@ export default function ProductTable({
       ],
     },
     {
-      key: "category",
+      key: "categoryId",
       label: "Category",
-      value: categoryFilter,
       options: [
-
+        ...categories.map((category) => ({
+          value: category._id,
+          label: category.name,
+        })),
       ],
     },
     {
       key: "featured",
       label: "Featured",
-      value: featuredFilter,
       options: [
         { value: "true", label: "Featured" },
         { value: "false", label: "Not Featured" },
       ],
     },
     {
-      key: "sale",
+      key: "onSale",
       label: "On Sale",
-      value: saleFilter,
       options: [
         { value: "true", label: "On Sale" },
         { value: "false", label: "Not On Sale" },
       ],
     },
     {
-      key: "stock",
+      key: "inStock",
       label: "Stock",
-      value: stockFilter,
       options: [
         { value: "true", label: "In Stock" },
         { value: "false", label: "Out of Stock" },
@@ -326,75 +276,43 @@ export default function ProductTable({
     {
       key: "view",
       label: "View",
-      icon: <Eye className="mr-2 h-4 w-4" />,
-      onClick: () => {},
+      icon: <Eye className="w-4 h-4" />,
+      onClick: (product) => {
+        // Handle view action
+        console.log("View product:", product);
+      },
     },
     {
       key: "edit",
       label: "Edit",
-      icon: <Edit className="mr-2 h-4 w-4" />,
-      onClick: onEdit,
+      icon: <Edit className="w-4 h-4" />,
+      onClick: (product) => onEdit(product),
     },
     {
       key: "delete",
       label: "Delete",
-      icon: <Trash2 className="mr-2 h-4 w-4" />,
-      onClick: () => {},
+      icon: <Trash2 className="w-4 h-4" />,
+      onClick: (product) => onDelete(product),
       variant: "destructive",
     },
   ];
 
   return (
-    <AdminTable
+    <ClientSideAdminTable
       data={products}
       columns={columns}
       actions={actions}
       filters={filters}
+      searchFields={["name", "description", "tags"]}
       searchPlaceholder="Search products..."
       emptyMessage="No products found"
-      isLoading={isLoading}
-      onSearch={onSearch}
-      onFilter={(key, value) => {
-        switch (key) {
-          case "status":
-            onStatusFilter(value);
-            break;
-          case "category":
-            onCategoryFilter(value);
-            break;
-          case "featured":
-            onFeaturedFilter(value);
-            break;
-          case "sale":
-            onSaleFilter(value);
-            break;
-          case "stock":
-            onStockFilter(value);
-            break;
-        }
-      }}
-      onDelete={handleDelete}
+      loadingRows={5}
+      onDelete={onDelete}
       deleteTitle="Delete Product"
       deleteDescription={(product) =>
         `Are you sure you want to delete "${product.name}"? This action cannot be undone.`
       }
-      searchValue={searchTerm}
-      filterValues={{
-        status: statusFilter,
-        category: categoryFilter,
-        featured: featuredFilter,
-        sale: saleFilter,
-        stock: stockFilter,
-      }}
-      pagination={
-        onPageChange
-          ? {
-              currentPage,
-              totalPages,
-              onPageChange,
-            }
-          : undefined
-      }
+      itemsPerPage={10}
     />
   );
 }

@@ -5,7 +5,6 @@ import { AdminMiddleware } from "@/lib/admin-middleware";
 
 export async function GET(request: NextRequest) {
   try {
-
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -17,6 +16,22 @@ export async function GET(request: NextRequest) {
     await connectDB();
 
     const { searchParams } = new URL(request.url);
+    const all = searchParams.get("all") === "true";
+
+    if (all) {
+      // Return all categories without pagination for client-side handling
+      const categories = await Category.find({})
+        .populate("productCount")
+        .sort({ order: 1, createdAt: -1 })
+        .lean();
+
+      return NextResponse.json({
+        success: true,
+        data: categories,
+      });
+    }
+
+    // Original paginated endpoint for backward compatibility
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const search = searchParams.get("search") || "";
@@ -24,7 +39,7 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-const filter: Record<string, unknown> = {};
+    const filter: Record<string, unknown> = {};
 
     if (search) {
       filter.$or = [
@@ -38,9 +53,9 @@ const filter: Record<string, unknown> = {};
       filter.status = status;
     }
 
-const total = await Category.countDocuments(filter);
+    const total = await Category.countDocuments(filter);
 
-const categories = await Category.find(filter)
+    const categories = await Category.find(filter)
       .populate("productCount")
       .sort({ order: 1, createdAt: -1 })
       .skip(skip)
@@ -72,7 +87,6 @@ const categories = await Category.find(filter)
 
 export async function POST(request: NextRequest) {
   try {
-
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -94,14 +108,14 @@ export async function POST(request: NextRequest) {
       seoDescription,
     } = body;
 
-if (!name) {
+    if (!name) {
       return NextResponse.json(
         { success: false, error: "Name is required" },
         { status: 400 }
       );
     }
 
-const existingCategory = await Category.findOne({
+    const existingCategory = await Category.findOne({
       name: { $regex: new RegExp(`^${name}$`, "i") },
     });
 
@@ -112,12 +126,12 @@ const existingCategory = await Category.findOne({
       );
     }
 
-const slug = name
+    const slug = name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
-const existingSlug = await Category.findOne({ slug });
+    const existingSlug = await Category.findOne({ slug });
     if (existingSlug) {
       return NextResponse.json(
         { success: false, error: "Category with this slug already exists" },
@@ -125,7 +139,7 @@ const existingSlug = await Category.findOne({ slug });
       );
     }
 
-const category = await Category.create({
+    const category = await Category.create({
       name,
       slug,
       description,
@@ -136,7 +150,7 @@ const category = await Category.create({
       seoDescription,
     });
 
-const populatedCategory = await Category.findById(category._id)
+    const populatedCategory = await Category.findById(category._id)
       .populate("productCount")
       .lean();
 

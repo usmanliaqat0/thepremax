@@ -14,46 +14,31 @@ import {
   UserCheck,
   UserX,
 } from "lucide-react";
-import AdminTable, {
+import ClientSideAdminTable, {
   TableColumn,
-  FilterOption,
   ActionItem,
-} from "./AdminTable";
+} from "./ClientSideAdminTable";
+import { FilterOption } from "@/hooks/use-client-pagination";
 
 interface UserTableProps {
   users: User[];
   onRefresh: () => void;
-  onSearch: (search: string) => void;
-  onStatusFilter: (status: string) => void;
   onView: (user: User) => void;
   onEdit: (user: User) => void;
   onToggleStatus: (userId: string, newStatus: "active" | "inactive") => void;
   onDelete: (userId: string) => void;
-  searchTerm: string;
-  statusFilter: string;
   isLoading: boolean;
   actionLoading: { [key: string]: boolean };
-
-  currentPage?: number;
-  totalPages?: number;
-  onPageChange?: (page: number) => void;
 }
 
 export default function UserTable({
   users,
-  onSearch,
-  onStatusFilter,
   onView,
   onEdit,
   onToggleStatus,
   onDelete,
-  searchTerm,
-  statusFilter,
   isLoading,
   actionLoading,
-  currentPage = 1,
-  totalPages = 1,
-  onPageChange,
 }: UserTableProps) {
   const getStatusBadge = (status: string) => {
     return (
@@ -155,10 +140,17 @@ export default function UserTable({
     {
       key: "status",
       label: "Status",
-      value: statusFilter,
       options: [
         { value: "active", label: "Active" },
         { value: "inactive", label: "Inactive" },
+      ],
+    },
+    {
+      key: "role",
+      label: "Role",
+      options: [
+        { value: "admin", label: "Admin" },
+        { value: "customer", label: "Customer" },
       ],
     },
   ];
@@ -203,29 +195,15 @@ export default function UserTable({
   ];
 
   return (
-    <AdminTable
+    <ClientSideAdminTable
       data={users}
       columns={columns}
       actions={actions}
       filters={filters}
+      searchFields={["firstName", "lastName", "email"]}
       searchPlaceholder="Search users by name or email..."
       emptyMessage="No users found"
       isLoading={isLoading}
-      onSearch={onSearch}
-      onFilter={(key, value) => {
-        if (key === "status") onStatusFilter(value);
-      }}
-      searchValue={searchTerm}
-      filterValues={{ status: statusFilter }}
-      pagination={
-        onPageChange
-          ? {
-              currentPage,
-              totalPages,
-              onPageChange,
-            }
-          : undefined
-      }
     />
   );
 }

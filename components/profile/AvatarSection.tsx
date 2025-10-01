@@ -18,16 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Upload,
-  Camera,
-  Trash2,
-  RefreshCw,
-  User,
-  Edit3,
-  Check,
-  X,
-} from "lucide-react";
+import { Camera, Trash2, User, Edit3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface AvatarOption {
@@ -44,10 +35,7 @@ const AvatarSection = () => {
   const [currentAvatar, setCurrentAvatar] = useState<string>(
     "/profile-images/defaults/male-avatar.svg"
   );
-  const [isUploading, setIsUploading] = useState(false);
   const [showAvatarDialog, setShowAvatarDialog] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>("");
 
   const defaultAvatars: AvatarOption[] = [
     {
@@ -70,68 +58,6 @@ const AvatarSection = () => {
     },
   ];
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      toast({
-        title: "Invalid file type",
-        description: "Please select an image file.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Please select an image smaller than 5MB.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSelectedFile(file);
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreviewUrl(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFile) return;
-
-    setIsUploading(true);
-
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      const formData = new FormData();
-      formData.append("avatar", selectedFile);
-
-      setCurrentAvatar(previewUrl);
-      setShowAvatarDialog(false);
-      setSelectedFile(null);
-      setPreviewUrl("");
-
-      toast({
-        title: "Avatar updated",
-        description: "Your profile picture has been updated successfully.",
-      });
-    } catch {
-      toast({
-        title: "Upload failed",
-        description: "Failed to update your avatar. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   const handleDefaultAvatarSelect = (avatar: AvatarOption) => {
     setCurrentAvatar(avatar.src);
     setShowAvatarDialog(false);
@@ -149,18 +75,6 @@ const AvatarSection = () => {
       title: "Avatar removed",
       description: "Your profile picture has been reset to default.",
     });
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
-
-  const cancelUpload = () => {
-    setSelectedFile(null);
-    setPreviewUrl("");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
   };
 
   return (
@@ -221,38 +135,33 @@ const AvatarSection = () => {
                       />
                     </div>
 
-                    {!selectedFile && (
-                      <div className="space-y-4">
-                        <h4 className="font-medium">Choose Default Avatar</h4>
+                    <div className="space-y-4">
+                      <h4 className="font-medium">Choose Default Avatar</h4>
 
-                        <div className="grid grid-cols-3 gap-4">
-                          {defaultAvatars.map((avatar) => (
-                            <div
-                              key={avatar.id}
-                              className={`cursor-pointer rounded-lg p-3 border-2 transition-all ${
-                                currentAvatar === avatar.src
-                                  ? "border-blue-500 bg-blue-50"
-                                  : "border-gray-200 hover:border-gray-300"
-                              }`}
-                              onClick={() => handleDefaultAvatarSelect(avatar)}
-                            >
-                              <Avatar className="w-16 h-16 mx-auto mb-2">
-                                <AvatarImage
-                                  src={avatar.src}
-                                  alt={avatar.name}
-                                />
-                                <AvatarFallback>
-                                  <User className="w-6 h-6" />
-                                </AvatarFallback>
-                              </Avatar>
-                              <p className="text-xs text-center text-gray-600">
-                                {avatar.name}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        {defaultAvatars.map((avatar) => (
+                          <div
+                            key={avatar.id}
+                            className={`cursor-pointer rounded-lg p-3 border-2 transition-all ${
+                              currentAvatar === avatar.src
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                            onClick={() => handleDefaultAvatarSelect(avatar)}
+                          >
+                            <Avatar className="w-16 h-16 mx-auto mb-2">
+                              <AvatarImage src={avatar.src} alt={avatar.name} />
+                              <AvatarFallback>
+                                <User className="w-6 h-6" />
+                              </AvatarFallback>
+                            </Avatar>
+                            <p className="text-xs text-center text-gray-600">
+                              {avatar.name}
+                            </p>
+                          </div>
+                        ))}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </DialogContent>
               </Dialog>

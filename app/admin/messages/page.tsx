@@ -1,13 +1,14 @@
 ﻿"use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, RefreshCw } from "lucide-react";
 import MessageTable from "@/components/admin/MessageTable";
 import { toast } from "sonner";
+import { useAdminData } from "@/hooks/use-admin-data";
 
-interface ContactMessage {
+interface ContactMessage extends Record<string, unknown> {
   _id: string;
   name: string;
   email: string;
@@ -21,74 +22,51 @@ interface ContactMessage {
   updatedAt: string;
 }
 
-interface MessagesResponse {
-  success: boolean;
-  data: ContactMessage[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-}
-
 export default function MessagesPage() {
-  const [messages, setMessages] = useState<ContactMessage[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  const [refreshTrigger] = useState(0);
 
-  const fetchMessages = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: "10",
-        ...(searchTerm && { search: searchTerm }),
-        ...(statusFilter && { status: statusFilter }),
-      });
-
-      const response = await fetch(`/api/admin/messages?${params}`);
-      const data: MessagesResponse = await response.json();
-
-      if (data.success) {
-        setMessages(data.data);
-        setTotalPages(data.pagination.totalPages);
-      } else {
-        toast.error("Failed to fetch messages");
-        setMessages([]);
-      }
-    } catch (error) {
-      console.error("Fetch messages error:", error);
-      toast.error("Failed to fetch messages");
-      setMessages([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [currentPage, searchTerm, statusFilter]);
-
-  useEffect(() => {
-    fetchMessages();
-  }, [fetchMessages]);
+  // Use the new hook for fetching all messages
+  const {
+    data: messages,
+    isLoading: loading,
+    error,
+    refresh,
+    setData,
+  } = useAdminData<ContactMessage>({
+    endpoint: "/api/admin/messages",
+    refreshTrigger,
+  });
 
   const handleRefresh = () => {
-    fetchMessages();
+    refresh();
+    toast.success("Messages refreshed");
   };
 
-  const handleSearch = (search: string) => {
-    setSearchTerm(search);
-    setCurrentPage(1);
-  };
+  const handleStatusUpdate = async (messageId: string, newStatus: string) => {
+    try {
+      const response = await fetch(`/api/admin/messages/${messageId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await response.json();
 
-  const handleStatusFilter = (status: string) => {
-    setStatusFilter(status === "all" ? "" : status);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+      if (data.success) {
+        setData(
+          messages.map((msg) =>
+            msg._id === messageId
+              ? { ...msg, status: newStatus as ContactMessage["status"] }
+              : msg
+          )
+        );
+        toast.success("Message status updated");
+      } else {
+        toast.error(data.error || "Failed to update message status");
+      }
+    } catch (error) {
+      console.error("Error updating message status:", error);
+      toast.error("Failed to update message status");
+    }
   };
 
   const getStatusCounts = () => {
@@ -107,6 +85,23 @@ export default function MessagesPage() {
   };
 
   const statusCounts = getStatusCounts();
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Contact Messages</h1>
+        </div>
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center text-red-500">
+              Error loading messages: {error}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3 sm:space-y-4 lg:space-y-6">
@@ -131,7 +126,6 @@ export default function MessagesPage() {
         </Button>
       </div>
 
-      {}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -194,20 +188,15 @@ export default function MessagesPage() {
         </Card>
       </div>
 
-      {}
       <Card>
         <CardHeader>
-          <CardTitle>All Messages</CardTitle>
+          <CardTitle>All Messages ({messages.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <MessageTable
             messages={messages}
             onRefresh={handleRefresh}
-            onSearch={handleSearch}
-            onStatusFilter={handleStatusFilter}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
+            onStatusUpdate={handleStatusUpdate}
             loading={loading}
           />
         </CardContent>

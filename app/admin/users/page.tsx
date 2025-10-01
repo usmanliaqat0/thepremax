@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,93 +16,29 @@ import UserEditDialog from "@/components/admin/UserEditDialog";
 import UserViewDialog from "@/components/admin/UserViewDialog";
 import UserTable from "@/components/admin/UserTable";
 import { showSuccessMessage, showErrorMessage } from "@/lib/error-handler";
+import { useAdminData } from "@/hooks/use-admin-data";
 
 export default function UsersManagement() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<
-    "all" | "active" | "inactive"
-  >("all");
   const [actionLoading, setActionLoading] = useState<{
     [key: string]: boolean;
   }>({});
-  const [refreshLoading, setRefreshLoading] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageLimit] = useState(10);
-  const [pagination, setPagination] = useState({
-    total: 0,
-    totalPages: 1,
-    hasNext: false,
-    hasPrevious: false,
+  const [refreshTrigger] = useState(0);
+
+  // Use the new hook for fetching all users
+  const {
+    data: users,
+    isLoading: loading,
+    error,
+    refresh,
+    setData,
+  } = useAdminData<User>({
+    endpoint: "/api/admin/users",
+    refreshTrigger,
   });
-
-  const fetchUsers = useCallback(
-    async (isRefresh = false) => {
-      if (isRefresh) {
-        setRefreshLoading(true);
-      } else {
-        setLoading(true);
-      }
-      try {
-        const params = new URLSearchParams({
-          page: currentPage.toString(),
-          limit: pageLimit.toString(),
-          ...(searchTerm && { search: searchTerm }),
-          ...(filterStatus &&
-            filterStatus !== "all" && { status: filterStatus }),
-        });
-
-        const res = await fetch(`/api/admin/users?${params}`);
-        const data = await res.json();
-        if (data.success) {
-          setUsers(data.data.users || []);
-          setPagination(
-            data.pagination || {
-              total: 0,
-              totalPages: 1,
-              hasNext: false,
-              hasPrevious: false,
-            }
-          );
-          if (isRefresh) {
-            showSuccessMessage("Users refreshed successfully");
-          }
-        } else {
-          setUsers([]);
-          setPagination({
-            total: 0,
-            totalPages: 1,
-            hasNext: false,
-            hasPrevious: false,
-          });
-          showErrorMessage("Failed to fetch users");
-        }
-      } catch (error) {
-        setUsers([]);
-        setPagination({
-          total: 0,
-          totalPages: 1,
-          hasNext: false,
-          hasPrevious: false,
-        });
-        console.error("Error fetching users:", error);
-        showErrorMessage("Failed to fetch users. Please try again.");
-      } finally {
-        setLoading(false);
-        setRefreshLoading(false);
-      }
-    },
-    [currentPage, pageLimit, searchTerm, filterStatus]
-  );
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
 
   const handleDeleteUser = async (userId: string) => {
     setActionLoading((prev) => ({ ...prev, [`delete-${userId}`]: true }));
@@ -112,7 +48,7 @@ export default function UsersManagement() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        setUsers(users.filter((user) => user.id !== userId));
+        setData(users.filter((user) => user.id !== userId));
         showSuccessMessage("User deleted successfully");
       } else {
         showErrorMessage(data.message || "Failed to delete user");
@@ -138,7 +74,7 @@ export default function UsersManagement() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        setUsers(
+        setData(
           users.map((user) =>
             user.id === userId ? { ...user, status: newStatus } : user
           )
@@ -159,25 +95,39 @@ export default function UsersManagement() {
     }
   };
 
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
+  const handleRefresh = () => {
+    refresh();
+    showSuccessMessage("Users refreshed successfully");
   };
 
-  const handleSearch = (search: string) => {
-    setSearchTerm(search);
-    setCurrentPage(1);
+  // Calculate stats from all users
+  const stats = {
+    total: users.length,
+    active: users.filter((u) => u.status === "active").length,
+    inactive: users.filter((u) => u.status === "inactive").length,
+    verifiedEmails: users.filter((u) => u.isEmailVerified).length,
+    verifiedPhones: users.filter((u) => u.isPhoneVerified).length,
   };
 
-  const handleStatusFilter = (status: string) => {
-    setFilterStatus(status as "all" | "active" | "inactive");
-    setCurrentPage(1);
-  };
-
-  const filteredUsers = users;
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">User Management</h1>
+        </div>
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center text-red-500">
+              Error loading users: {error}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-3 sm:space-y-4 lg:space-y-6">
-      {}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
@@ -190,14 +140,14 @@ export default function UsersManagement() {
         <div className="flex flex-col sm:flex-row gap-2">
           <Button
             variant="outline"
-            onClick={() => fetchUsers(true)}
-            disabled={refreshLoading}
+            onClick={handleRefresh}
+            disabled={loading}
             className="w-full sm:w-auto"
           >
             <RefreshCw
-              className={`h-4 w-4 mr-2 ${refreshLoading ? "animate-spin" : ""}`}
+              className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
             />
-            {refreshLoading ? "Refreshing..." : "Refresh"}
+            {loading ? "Refreshing..." : "Refresh"}
           </Button>
           <Button variant="outline" className="w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
@@ -206,7 +156,6 @@ export default function UsersManagement() {
         </div>
       </div>
 
-      {}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardContent className="p-3 sm:p-2">
@@ -215,9 +164,7 @@ export default function UsersManagement() {
               <p className="text-xs sm:text-sm text-muted-foreground text-center">
                 Active Users
               </p>
-              <p className="text-xl sm:text-2xl font-bold">
-                {users.filter((u) => u.status === "active").length}
-              </p>
+              <p className="text-xl sm:text-2xl font-bold">{stats.active}</p>
             </div>
           </CardContent>
         </Card>
@@ -228,9 +175,7 @@ export default function UsersManagement() {
               <p className="text-xs sm:text-sm text-muted-foreground text-center">
                 Inactive Users
               </p>
-              <p className="text-xl sm:text-2xl font-bold">
-                {users.filter((u) => u.status === "inactive").length}
-              </p>
+              <p className="text-xl sm:text-2xl font-bold">{stats.inactive}</p>
             </div>
           </CardContent>
         </Card>
@@ -242,7 +187,7 @@ export default function UsersManagement() {
                 Verified Emails
               </p>
               <p className="text-xl sm:text-2xl font-bold">
-                {users.filter((u) => u.isEmailVerified).length}
+                {stats.verifiedEmails}
               </p>
             </div>
           </CardContent>
@@ -255,24 +200,21 @@ export default function UsersManagement() {
                 Verified Phones
               </p>
               <p className="text-xl sm:text-2xl font-bold">
-                {users.filter((u) => u.isPhoneVerified).length}
+                {stats.verifiedPhones}
               </p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {}
       <Card>
         <CardHeader>
-          <CardTitle>Users ({filteredUsers.length})</CardTitle>
+          <CardTitle>Users ({stats.total})</CardTitle>
         </CardHeader>
         <CardContent>
           <UserTable
-            users={filteredUsers}
-            onRefresh={() => fetchUsers(true)}
-            onSearch={handleSearch}
-            onStatusFilter={handleStatusFilter}
+            users={users}
+            onRefresh={handleRefresh}
             onView={(user) => {
               setSelectedUser(user);
               setViewDialogOpen(true);
@@ -283,18 +225,12 @@ export default function UsersManagement() {
             }}
             onToggleStatus={handleToggleUserStatus}
             onDelete={handleDeleteUser}
-            searchTerm={searchTerm}
-            statusFilter={filterStatus}
             isLoading={loading}
             actionLoading={actionLoading}
-            currentPage={currentPage}
-            totalPages={pagination.totalPages}
-            onPageChange={handlePageChange}
           />
         </CardContent>
       </Card>
 
-      {}
       {selectedUser && (
         <>
           <UserViewDialog
@@ -308,7 +244,6 @@ export default function UsersManagement() {
             onOpenChange={setEditDialogOpen}
             loading={editLoading}
             onUserUpdated={async (updatedUser) => {
-
               setEditLoading(true);
               try {
                 const res = await fetch(`/api/admin/users/${updatedUser.id}`, {
@@ -318,7 +253,7 @@ export default function UsersManagement() {
                 });
                 const data = await res.json();
                 if (res.ok && data.success) {
-                  setUsers(
+                  setData(
                     users.map((u) => (u.id === updatedUser.id ? data.data : u))
                   );
                   showSuccessMessage("User updated successfully");

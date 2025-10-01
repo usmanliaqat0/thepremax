@@ -32,7 +32,7 @@ const ResetPasswordForm = () => {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
 
-useEffect(() => {
+  useEffect(() => {
     const verifyToken = async () => {
       if (!token) {
         setError("Invalid reset link. Please request a new password reset.");
@@ -65,7 +65,7 @@ useEffect(() => {
     e.preventDefault();
     setError("");
 
-if (password.length < 6) {
+    if (password.length < 6) {
       setError("Password must be at least 6 characters long");
       return;
     }
@@ -282,7 +282,6 @@ const ResetPassword = () => {
               <CardContent className="py-12">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading...</p>
                 </div>
               </CardContent>
             </Card>

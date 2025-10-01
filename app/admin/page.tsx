@@ -90,7 +90,7 @@ export default function AdminDashboard() {
                 <div className="flex items-center text-sm mt-2">
                   <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
                   <span className="text-green-600 font-medium">
-                    {stats.users.growth}
+                    {stats.users.activeGrowth}
                   </span>
                   <span className="text-muted-foreground ml-1">
                     from last month
@@ -112,9 +112,11 @@ export default function AdminDashboard() {
                 <div className="flex items-center text-sm mt-2">
                   <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
                   <span className="text-green-600 font-medium">
-                    {stats.verification.emailVerificationRate}%
+                    {stats.verification.emailGrowth}
                   </span>
-                  <span className="text-muted-foreground ml-1">verified</span>
+                  <span className="text-muted-foreground ml-1">
+                    from last month
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -132,9 +134,11 @@ export default function AdminDashboard() {
                 <div className="flex items-center text-sm mt-2">
                   <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
                   <span className="text-green-600 font-medium">
-                    {stats.verification.phoneVerificationRate}%
+                    {stats.verification.phoneGrowth}
                   </span>
-                  <span className="text-muted-foreground ml-1">verified</span>
+                  <span className="text-muted-foreground ml-1">
+                    from last month
+                  </span>
                 </div>
               </CardContent>
             </Card>

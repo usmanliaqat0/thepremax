@@ -195,7 +195,6 @@ const ProductSchema = new Schema<IProduct>(
 );
 
 ProductSchema.index({ name: 1 });
-ProductSchema.index({ slug: 1 });
 ProductSchema.index({ categoryId: 1, status: 1 });
 ProductSchema.index({ basePrice: 1 });
 ProductSchema.index({ featured: 1, status: 1 });
@@ -238,7 +237,7 @@ ProductSchema.pre("save", function (next) {
       .replace(/(^-|-$)/g, "");
   }
 
-if (
+  if (
     this.isModified("status") &&
     this.status === "active" &&
     !this.publishedAt
@@ -252,12 +251,10 @@ if (
 let Product: mongoose.Model<IProduct> | Record<string, never>;
 
 if (typeof window === "undefined") {
-
   Product =
     mongoose.models.Product ||
     mongoose.model<IProduct>("Product", ProductSchema);
 } else {
-
   Product = {};
 }
 

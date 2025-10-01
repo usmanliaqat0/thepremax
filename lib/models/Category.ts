@@ -64,7 +64,6 @@ const CategorySchema = new Schema<ICategory>(
 );
 
 CategorySchema.index({ name: 1 });
-CategorySchema.index({ slug: 1 });
 CategorySchema.index({ status: 1, order: 1 });
 
 CategorySchema.virtual("productCount", {
@@ -90,12 +89,10 @@ CategorySchema.pre("save", function (next) {
 let Category: mongoose.Model<ICategory> | Record<string, never>;
 
 if (typeof window === "undefined") {
-
   Category =
     mongoose.models.Category ||
     mongoose.model<ICategory>("Category", CategorySchema);
 } else {
-
   Category = {};
 }
 

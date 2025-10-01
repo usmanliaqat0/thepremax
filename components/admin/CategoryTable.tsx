@@ -2,15 +2,14 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Eye } from "lucide-react";
-import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import AdminTable, {
+import ClientSideAdminTable, {
   TableColumn,
-  FilterOption,
   ActionItem,
-} from "./AdminTable";
+} from "./ClientSideAdminTable";
+import { FilterOption } from "@/hooks/use-client-pagination";
 
-interface Category {
+interface Category extends Record<string, unknown> {
   _id: string;
   name: string;
   slug: string;
@@ -31,51 +30,17 @@ interface CategoryTableProps {
   onEdit: (category: Category) => void;
   onView: (category: Category) => void;
   onRefresh: () => void;
-  onSearch: (search: string) => void;
-  onStatusFilter: (status: string) => void;
-  searchTerm: string;
-  statusFilter: string;
+  onDelete?: (category: Category) => Promise<void>;
   isLoading: boolean;
-
-  currentPage?: number;
-  totalPages?: number;
-  onPageChange?: (page: number) => void;
 }
 
 export default function CategoryTable({
   categories,
   onEdit,
   onView,
-  onRefresh,
-  onSearch,
-  onStatusFilter,
-  searchTerm,
-  statusFilter,
+  onDelete,
   isLoading,
-  currentPage = 1,
-  totalPages = 1,
-  onPageChange,
 }: CategoryTableProps) {
-  const handleDelete = async (category: Category) => {
-    try {
-      const response = await fetch(`/api/admin/categories/${category._id}`, {
-        method: "DELETE",
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        toast.success("Category deleted successfully");
-        onRefresh();
-      } else {
-        toast.error(data.error || "Failed to delete category");
-      }
-    } catch (error) {
-      console.error("Error deleting category:", error);
-      toast.error("Failed to delete category");
-    }
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -142,7 +107,6 @@ export default function CategoryTable({
     {
       key: "status",
       label: "Status",
-      value: statusFilter,
       options: [
         { value: "active", label: "Active" },
         { value: "inactive", label: "Inactive" },
@@ -167,25 +131,22 @@ export default function CategoryTable({
       key: "delete",
       label: "Delete",
       icon: <Trash2 className="mr-2 h-4 w-4" />,
-      onClick: handleDelete,
+      onClick: onDelete || (() => {}),
       variant: "destructive",
     },
   ];
 
   return (
-    <AdminTable
+    <ClientSideAdminTable
       data={categories}
       columns={columns}
       actions={actions}
       filters={filters}
+      searchFields={["name", "slug", "description"]}
       searchPlaceholder="Search categories..."
       emptyMessage="No categories found"
       isLoading={isLoading}
-      onSearch={onSearch}
-      onFilter={(key, value) => {
-        if (key === "status") onStatusFilter(value);
-      }}
-      onDelete={handleDelete}
+      onDelete={onDelete}
       deleteTitle="Delete Category"
       deleteDescription={(category) =>
         `Are you sure you want to delete "${
@@ -195,17 +156,6 @@ export default function CategoryTable({
             ? ` Warning: This category has ${category.productCount} products. You must move or delete these products first.`
             : ""
         }`
-      }
-      searchValue={searchTerm}
-      filterValues={{ status: statusFilter }}
-      pagination={
-        onPageChange
-          ? {
-              currentPage,
-              totalPages,
-              onPageChange,
-            }
-          : undefined
       }
     />
   );

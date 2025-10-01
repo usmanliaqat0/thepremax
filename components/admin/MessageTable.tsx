@@ -15,13 +15,13 @@ import { Label } from "@/components/ui/label";
 import { Eye, Trash2, MessageSquare, X } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import AdminTable, {
+import ClientSideAdminTable, {
   TableColumn,
-  FilterOption,
   ActionItem,
-} from "./AdminTable";
+} from "./ClientSideAdminTable";
+import { FilterOption } from "@/hooks/use-client-pagination";
 
-interface ContactMessage {
+interface ContactMessage extends Record<string, unknown> {
   _id: string;
   name: string;
   email: string;
@@ -38,22 +38,14 @@ interface ContactMessage {
 interface MessageTableProps {
   messages: ContactMessage[];
   onRefresh: () => void;
-  onSearch: (search: string) => void;
-  onStatusFilter: (status: string) => void;
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
+  onStatusUpdate?: (messageId: string, newStatus: string) => void;
   loading?: boolean;
 }
 
 export default function MessageTable({
   messages,
   onRefresh,
-  onSearch,
-  onStatusFilter,
-  currentPage,
-  totalPages,
-  onPageChange,
+  onStatusUpdate,
   loading = false,
 }: MessageTableProps) {
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(
@@ -88,6 +80,11 @@ export default function MessageTable({
   };
 
   const handleStatusUpdate = async (messageId: string, newStatus: string) => {
+    if (onStatusUpdate) {
+      onStatusUpdate(messageId, newStatus);
+      return;
+    }
+
     setIsUpdating(true);
     try {
       const response = await fetch(`/api/admin/messages/${messageId}`, {
@@ -168,7 +165,6 @@ export default function MessageTable({
     {
       key: "status",
       label: "Status",
-      value: "all",
       options: [
         { value: "new", label: "New" },
         { value: "read", label: "Read" },
@@ -205,35 +201,27 @@ export default function MessageTable({
       key: "delete",
       label: "Delete",
       icon: <Trash2 className="mr-2 h-4 w-4" />,
-      onClick: () => {},
+      onClick: handleDelete,
       variant: "destructive",
     },
   ];
 
   return (
     <>
-      <AdminTable
+      <ClientSideAdminTable
         data={messages}
         columns={columns}
         actions={actions}
         filters={filters}
+        searchFields={["name", "email", "subject", "message"]}
         searchPlaceholder="Search messages..."
         emptyMessage="No messages found"
         isLoading={loading}
-        onSearch={onSearch}
-        onFilter={(key, value) => {
-          if (key === "status") onStatusFilter(value);
-        }}
         onDelete={handleDelete}
         deleteTitle="Delete Message"
         deleteDescription={() =>
           "Are you sure you want to delete this message? This action cannot be undone."
         }
-        pagination={{
-          currentPage,
-          totalPages,
-          onPageChange,
-        }}
       />
 
       {}

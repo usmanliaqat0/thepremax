@@ -61,7 +61,7 @@ export default function CategoryDialog({
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-useEffect(() => {
+  useEffect(() => {
     if (open) {
       if (category) {
         setFormData({

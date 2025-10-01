@@ -9,13 +9,35 @@ export const GET = AdminMiddleware.requireAdmin(
       await connectDB();
 
       const { searchParams } = new URL(request.url);
+      const all = searchParams.get("all") === "true";
+
+      if (all) {
+        // Return all users without pagination for client-side handling
+        const users = await User.find({})
+          .select("-password")
+          .sort({ createdAt: -1 })
+          .lean();
+
+        return NextResponse.json({
+          success: true,
+          data: {
+            users: users.map((user) => ({
+              ...user,
+              id: user._id.toString(),
+              _id: undefined,
+            })),
+          },
+        });
+      }
+
+      // Original paginated endpoint for backward compatibility
       const page = parseInt(searchParams.get("page") || "1");
       const limit = parseInt(searchParams.get("limit") || "10");
       const search = searchParams.get("search") || "";
       const status = searchParams.get("status") || "";
       const role = searchParams.get("role") || "";
 
-const filter: Record<string, unknown> = {};
+      const filter: Record<string, unknown> = {};
 
       if (search) {
         filter.$or = [
@@ -33,9 +55,9 @@ const filter: Record<string, unknown> = {};
         filter.role = role;
       }
 
-const skip = (page - 1) * limit;
+      const skip = (page - 1) * limit;
 
-const [users, totalUsers] = await Promise.all([
+      const [users, totalUsers] = await Promise.all([
         User.find(filter)
           .select("-password")
           .sort({ createdAt: -1 })
@@ -86,7 +108,7 @@ export const POST = AdminMiddleware.requireAdmin(
         status = "active",
       } = body;
 
-if (!email || !firstName || !lastName) {
+      if (!email || !firstName || !lastName) {
         return NextResponse.json(
           {
             success: false,
@@ -98,7 +120,7 @@ if (!email || !firstName || !lastName) {
 
       await connectDB();
 
-const existingUser = await User.findOne({ email: email.toLowerCase() });
+      const existingUser = await User.findOne({ email: email.toLowerCase() });
       if (existingUser) {
         return NextResponse.json(
           {
@@ -109,7 +131,7 @@ const existingUser = await User.findOne({ email: email.toLowerCase() });
         );
       }
 
-const newUser = await User.create({
+      const newUser = await User.create({
         email: email.toLowerCase(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),

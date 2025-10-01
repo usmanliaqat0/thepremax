@@ -5,7 +5,6 @@ import { AdminMiddleware } from "@/lib/admin-middleware";
 
 export async function GET(request: NextRequest) {
   try {
-
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -17,6 +16,21 @@ export async function GET(request: NextRequest) {
     await connectDB();
 
     const { searchParams } = new URL(request.url);
+    const all = searchParams.get("all") === "true";
+
+    if (all) {
+      // Return all messages without pagination for client-side handling
+      const messages = await ContactMessage.find({})
+        .sort({ createdAt: -1 })
+        .lean();
+
+      return NextResponse.json({
+        success: true,
+        data: messages,
+      });
+    }
+
+    // Original paginated endpoint for backward compatibility
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const search = searchParams.get("search") || "";
@@ -24,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-const filter: Record<string, unknown> = {};
+    const filter: Record<string, unknown> = {};
 
     if (search) {
       filter.$or = [
@@ -39,9 +53,9 @@ const filter: Record<string, unknown> = {};
       filter.status = status;
     }
 
-const total = await ContactMessage.countDocuments(filter);
+    const total = await ContactMessage.countDocuments(filter);
 
-const messages = await ContactMessage.find(filter)
+    const messages = await ContactMessage.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)

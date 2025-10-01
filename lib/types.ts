@@ -5,7 +5,7 @@ export type Timestamp = string;
 export type Currency = "USD" | "EUR" | "PKR";
 export type Status = "active" | "inactive" | "pending" | "archived";
 
-export interface User {
+export interface User extends Record<string, unknown> {
   id: ID;
   email: string;
   firstName: string;
@@ -408,12 +408,15 @@ export interface AdminStats {
     active: number;
     inactive: number;
     growth: string;
+    activeGrowth: string;
   };
   verification: {
     emailVerified: number;
     phoneVerified: number;
     emailVerificationRate: number;
     phoneVerificationRate: number;
+    emailGrowth: string;
+    phoneGrowth: string;
   };
   recentUsers: Array<{
     id: string;

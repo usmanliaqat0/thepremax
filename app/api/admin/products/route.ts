@@ -6,7 +6,6 @@ import { AdminMiddleware } from "@/lib/admin-middleware";
 
 export async function GET(request: NextRequest) {
   try {
-
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -18,6 +17,22 @@ export async function GET(request: NextRequest) {
     await connectDB();
 
     const { searchParams } = new URL(request.url);
+    const all = searchParams.get("all") === "true";
+
+    if (all) {
+      // Return all products without pagination for client-side handling
+      const products = await Product.find({})
+        .populate("category", "name slug")
+        .sort({ createdAt: -1 })
+        .lean();
+
+      return NextResponse.json({
+        success: true,
+        data: products,
+      });
+    }
+
+    // Original paginated endpoint for backward compatibility
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const search = searchParams.get("search") || "";
@@ -29,7 +44,7 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-const filter: Record<string, unknown> = {};
+    const filter: Record<string, unknown> = {};
 
     if (search) {
       filter.$or = [
@@ -59,9 +74,9 @@ const filter: Record<string, unknown> = {};
       filter.inStock = inStock === "true";
     }
 
-const total = await Product.countDocuments(filter);
+    const total = await Product.countDocuments(filter);
 
-const products = await Product.find(filter)
+    const products = await Product.find(filter)
       .populate("category", "name slug")
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -93,7 +108,6 @@ const products = await Product.find(filter)
 
 export async function POST(request: NextRequest) {
   try {
-
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
@@ -130,7 +144,7 @@ export async function POST(request: NextRequest) {
       sourceUrl,
     } = body;
 
-if (!name) {
+    if (!name) {
       return NextResponse.json(
         { success: false, error: "Name is required" },
         { status: 400 }
@@ -158,7 +172,7 @@ if (!name) {
       );
     }
 
-const category = await Category.findById(categoryId);
+    const category = await Category.findById(categoryId);
     if (!category) {
       return NextResponse.json(
         { success: false, error: "Category not found" },
@@ -166,7 +180,7 @@ const category = await Category.findById(categoryId);
       );
     }
 
-const existingProduct = await Product.findOne({
+    const existingProduct = await Product.findOne({
       name: { $regex: new RegExp(`^${name}$`, "i") },
     });
 
@@ -177,12 +191,12 @@ const existingProduct = await Product.findOne({
       );
     }
 
-const slug = name
+    const slug = name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
-const existingSlug = await Product.findOne({ slug });
+    const existingSlug = await Product.findOne({ slug });
     if (existingSlug) {
       return NextResponse.json(
         { success: false, error: "Product with this slug already exists" },
@@ -190,7 +204,7 @@ const existingSlug = await Product.findOne({ slug });
       );
     }
 
-if (variants.length > 0) {
+    if (variants.length > 0) {
       const skus = variants.map((v: { sku: string }) => v.sku).filter(Boolean);
       const uniqueSkus = new Set(skus);
       if (skus.length !== uniqueSkus.size) {
@@ -200,7 +214,7 @@ if (variants.length > 0) {
         );
       }
 
-const existingSkus = await Product.find({
+      const existingSkus = await Product.find({
         "variants.sku": { $in: skus },
       });
       if (existingSkus.length > 0) {
@@ -211,7 +225,7 @@ const existingSkus = await Product.find({
       }
     }
 
-if (images.length > 0) {
+    if (images.length > 0) {
       const hasPrimary = images.some(
         (img: { isPrimary: boolean }) => img.isPrimary
       );
@@ -220,7 +234,7 @@ if (images.length > 0) {
       }
     }
 
-const product = await Product.create({
+    const product = await Product.create({
       name,
       slug,
       description,
@@ -247,7 +261,7 @@ const product = await Product.create({
       publishedAt: status === "active" ? new Date() : undefined,
     });
 
-const populatedProduct = await Product.findById(product._id)
+    const populatedProduct = await Product.findById(product._id)
       .populate("category", "name slug")
       .lean();
 
