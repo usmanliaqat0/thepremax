@@ -19,12 +19,13 @@ import { Card, CardContent } from "@/components/ui/card";
 // Removed dummy data imports - now using real API data
 import { Search, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 import { Product, Category } from "@/lib/types";
 
 const CategoryPage = () => {
   const params = useParams();
-  const categoryId = params.category as string;
+  const categorySlug = params.category as string;
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
@@ -32,14 +33,48 @@ const CategoryPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const category = categories.find((cat) => cat._id === categoryId);
+  const category = categories.find((cat) => cat.slug === categorySlug);
 
   useScrollToTop();
 
+  // Fetch data from API
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+
+        // Fetch products
+        const productsResponse = await fetch("/api/products?limit=1000");
+        const productsData = await productsResponse.json();
+
+        // Fetch categories
+        const categoriesResponse = await fetch("/api/categories");
+        const categoriesData = await categoriesResponse.json();
+
+        if (productsData.success) {
+          setProducts(productsData.data);
+        }
+
+        if (categoriesData.success) {
+          setCategories(categoriesData.data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (!category) return;
+
     let filtered = products.filter(
-      (product) => product.categoryId === categoryId
+      (product) => product.categoryId === category._id
     );
 
     if (searchTerm.trim()) {
@@ -90,7 +125,7 @@ const CategoryPage = () => {
     });
 
     setFilteredProducts(filtered);
-  }, [categoryId, searchTerm, sortBy, priceRange]);
+  }, [category, products, searchTerm, sortBy, priceRange]);
 
   const clearFilters = () => {
     setSearchTerm("");
@@ -102,6 +137,21 @@ const CategoryPage = () => {
     searchTerm.trim() !== "",
     priceRange !== "all",
   ].filter(Boolean).length;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-16">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading category...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!category) {
     return (
@@ -150,11 +200,28 @@ const CategoryPage = () => {
                 <span>/</span>
                 <span className="text-primary">{category.name}</span>
               </div>
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-4xl">📦</span>
-                <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary">
-                  {category.name}
-                </h1>
+              <div className="flex items-center gap-6 mb-4">
+                <div className="w-20 h-20 flex items-center justify-center rounded-lg overflow-hidden shadow-fashion-sm">
+                  {category.image ? (
+                    <Image
+                      src={category.image}
+                      alt={category.name}
+                      width={80}
+                      height={80}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-accent/20 to-accent/40 flex items-center justify-center">
+                      <span className="text-4xl">📦</span>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-2">
+                    {category.name}
+                  </h1>
+                  <div className="w-16 h-1 bg-gradient-to-r from-accent to-accent/60 rounded-full"></div>
+                </div>
               </div>
               <p className="text-muted-foreground mb-2">
                 {category.description}

@@ -119,14 +119,14 @@ const ShopContent = () => {
 
       // Category filter
       if (categoryFilter !== "all") {
-        filtered = filtered.filter((product) => {
-          if (typeof product.category === "string") {
-            return product.category === categoryFilter;
-          } else if (product.category && typeof product.category === "object") {
-            return product.category.slug === categoryFilter;
-          }
-          return false;
-        });
+        const selectedCategory = categories.find(
+          (cat) => cat.slug === categoryFilter
+        );
+        if (selectedCategory) {
+          filtered = filtered.filter((product) => {
+            return product.categoryId === selectedCategory._id;
+          });
+        }
       }
 
       // Price range filter
@@ -164,7 +164,7 @@ const ShopContent = () => {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [products, searchTerm, categoryFilter, priceRange, sortBy]);
+  }, [products, searchTerm, categoryFilter, priceRange, sortBy, categories]);
 
   const clearFilters = () => {
     setSearchTerm("");

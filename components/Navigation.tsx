@@ -20,31 +20,32 @@ import Image from "next/image";
 import { useCart, CartItem } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
-import { useMemo, useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
+import { Category } from "@/lib/types";
 
 const Navigation = () => {
   const { getCartItemsCount, state } = useCart();
   const { isAdmin } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  const categories = useMemo(
-    () => [
-      { name: "Health & Beauty", href: "/category/health-beauty", icon: "💄" },
-      {
-        name: "Sports & Recreation",
-        href: "/category/sports-recreation",
-        icon: "🏀",
-      },
-      {
-        name: "Tools & Equipment",
-        href: "/category/tools-equipment",
-        icon: "🔧",
-      },
-      { name: "Automotive", href: "/category/automotive", icon: "🚗" },
-    ],
-    []
-  );
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/categories");
+        const data = await response.json();
+        if (data.success) {
+          setCategories(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleSearch = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -94,14 +95,32 @@ const Navigation = () => {
                 <div className="py-2">
                   {categories.map((category) => (
                     <Link
-                      key={category.name}
-                      href={category.href}
-                      className="flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                      key={category._id}
+                      href={`/category/${category.slug}`}
+                      className="flex items-center px-4 py-4 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-fashion hover:scale-[1.02] group"
                     >
-                      <span className="mr-3 text-lg">{category.icon}</span>
-                      <div>
-                        <div className="font-medium">{category.name}</div>
+                      <div className="mr-3 w-10 h-10 flex items-center justify-center rounded-lg overflow-hidden shadow-fashion-sm">
+                        {category.image ? (
+                          <Image
+                            src={category.image}
+                            alt={category.name}
+                            width={40}
+                            height={40}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-accent/20 to-accent/40 flex items-center justify-center">
+                            <span className="text-lg">📦</span>
+                          </div>
+                        )}
                       </div>
+                      <div className="flex-1">
+                        <div className="font-semibold">{category.name}</div>
+                        <div className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          Explore products
+                        </div>
+                      </div>
+                      <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-1 group-hover:translate-x-0" />
                     </Link>
                   ))}
                   <div className="border-t border-border mt-2 pt-2">
@@ -271,7 +290,9 @@ const Navigation = () => {
                       </Button>
                       {isAdmin() && (
                         <Button
-                          variant={pathname === "/admin" ? "secondary" : "ghost"}
+                          variant={
+                            pathname === "/admin" ? "secondary" : "ghost"
+                          }
                           className={`w-full justify-start h-10 text-base transition-colors ${
                             pathname === "/admin"
                               ? "bg-accent text-accent-foreground font-medium"
@@ -279,7 +300,10 @@ const Navigation = () => {
                           }`}
                           asChild
                         >
-                          <Link href="/admin" className="text-accent font-semibold">
+                          <Link
+                            href="/admin"
+                            className="text-accent font-semibold"
+                          >
                             Admin Panel
                           </Link>
                         </Button>
@@ -292,25 +316,39 @@ const Navigation = () => {
                       </h3>
                       {categories.map((category) => (
                         <Button
-                          key={category.name}
+                          key={category._id}
                           variant={
-                            pathname === category.href ? "secondary" : "ghost"
+                            pathname === `/category/${category.slug}`
+                              ? "secondary"
+                              : "ghost"
                           }
-                          className={`w-full justify-start h-10 text-base pl-4 transition-colors ${
-                            pathname === category.href
-                              ? "bg-accent text-accent-foreground font-medium"
-                              : ""
+                          className={`w-full justify-start h-12 text-base pl-4 transition-fashion hover:bg-accent/10 hover:scale-[1.02] ${
+                            pathname === `/category/${category.slug}`
+                              ? "bg-accent text-accent-foreground font-medium shadow-fashion-sm"
+                              : "hover:shadow-fashion-sm"
                           }`}
                           asChild
                         >
                           <Link
-                            href={category.href}
+                            href={`/category/${category.slug}`}
                             className="flex items-center"
                           >
-                            <span className="mr-3 text-lg">
-                              {category.icon}
-                            </span>
-                            {category.name}
+                            <div className="mr-3 w-10 h-10 flex items-center justify-center rounded-lg overflow-hidden shadow-fashion-sm">
+                              {category.image ? (
+                                <Image
+                                  src={category.image}
+                                  alt={category.name}
+                                  width={40}
+                                  height={40}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-accent/20 to-accent/40 flex items-center justify-center">
+                                  <span className="text-lg">📦</span>
+                                </div>
+                              )}
+                            </div>
+                            <span className="font-medium">{category.name}</span>
                           </Link>
                         </Button>
                       ))}
@@ -350,10 +388,14 @@ const Navigation = () => {
 
                       <Button
                         variant={
-                          (pathname === "/profile" || (isAdmin() && pathname === "/admin")) ? "secondary" : "ghost"
+                          pathname === "/profile" ||
+                          (isAdmin() && pathname === "/admin")
+                            ? "secondary"
+                            : "ghost"
                         }
                         className={`w-full justify-start h-10 text-base transition-colors ${
-                          (pathname === "/profile" || (isAdmin() && pathname === "/admin"))
+                          pathname === "/profile" ||
+                          (isAdmin() && pathname === "/admin")
                             ? "bg-accent text-accent-foreground font-medium"
                             : ""
                         }`}
