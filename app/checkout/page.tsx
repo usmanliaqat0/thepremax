@@ -20,6 +20,7 @@ import { CreditCard, MapPin, ArrowLeft, Check } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 import { formatPrice } from "@/lib/currency";
 import { useToast } from "@/hooks/use-toast";
@@ -44,6 +45,7 @@ interface PaymentInfo {
 
 const Checkout = () => {
   const { state, getCartTotal, getCartItemsCount, clearCart } = useCart();
+  const { state: authState } = useAuth();
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     fullName: "",
     email: "",
@@ -65,6 +67,31 @@ const Checkout = () => {
   const router = useRouter();
 
   useScrollToTop();
+
+  // Redirect to login if not authenticated
+  if (!authState.token) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-16">
+          <Card className="max-w-md mx-auto text-center">
+            <CardContent className="py-12">
+              <h2 className="text-2xl font-heading font-bold mb-4">
+                Authentication Required
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                Please log in to proceed with checkout.
+              </p>
+              <Link href="/login">
+                <Button className="w-full">Go to Login</Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (state.items.length === 0) {
     return (
@@ -110,16 +137,101 @@ const Checkout = () => {
     e.preventDefault();
     setIsProcessing(true);
 
-    setTimeout(() => {
+    // Check if user is authenticated
+    if (!authState.token) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to place an order.",
+        variant: "destructive",
+      });
+      router.push("/login");
+      setIsProcessing(false);
+      return;
+    }
+
+    try {
+      // Prepare order data
+      const orderItems = state.items.map((item) => ({
+        productId: item.id,
+        name: item.product.name,
+        image: item.product.images[0]?.url || "/placeholder-product.jpg",
+        price: item.product.basePrice,
+        quantity: item.quantity,
+        size: item.size,
+        color: item.color,
+      }));
+
+      // Split full name into first and last name
+      const nameParts = shippingInfo.fullName.trim().split(" ");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+
+      const orderData = {
+        items: orderItems,
+        subtotal,
+        tax,
+        shipping,
+        total,
+        paymentMethod,
+        shippingAddress: {
+          firstName,
+          lastName,
+          phone: shippingInfo.phone,
+          address: shippingInfo.address,
+          city: shippingInfo.city,
+          state: shippingInfo.province,
+          postalCode: shippingInfo.postalCode,
+          country: "Pakistan",
+        },
+        billingAddress: {
+          firstName,
+          lastName,
+          phone: shippingInfo.phone,
+          address: shippingInfo.address,
+          city: shippingInfo.city,
+          state: shippingInfo.province,
+          postalCode: shippingInfo.postalCode,
+          country: "Pakistan",
+        },
+      };
+
+      // Create order
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authState.token}`,
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create order");
+      }
+
+      const result = await response.json();
+
+      // Clear cart and redirect
       clearCart();
       toast({
         title: "Order placed successfully!",
-        description:
-          "Thank you for your purchase. You will receive a confirmation email shortly.",
+        description: `Order #${result.order.orderNumber} has been created. You will receive a confirmation email shortly.`,
       });
-      router.push("/order-success");
+      router.push(`/order-success?orderId=${result.order._id}`);
+    } catch (error) {
+      console.error("Order creation error:", error);
+      toast({
+        title: "Order failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to create order. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setIsProcessing(false);
-    }, 2000);
+    }
   };
 
   return (

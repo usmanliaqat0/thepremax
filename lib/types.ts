@@ -139,6 +139,17 @@ export interface AdminStats {
     emailGrowth: string;
     phoneGrowth: string;
   };
+  orders: {
+    total: number;
+    totalRevenue: number;
+    pending: number;
+    processing: number;
+    shipped: number;
+    delivered: number;
+    cancelled: number;
+    growth: string;
+    revenueGrowth: string;
+  };
   recentUsers: Array<{
     id: string;
     firstName: string;

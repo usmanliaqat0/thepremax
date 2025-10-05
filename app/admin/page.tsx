@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, TrendingUp } from "lucide-react";
+import { Users, TrendingUp, ShoppingCart, DollarSign } from "lucide-react";
 
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
@@ -43,9 +43,9 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 lg:gap-6">
         {loading || !stats ? (
-          Array.from({ length: 4 }).map((_, i) => (
+          Array.from({ length: 6 }).map((_, i) => (
             <Card key={i}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground bg-muted h-4 w-24 animate-pulse rounded" />
@@ -135,6 +135,48 @@ export default function AdminDashboard() {
                   <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
                   <span className="text-green-600 font-medium">
                     {stats.verification.phoneGrowth}
+                  </span>
+                  <span className="text-muted-foreground ml-1">
+                    from last month
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Orders
+                </CardTitle>
+                <ShoppingCart className="h-5 w-5 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{stats.orders.total}</div>
+                <div className="flex items-center text-sm mt-2">
+                  <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
+                  <span className="text-green-600 font-medium">
+                    {stats.orders.growth}
+                  </span>
+                  <span className="text-muted-foreground ml-1">
+                    from last month
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Total Revenue
+                </CardTitle>
+                <DollarSign className="h-5 w-5 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">
+                  ${stats.orders.totalRevenue.toLocaleString()}
+                </div>
+                <div className="flex items-center text-sm mt-2">
+                  <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
+                  <span className="text-green-600 font-medium">
+                    {stats.orders.revenueGrowth}
                   </span>
                   <span className="text-muted-foreground ml-1">
                     from last month

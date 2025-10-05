@@ -40,7 +40,7 @@ import {
 } from "lucide-react";
 
 interface OrderItem {
-  id: string;
+  productId: string;
   name: string;
   image: string;
   price: number;
@@ -50,21 +50,25 @@ interface OrderItem {
 }
 
 interface Order {
-  id: string;
+  _id: string;
   orderNumber: string;
-  date: string;
+  createdAt: string;
   status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  paymentStatus: "pending" | "paid" | "failed" | "refunded";
   items: OrderItem[];
   subtotal: number;
   shipping: number;
   tax: number;
   total: number;
   shippingAddress: {
-    name: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
     address: string;
     city: string;
     state: string;
     postalCode: string;
+    country: string;
   };
   trackingNumber?: string;
   estimatedDelivery?: string;
@@ -73,25 +77,31 @@ interface Order {
 const OrderHistorySection = () => {
   const { state } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-useEffect(() => {
+  useEffect(() => {
     const fetchOrders = async () => {
-      if (!state.token) return;
+      if (!state.token) {
+        setLoading(false);
+        return;
+      }
 
       try {
-        const response = await fetch("/api/profile/orders", {
+        const response = await fetch("/api/orders", {
           headers: {
             Authorization: `Bearer ${state.token}`,
           },
         });
 
-        const result = await response.json();
-        if (result.success) {
+        if (response.ok) {
+          const result = await response.json();
           setOrders(result.orders || []);
+        } else {
+          const errorData = await response.json();
+          console.error("Orders API error:", errorData);
         }
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -149,18 +159,46 @@ useEffect(() => {
   });
 
   const handleTrackOrder = (trackingNumber: string) => {
-
     window.open(`https://example-tracking.com/${trackingNumber}`, "_blank");
   };
 
   const handleDownloadInvoice = (orderNumber: string) => {
-
     console.log(`Downloading invoice for order ${orderNumber}`);
   };
 
   const handleReorder = (order: Order) => {
-
     console.log(`Reordering items from order ${order.orderNumber}`);
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (!state.token) return;
+
+    try {
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${state.token}`,
+        },
+        body: JSON.stringify({ status: "cancelled" }),
+      });
+
+      if (response.ok) {
+        // Refresh orders
+        const ordersResponse = await fetch("/api/orders", {
+          headers: {
+            Authorization: `Bearer ${state.token}`,
+          },
+        });
+
+        if (ordersResponse.ok) {
+          const result = await ordersResponse.json();
+          setOrders(result.orders || []);
+        }
+      }
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+    }
   };
 
   return (
@@ -206,7 +244,12 @@ useEffect(() => {
         </CardHeader>
 
         <CardContent>
-          {filteredOrders.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading orders...</p>
+            </div>
+          ) : filteredOrders.length === 0 ? (
             <div className="text-center py-8">
               <Package className="w-12 h-12 mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -244,7 +287,8 @@ useEffect(() => {
 
                       <div className="text-sm text-gray-600 space-y-1">
                         <p>
-                          Placed on {new Date(order.date).toLocaleDateString()}
+                          Placed on{" "}
+                          {new Date(order.createdAt).toLocaleDateString()}
                         </p>
                         <p>
                           {order.items.length} item
@@ -310,7 +354,7 @@ useEffect(() => {
                             </DialogTitle>
                             <DialogDescription>
                               Placed on{" "}
-                              {new Date(order.date).toLocaleDateString()}
+                              {new Date(order.createdAt).toLocaleDateString()}
                             </DialogDescription>
                           </DialogHeader>
 
@@ -352,7 +396,7 @@ useEffect(() => {
                                 <div className="space-y-3">
                                   {selectedOrder.items.map((item) => (
                                     <div
-                                      key={item.id}
+                                      key={item.productId}
                                       className="flex items-center space-x-4 p-3 border rounded-lg"
                                     >
                                       <Image
@@ -427,7 +471,8 @@ useEffect(() => {
                                 </h4>
                                 <div className="p-3 bg-gray-50 rounded-lg">
                                   <p className="font-medium">
-                                    {selectedOrder.shippingAddress.name}
+                                    {selectedOrder.shippingAddress.firstName}{" "}
+                                    {selectedOrder.shippingAddress.lastName}
                                   </p>
                                   <p>{selectedOrder.shippingAddress.address}</p>
                                   <p>
@@ -435,6 +480,7 @@ useEffect(() => {
                                     {selectedOrder.shippingAddress.state}{" "}
                                     {selectedOrder.shippingAddress.postalCode}
                                   </p>
+                                  <p>{selectedOrder.shippingAddress.country}</p>
                                 </div>
                               </div>
                             </div>
@@ -463,6 +509,17 @@ useEffect(() => {
                         <Download className="w-4 h-4 mr-2" />
                         Invoice
                       </Button>
+
+                      {order.status === "pending" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCancelOrder(order._id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          Cancel Order
+                        </Button>
+                      )}
 
                       {order.status === "delivered" && (
                         <Button

@@ -2,6 +2,7 @@
 import { AdminMiddleware } from "@/lib/admin-middleware";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
+import Order from "@/lib/models/Order";
 
 export const GET = AdminMiddleware.requireAdmin(async () => {
   try {
@@ -27,6 +28,16 @@ export const GET = AdminMiddleware.requireAdmin(async () => {
       activeUsersLastMonth,
       verifiedEmailsLastMonth,
       verifiedPhonesLastMonth,
+      // Order statistics
+      totalOrders,
+      totalRevenue,
+      pendingOrders,
+      processingOrders,
+      shippedOrders,
+      deliveredOrders,
+      cancelledOrders,
+      ordersLastMonth,
+      revenueLastMonth,
     ] = await Promise.all([
       User.countDocuments(),
       User.countDocuments({ status: "active" }),
@@ -49,6 +60,21 @@ export const GET = AdminMiddleware.requireAdmin(async () => {
         isPhoneVerified: true,
         createdAt: { $lt: lastMonth },
       }),
+      // Order statistics
+      Order.countDocuments(),
+      Order.aggregate([
+        { $group: { _id: null, total: { $sum: "$total" } } },
+      ]).then((result) => result[0]?.total || 0),
+      Order.countDocuments({ status: "pending" }),
+      Order.countDocuments({ status: "processing" }),
+      Order.countDocuments({ status: "shipped" }),
+      Order.countDocuments({ status: "delivered" }),
+      Order.countDocuments({ status: "cancelled" }),
+      Order.countDocuments({ createdAt: { $lt: lastMonth } }),
+      Order.aggregate([
+        { $match: { createdAt: { $lt: lastMonth } } },
+        { $group: { _id: null, total: { $sum: "$total" } } },
+      ]).then((result) => result[0]?.total || 0),
     ]);
 
     // Calculate growth percentages
@@ -68,6 +94,8 @@ export const GET = AdminMiddleware.requireAdmin(async () => {
       verifiedPhones,
       verifiedPhonesLastMonth
     );
+    const orderGrowth = calculateGrowth(totalOrders, ordersLastMonth);
+    const revenueGrowth = calculateGrowth(totalRevenue, revenueLastMonth);
 
     const emailVerificationRate =
       totalUsers > 0 ? Math.round((verifiedEmails / totalUsers) * 100) : 0;
@@ -89,6 +117,17 @@ export const GET = AdminMiddleware.requireAdmin(async () => {
         phoneVerificationRate,
         emailGrowth: emailVerificationGrowth,
         phoneGrowth: phoneVerificationGrowth,
+      },
+      orders: {
+        total: totalOrders,
+        totalRevenue,
+        pending: pendingOrders,
+        processing: processingOrders,
+        shipped: shippedOrders,
+        delivered: deliveredOrders,
+        cancelled: cancelledOrders,
+        growth: orderGrowth,
+        revenueGrowth,
       },
       recentUsers: recentUsers.map((user) => ({
         id: user._id.toString(),

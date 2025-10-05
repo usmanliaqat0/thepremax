@@ -10,8 +10,53 @@ export interface AuthenticatedRequest extends NextRequest {
   };
 }
 
+// Helper functions for token extraction
+function extractTokenFromHeader(req: NextRequest): string | null {
+  const authHeader = req.headers.get("authorization");
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    return authHeader.substring(7);
+  }
+
+  return null;
+}
+
+function extractTokenFromCookies(req: NextRequest): string | null {
+  return req.cookies.get("accessToken")?.value || null;
+}
+
+// Simple auth middleware function for API routes
+export async function authMiddleware(req: NextRequest): Promise<{
+  id: string;
+  email: string;
+  role: string;
+  isEmailVerified?: boolean;
+} | null> {
+  try {
+    let token = extractTokenFromHeader(req);
+
+    if (!token) {
+      token = extractTokenFromCookies(req);
+    }
+
+    if (!token) {
+      return null;
+    }
+
+    const decoded = TokenUtils.verifyAccessToken(token);
+
+    return {
+      id: decoded.id,
+      email: decoded.email,
+      role: decoded.role,
+    };
+  } catch (error) {
+    console.error("Auth middleware error:", error);
+    return null;
+  }
+}
+
 export class AuthMiddleware {
-  
   static async verifyRequest(req: NextRequest): Promise<{
     success: boolean;
     user?: {
@@ -23,7 +68,6 @@ export class AuthMiddleware {
     error?: string;
   }> {
     try {
-
       let token = this.extractTokenFromHeader(req);
 
       if (!token) {
@@ -37,7 +81,7 @@ export class AuthMiddleware {
         };
       }
 
-const decoded = TokenUtils.verifyAccessToken(token);
+      const decoded = TokenUtils.verifyAccessToken(token);
 
       return {
         success: true,
@@ -67,21 +111,15 @@ const decoded = TokenUtils.verifyAccessToken(token);
     }
   }
 
-private static extractTokenFromHeader(req: NextRequest): string | null {
-    const authHeader = req.headers.get("authorization");
-
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      return authHeader.substring(7);
-    }
-
-    return null;
+  private static extractTokenFromHeader(req: NextRequest): string | null {
+    return extractTokenFromHeader(req);
   }
 
-private static extractTokenFromCookies(req: NextRequest): string | null {
-    return req.cookies.get("accessToken")?.value || null;
+  private static extractTokenFromCookies(req: NextRequest): string | null {
+    return extractTokenFromCookies(req);
   }
 
-static hasRole(
+  static hasRole(
     user: { role: string },
     requiredRole: string | string[]
   ): boolean {
@@ -89,11 +127,11 @@ static hasRole(
     return roles.includes(user.role);
   }
 
-static isAdmin(user: { role: string }): boolean {
+  static isAdmin(user: { role: string }): boolean {
     return user.role === "admin";
   }
 
-static canAccessResource(
+  static canAccessResource(
     user: { id: string; role: string },
     resourceUserId: string
   ): boolean {

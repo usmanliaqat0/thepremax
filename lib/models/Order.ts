@@ -1,4 +1,4 @@
-﻿import mongoose, { Schema } from "mongoose";
+﻿import mongoose, { Schema, Types } from "mongoose";
 
 export interface IOrderItem {
   productId: string;
@@ -11,7 +11,7 @@ export interface IOrderItem {
 }
 
 export interface IOrder {
-  userId: string;
+  userId: string | Types.ObjectId;
   orderNumber: string;
   items: IOrderItem[];
   subtotal: number;
@@ -72,7 +72,8 @@ const AddressSchema = {
 const OrderSchema = new Schema<IOrder>(
   {
     userId: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     orderNumber: {
