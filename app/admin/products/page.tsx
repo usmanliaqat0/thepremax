@@ -8,6 +8,7 @@ import ProductDialog from "@/components/admin/ProductDialog";
 import ProductTable from "@/components/admin/ProductTable";
 import { toast } from "sonner";
 import { useAdminData } from "@/hooks/use-admin-data";
+import { useDialog } from "@/hooks/use-dialog";
 
 interface Category {
   _id: string;
@@ -69,9 +70,17 @@ interface Product extends Record<string, unknown> {
 
 export default function ProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Use the custom dialog hook for better state management
+  const productDialog = useDialog({
+    onOpenChange: (open) => {
+      if (!open) {
+        setEditingProduct(null);
+      }
+    },
+  });
 
   // Use the new hook for fetching all products
   const {
@@ -103,21 +112,16 @@ export default function ProductsPage() {
 
   const handleEdit = (product: Product) => {
     setEditingProduct(product);
-    setIsDialogOpen(true);
+    productDialog.openDialog();
   };
 
   const handleCreate = () => {
     setEditingProduct(null);
-    setIsDialogOpen(true);
-  };
-
-  const handleDialogClose = () => {
-    setIsDialogOpen(false);
-    setEditingProduct(null);
+    productDialog.openDialog();
   };
 
   const handleProductSaved = () => {
-    handleDialogClose();
+    productDialog.closeDialog();
     setRefreshTrigger((prev) => prev + 1);
     toast.success("Product saved successfully");
   };
@@ -278,8 +282,8 @@ export default function ProductsPage() {
 
       {/* Product Dialog */}
       <ProductDialog
-        open={isDialogOpen}
-        onOpenChange={handleDialogClose}
+        open={productDialog.open}
+        onOpenChange={productDialog.onOpenChange}
         product={editingProduct}
         categories={categories}
         onSuccess={handleProductSaved}

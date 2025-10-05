@@ -17,16 +17,32 @@ import UserViewDialog from "@/components/admin/UserViewDialog";
 import UserTable from "@/components/admin/UserTable";
 import { showSuccessMessage, showErrorMessage } from "@/lib/error-handler";
 import { useAdminData } from "@/hooks/use-admin-data";
+import { useDialog } from "@/hooks/use-dialog";
 
 export default function UsersManagement() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState<{
     [key: string]: boolean;
   }>({});
   const [editLoading, setEditLoading] = useState(false);
   const [refreshTrigger] = useState(0);
+
+  // Use the custom dialog hook for better state management
+  const viewDialog = useDialog({
+    onOpenChange: (open) => {
+      if (!open) {
+        setSelectedUser(null);
+      }
+    },
+  });
+
+  const editDialog = useDialog({
+    onOpenChange: (open) => {
+      if (!open) {
+        setSelectedUser(null);
+      }
+    },
+  });
 
   // Use the new hook for fetching all users
   const {
@@ -217,11 +233,11 @@ export default function UsersManagement() {
             onRefresh={handleRefresh}
             onView={(user) => {
               setSelectedUser(user);
-              setViewDialogOpen(true);
+              viewDialog.openDialog();
             }}
             onEdit={(user) => {
               setSelectedUser(user);
-              setEditDialogOpen(true);
+              editDialog.openDialog();
             }}
             onToggleStatus={handleToggleUserStatus}
             onDelete={handleDeleteUser}
@@ -235,13 +251,13 @@ export default function UsersManagement() {
         <>
           <UserViewDialog
             user={selectedUser}
-            open={viewDialogOpen}
-            onOpenChange={setViewDialogOpen}
+            open={viewDialog.open}
+            onOpenChange={viewDialog.onOpenChange}
           />
           <UserEditDialog
             user={selectedUser}
-            open={editDialogOpen}
-            onOpenChange={setEditDialogOpen}
+            open={editDialog.open}
+            onOpenChange={editDialog.onOpenChange}
             loading={editLoading}
             onUserUpdated={async (updatedUser) => {
               setEditLoading(true);

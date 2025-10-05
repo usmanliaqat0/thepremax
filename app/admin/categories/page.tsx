@@ -9,6 +9,7 @@ import CategoryViewDialog from "@/components/admin/CategoryViewDialog";
 import CategoryTable from "@/components/admin/CategoryTable";
 import { toast } from "sonner";
 import { useAdminData } from "@/hooks/use-admin-data";
+import { useDialog } from "@/hooks/use-dialog";
 
 interface Category extends Record<string, unknown> {
   _id: string;
@@ -27,11 +28,26 @@ interface Category extends Record<string, unknown> {
 }
 
 export default function CategoriesPage() {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [viewingCategory, setViewingCategory] = useState<Category | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Use the custom dialog hook for better state management
+  const editDialog = useDialog({
+    onOpenChange: (open) => {
+      if (!open) {
+        setEditingCategory(null);
+      }
+    },
+  });
+
+  const viewDialog = useDialog({
+    onOpenChange: (open) => {
+      if (!open) {
+        setViewingCategory(null);
+      }
+    },
+  });
 
   // Use the new hook for fetching all categories
   const {
@@ -47,22 +63,12 @@ export default function CategoriesPage() {
 
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
-    setIsDialogOpen(true);
+    editDialog.openDialog();
   };
 
   const handleView = (category: Category) => {
     setViewingCategory(category);
-    setIsViewDialogOpen(true);
-  };
-
-  const handleDialogClose = () => {
-    setIsDialogOpen(false);
-    setEditingCategory(null);
-  };
-
-  const handleViewDialogClose = () => {
-    setIsViewDialogOpen(false);
-    setViewingCategory(null);
+    viewDialog.openDialog();
   };
 
   const handleSuccess = () => {
@@ -140,10 +146,7 @@ export default function CategoriesPage() {
             <Package className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Button
-            onClick={() => setIsDialogOpen(true)}
-            className="w-full sm:w-auto"
-          >
+          <Button onClick={editDialog.openDialog} className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             Add Category
           </Button>
@@ -208,15 +211,15 @@ export default function CategoriesPage() {
       </Card>
 
       <CategoryDialog
-        open={isDialogOpen}
-        onOpenChange={handleDialogClose}
+        open={editDialog.open}
+        onOpenChange={editDialog.onOpenChange}
         category={editingCategory}
         onSuccess={handleSuccess}
       />
 
       <CategoryViewDialog
-        open={isViewDialogOpen}
-        onOpenChange={handleViewDialogClose}
+        open={viewDialog.open}
+        onOpenChange={viewDialog.onOpenChange}
         category={viewingCategory}
       />
     </div>
