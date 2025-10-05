@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import Navigation from "@/components/Navigation";
@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Section, Container, SectionHeader } from "@/components/ui/layout";
 import { IconFeature, FeatureGrid } from "@/components/ui/features";
 import { ProductGridWrapper } from "@/components/ui/grid";
-import { getFeaturedProducts, getTopRatedProducts } from "@/lib/products";
+import { Product } from "@/lib/types";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -39,8 +39,38 @@ const Newsletter = dynamic(
 export default function Home() {
   useScrollToTop();
 
-  const featuredProducts = useMemo(() => getFeaturedProducts(), []);
-  const topRatedProducts = useMemo(() => getTopRatedProducts(), []);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [topRatedProducts, setTopRatedProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        // Fetch featured products
+        const featuredResponse = await fetch(
+          "/api/products?featured=true&limit=8"
+        );
+        const featuredData = await featuredResponse.json();
+
+        // Fetch top rated products
+        const topRatedResponse = await fetch(
+          "/api/products?sortBy=rating&sortOrder=desc&limit=8"
+        );
+        const topRatedData = await topRatedResponse.json();
+
+        if (featuredData.success) {
+          setFeaturedProducts(featuredData.data);
+        }
+
+        if (topRatedData.success) {
+          setTopRatedProducts(topRatedData.data);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const features = [
     {
@@ -208,7 +238,7 @@ export default function Home() {
           />
           <ProductGridWrapper>
             {topRatedProducts.slice(0, 4).map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product._id} product={product} />
             ))}
           </ProductGridWrapper>
         </Container>
@@ -223,7 +253,7 @@ export default function Home() {
 
           <ProductGridWrapper className="mb-12">
             {featuredProducts.slice(0, 4).map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product._id} product={product} />
             ))}
           </ProductGridWrapper>
 

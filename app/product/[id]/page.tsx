@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, notFound, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -26,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getProductById, products } from "@/lib/products";
 import {
   ArrowLeft,
   Heart,
@@ -42,6 +41,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/currency";
+import { Product } from "@/lib/types";
 
 const ProductDetail = () => {
   const params = useParams();
@@ -56,7 +56,11 @@ const ProductDetail = () => {
   } = useCart();
 
   const productId = params.id as string;
-  const product = getProductById(productId);
+
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useScrollToTop();
 
@@ -66,13 +70,67 @@ const ProductDetail = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
 
-  if (!product) {
-    notFound();
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/products/${productId}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to fetch product");
+        }
+
+        if (data.success && data.data) {
+          setProduct(data.data);
+
+          // Fetch related products from the same category
+          const relatedResponse = await fetch(
+            `/api/products?category=${data.data.categoryId}&limit=4`
+          );
+          const relatedData = await relatedResponse.json();
+
+          if (relatedData.success && relatedData.data) {
+            const filtered = relatedData.data.filter(
+              (p: Product) => p._id !== data.data._id
+            );
+            setRelatedProducts(filtered);
+          }
+        } else {
+          throw new Error("Product not found");
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch product"
+        );
+        console.error("Error fetching product:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (productId) {
+      fetchProduct();
+    }
+  }, [productId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent"></div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
-  const relatedProducts = products
-    .filter((p) => p.category === product.category && p.id !== product.id)
-    .slice(0, 4);
+  if (error || !product) {
+    notFound();
+  }
 
   const handleAddToCart = () => {
     addToCart(product, selectedSize, selectedColor, quantity);
@@ -108,8 +166,8 @@ const ProductDetail = () => {
   };
 
   const handleToggleWishlist = () => {
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
+    if (isInWishlist(product._id)) {
+      removeFromWishlist(product._id);
       toast({
         title: "Removed from wishlist",
         description: `${product.name} has been removed from your wishlist.`,
@@ -145,8 +203,8 @@ const ProductDetail = () => {
 
   const productImages =
     product.images && product.images.length > 0
-      ? product.images
-      : [product.image];
+      ? product.images.map((img) => img.url)
+      : ["/placeholder-product.jpg"];
 
   const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
   const colors = ["Black", "White", "Gray", "Navy", "Red"];
@@ -173,8 +231,12 @@ const ProductDetail = () => {
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={`/category/${product.category}`}>
-                  {product.category}
+                <Link
+                  href={`/category/${
+                    product.category?.slug || product.categoryId
+                  }`}
+                >
+                  {product.category?.name || "Category"}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -268,12 +330,18 @@ const ProductDetail = () => {
               </div>
 
               <div className="text-3xl font-bold text-primary mb-6">
-                {formatPrice(product.price)}
+                {formatPrice(product.basePrice)}
+                {product.compareAtPrice &&
+                  product.compareAtPrice > product.basePrice && (
+                    <span className="text-lg text-muted-foreground line-through ml-2">
+                      {formatPrice(product.compareAtPrice)}
+                    </span>
+                  )}
               </div>
             </div>
 
             {/* Product Options */}
-            {product.category === "shirts" && (
+            {product.category?.name?.toLowerCase() === "shirts" && (
               <div className="space-y-6 mb-8">
                 {/* Size Selection */}
                 <div>
@@ -348,12 +416,12 @@ const ProductDetail = () => {
                   className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-200"
                   size="lg"
                   disabled={
-                    product.category === "shirts" &&
+                    product.category?.name?.toLowerCase() === "shirts" &&
                     (!selectedSize || !selectedColor)
                   }
                 >
                   <ShoppingCart className="mr-2 h-5 w-5" />
-                  {isInCart(product.id) ? "Added to Cart" : "Add to Cart"}
+                  {isInCart(product._id) ? "Added to Cart" : "Add to Cart"}
                 </Button>
 
                 <Button
@@ -362,7 +430,7 @@ const ProductDetail = () => {
                   size="lg"
                   disabled={
                     isBuyingNow ||
-                    (product.category === "shirts" &&
+                    (product.category?.name?.toLowerCase() === "shirts" &&
                       (!selectedSize || !selectedColor))
                   }
                 >
@@ -390,12 +458,14 @@ const ProductDetail = () => {
                 >
                   <Heart
                     className={`h-4 w-4 ${
-                      isInWishlist(product.id)
+                      isInWishlist(product._id)
                         ? "fill-red-500 text-red-500"
                         : ""
                     }`}
                   />
-                  {isInWishlist(product.id) ? "In Wishlist" : "Add to Wishlist"}
+                  {isInWishlist(product._id)
+                    ? "In Wishlist"
+                    : "Add to Wishlist"}
                 </Button>
 
                 <Button variant="outline" size="lg" onClick={handleShare}>

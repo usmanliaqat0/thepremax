@@ -1,4 +1,4 @@
-﻿import { Product } from "./products";
+﻿import { Product } from "./types";
 
 export type SortOption =
   | "name"
@@ -34,7 +34,7 @@ export function searchProducts(
     (product) =>
       product.name.toLowerCase().includes(lowercaseSearch) ||
       product.description.toLowerCase().includes(lowercaseSearch) ||
-      product.category.toLowerCase().includes(lowercaseSearch) ||
+      product.category?.name.toLowerCase().includes(lowercaseSearch) ||
       product.colors.some((color) =>
         color.toLowerCase().includes(lowercaseSearch)
       ) ||
@@ -47,45 +47,45 @@ export function filterProducts(
   filters: FilterOptions
 ): Product[] {
   return products.filter((product) => {
-    if (filters.category && product.category !== filters.category) {
+    if (filters.category && product.categoryId !== filters.category) {
       return false;
     }
 
-if (filters.priceRange) {
+    if (filters.priceRange) {
       const { min, max } = filters.priceRange;
-      if (product.price < min || product.price > max) {
+      if (product.basePrice < min || product.basePrice > max) {
         return false;
       }
     }
 
-if (filters.sizes && filters.sizes.length > 0) {
+    if (filters.sizes && filters.sizes.length > 0) {
       if (!filters.sizes.some((size) => product.sizes.includes(size))) {
         return false;
       }
     }
 
-if (filters.colors && filters.colors.length > 0) {
+    if (filters.colors && filters.colors.length > 0) {
       if (!filters.colors.some((color) => product.colors.includes(color))) {
         return false;
       }
     }
 
-if (filters.inStock !== undefined && product.inStock !== filters.inStock) {
+    if (filters.inStock !== undefined && product.inStock !== filters.inStock) {
       return false;
     }
 
-if (filters.onSale !== undefined && product.sale !== filters.onSale) {
+    if (filters.onSale !== undefined && product.onSale !== filters.onSale) {
       return false;
     }
 
-if (
+    if (
       filters.featured !== undefined &&
       product.featured !== filters.featured
     ) {
       return false;
     }
 
-if (
+    if (
       filters.topRated !== undefined &&
       product.topRated !== filters.topRated
     ) {
@@ -107,10 +107,10 @@ export function sortProducts(
       return sorted.sort((a, b) => a.name.localeCompare(b.name));
 
     case "price-low":
-      return sorted.sort((a, b) => a.price - b.price);
+      return sorted.sort((a, b) => a.basePrice - b.basePrice);
 
     case "price-high":
-      return sorted.sort((a, b) => b.price - a.price);
+      return sorted.sort((a, b) => b.basePrice - a.basePrice);
 
     case "featured":
       return sorted.sort((a, b) => {
@@ -120,11 +120,12 @@ export function sortProducts(
       });
 
     case "newest":
-
-      return sorted.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+      return sorted.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
 
     case "popular":
-
       return sorted.sort((a, b) => {
         const aScore = (a.featured ? 2 : 0) + (a.topRated ? 1 : 0);
         const bScore = (b.featured ? 2 : 0) + (b.topRated ? 1 : 0);
@@ -138,13 +139,15 @@ export function sortProducts(
 }
 
 export function getAvailableFilters(products: Product[]) {
-  const categories = [...new Set(products.map((p) => p.category))];
+  const categories = [
+    ...new Set(products.map((p) => p.category?.name).filter(Boolean)),
+  ];
   const sizes = [...new Set(products.flatMap((p) => p.sizes))];
   const colors = [...new Set(products.flatMap((p) => p.colors))];
 
   const priceRange = {
-    min: Math.min(...products.map((p) => p.price)),
-    max: Math.max(...products.map((p) => p.price)),
+    min: Math.min(...products.map((p) => p.basePrice)),
+    max: Math.max(...products.map((p) => p.basePrice)),
   };
 
   return {
@@ -164,16 +167,21 @@ export function getDiscountPercentage(
 }
 
 export function hasDiscount(product: Product): boolean {
-  return !!(product.originalPrice && product.originalPrice > product.price);
+  return !!(
+    product.compareAtPrice && product.compareAtPrice > product.basePrice
+  );
 }
 
 export function getProductBadges(product: Product) {
   const badges = [];
 
-  if (product.sale || hasDiscount(product)) {
+  if (product.onSale || hasDiscount(product)) {
     badges.push({
       text: hasDiscount(product)
-        ? `${getDiscountPercentage(product.price, product.originalPrice)}% OFF`
+        ? `${getDiscountPercentage(
+            product.basePrice,
+            product.compareAtPrice
+          )}% OFF`
         : "SALE",
       variant: "destructive" as const,
     });
@@ -211,15 +219,15 @@ export function processProducts(
 ): Product[] {
   let result = [...products];
 
-if (searchTerm) {
+  if (searchTerm) {
     result = searchProducts(result, searchTerm);
   }
 
-if (filters) {
+  if (filters) {
     result = filterProducts(result, filters);
   }
 
-result = sortProducts(result, sortBy);
+  result = sortProducts(result, sortBy);
 
   return result;
 }
@@ -232,7 +240,8 @@ export function getRelatedProducts(
   return products
     .filter(
       (p) =>
-        p.id !== currentProduct.id && p.category === currentProduct.category
+        p._id !== currentProduct._id &&
+        p.categoryId === currentProduct.categoryId
     )
     .slice(0, limit);
 }
@@ -242,6 +251,6 @@ export function getRecentlyViewed(
   allProducts: Product[]
 ): Product[] {
   return productIds
-    .map((id) => allProducts.find((p) => p.id === id))
+    .map((id) => allProducts.find((p) => p._id === id))
     .filter((product): product is Product => product !== undefined);
 }

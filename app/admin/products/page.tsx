@@ -106,6 +106,7 @@ export default function ProductsPage() {
     try {
       const response = await fetch("/api/admin/categories?all=true");
       const data = await response.json();
+
       if (data.success) {
         setCategories(data.data);
       }

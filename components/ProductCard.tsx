@@ -5,7 +5,7 @@ import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Product } from "@/lib/products";
+import { Product } from "@/lib/types";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
@@ -38,8 +38,8 @@ const ProductCard = ({
   const handleToggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
+    if (isInWishlist(product._id)) {
+      removeFromWishlist(product._id);
     } else {
       addToWishlist(product);
     }
@@ -76,11 +76,11 @@ const ProductCard = ({
 
   return (
     <Card className={cn(variantStyles.card, "p-0 gap-0", className)}>
-      <Link href={`/product/${product.id}`}>
+      <Link href={`/product/${product._id}`}>
         <div className="relative overflow-hidden">
           <div className={cn(variantStyles.image, "overflow-hidden bg-muted")}>
             <Image
-              src={product.image}
+              src={product.images?.[0]?.url || "/placeholder.jpg"}
               alt={product.name}
               width={400}
               height={400}
@@ -94,7 +94,7 @@ const ProductCard = ({
           </div>
 
           <div className="absolute top-3 left-3 flex flex-col gap-2">
-            {product.sale && (
+            {product.onSale && (
               <Badge
                 variant="destructive"
                 className="text-xs font-medium shadow-fashion-sm"
@@ -126,7 +126,7 @@ const ProductCard = ({
             <Heart
               className={cn(
                 variant === "compact" ? "h-3.5 w-3.5" : "h-4 w-4",
-                isInWishlist(product.id)
+                isInWishlist(product._id)
                   ? "fill-red-500 text-red-500"
                   : "text-muted-foreground"
               )}
@@ -160,7 +160,7 @@ const ProductCard = ({
                 variant === "compact" && "text-xs px-1.5 py-0.5"
               )}
             >
-              {product.category.replace("-", " ")}
+              {product.category?.name || "Uncategorized"}
             </Badge>
           </div>
 
@@ -190,16 +190,16 @@ const ProductCard = ({
 
           <div className="flex items-center gap-2">
             <span className={variantStyles.price}>
-              {formatPrice(product.price)}
+              {formatPrice(product.basePrice)}
             </span>
-            {product.originalPrice && (
+            {product.compareAtPrice && (
               <span
                 className={cn(
                   "text-muted-foreground line-through",
                   variant === "featured" ? "text-base" : "text-sm"
                 )}
               >
-                {formatPrice(product.originalPrice)}
+                {formatPrice(product.compareAtPrice)}
               </span>
             )}
           </div>

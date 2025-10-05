@@ -8,7 +8,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { Product } from "@/lib/products";
+import { Product } from "@/lib/types";
 import { toast } from "sonner";
 
 export interface CartItem {
@@ -63,7 +63,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       const { product, size, color, quantity = 1 } = action.payload;
       const existingItemIndex = state.items.findIndex(
         (item) =>
-          item.id === product.id && item.size === size && item.color === color
+          item.id === product._id && item.size === size && item.color === color
       );
 
       if (existingItemIndex >= 0) {
@@ -72,7 +72,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         return { ...state, items: updatedItems };
       } else {
         const newItem: CartItem = {
-          id: product.id,
+          id: product._id,
           product,
           quantity,
           size,
@@ -120,13 +120,13 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case "ADD_TO_WISHLIST": {
       const { product } = action.payload;
       const existingItem = state.wishlist.find(
-        (item) => item.id === product.id
+        (item) => item.id === product._id
       );
       if (existingItem) {
         return state;
       }
       const newWishlistItem: WishlistItem = {
-        id: product.id,
+        id: product._id,
         product,
       };
       return { ...state, wishlist: [...state.wishlist, newWishlistItem] };
@@ -146,11 +146,11 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case "MOVE_TO_CART": {
       const { product, size, color } = action.payload;
       const updatedWishlist = state.wishlist.filter(
-        (item) => item.id !== product.id
+        (item) => item.id !== product._id
       );
       const existingItemIndex = state.items.findIndex(
         (item) =>
-          item.id === product.id && item.size === size && item.color === color
+          item.id === product._id && item.size === size && item.color === color
       );
 
       let updatedItems = [...state.items];
@@ -158,7 +158,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         updatedItems[existingItemIndex].quantity += 1;
       } else {
         const newItem: CartItem = {
-          id: product.id,
+          id: product._id,
           product,
           quantity: 1,
           size,
@@ -293,7 +293,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const cartTotal = useMemo(() => {
     return state.items.reduce(
-      (total, item) => total + item.product.price * item.quantity,
+      (total, item) => total + item.product.basePrice * item.quantity,
       0
     );
   }, [state.items]);

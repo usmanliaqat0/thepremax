@@ -187,7 +187,6 @@ export class VerificationUtils {
   }
 
   static getVerificationExpiry(): Date {
-
     return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
   }
 }
@@ -236,6 +235,17 @@ export class AuthService {
             role: "admin",
             avatar: AvatarUtils.getDefaultAvatar(),
             isEmailVerified: true,
+            isPhoneVerified: false,
+            status: "active",
+            preferences: {
+              currency: "USD",
+              language: "en",
+              theme: "light",
+              favoriteCategories: [],
+            },
+            addresses: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
           };
 
           const accessToken = TokenUtils.generateAccessToken(adminUserData);
@@ -287,7 +297,7 @@ export class AuthService {
         };
       }
 
-const userData: AuthUser = {
+      const userData: AuthUser = {
         id: user._id.toString(),
         email: user.email,
         firstName: user.firstName,
@@ -296,6 +306,12 @@ const userData: AuthUser = {
         avatar: user.avatar,
         role: user.role,
         isEmailVerified: user.isEmailVerified,
+        isPhoneVerified: user.isPhoneVerified,
+        status: user.status,
+        preferences: user.preferences,
+        addresses: user.addresses,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
       };
 
       const accessToken = TokenUtils.generateAccessToken(userData);
@@ -351,7 +367,7 @@ const userData: AuthUser = {
 
       await connectDB();
 
-const normalizedEmail = EmailUtils.normalize(email);
+      const normalizedEmail = EmailUtils.normalize(email);
       const existingUser = await User.findOne({ email: normalizedEmail });
 
       if (existingUser) {
@@ -361,14 +377,14 @@ const normalizedEmail = EmailUtils.normalize(email);
         };
       }
 
-const hashedPassword = await PasswordUtils.hash(password);
+      const hashedPassword = await PasswordUtils.hash(password);
 
-const emailVerificationToken =
+      const emailVerificationToken =
         VerificationUtils.generateVerificationToken();
       const emailVerificationExpires =
         VerificationUtils.getVerificationExpiry();
 
-const newUser = new (User as mongoose.Model<IUser>)({
+      const newUser = new (User as mongoose.Model<IUser>)({
         email: normalizedEmail,
         password: hashedPassword,
         firstName: firstName.trim(),
@@ -389,7 +405,7 @@ const newUser = new (User as mongoose.Model<IUser>)({
 
       const savedUser = await newUser.save();
 
-const userData: AuthUser = {
+      const userData: AuthUser = {
         id: savedUser._id.toString(),
         email: savedUser.email,
         firstName: savedUser.firstName,
@@ -398,12 +414,18 @@ const userData: AuthUser = {
         avatar: savedUser.avatar,
         role: savedUser.role,
         isEmailVerified: savedUser.isEmailVerified,
+        isPhoneVerified: savedUser.isPhoneVerified,
+        status: savedUser.status,
+        preferences: savedUser.preferences,
+        addresses: savedUser.addresses,
+        createdAt: savedUser.createdAt.toISOString(),
+        updatedAt: savedUser.updatedAt.toISOString(),
       };
 
-const accessToken = TokenUtils.generateAccessToken(userData);
+      const accessToken = TokenUtils.generateAccessToken(userData);
       const refreshToken = TokenUtils.generateRefreshToken(userData);
 
-EmailService.sendEmailVerificationEmail(
+      EmailService.sendEmailVerificationEmail(
         email,
         firstName,
         emailVerificationToken
@@ -435,12 +457,11 @@ EmailService.sendEmailVerificationEmail(
     message?: string;
   }> {
     try {
-
       const decoded = TokenUtils.verifyRefreshToken(refreshToken);
 
-await connectDB();
+      await connectDB();
 
-const user = await User.findById(decoded.id);
+      const user = await User.findById(decoded.id);
       if (!user || user.status !== "active") {
         return {
           success: false,
@@ -448,7 +469,7 @@ const user = await User.findById(decoded.id);
         };
       }
 
-const userData: AuthUser = {
+      const userData: AuthUser = {
         id: user._id.toString(),
         email: user.email,
         firstName: user.firstName,
@@ -457,9 +478,15 @@ const userData: AuthUser = {
         avatar: user.avatar,
         role: user.role,
         isEmailVerified: user.isEmailVerified,
+        isPhoneVerified: user.isPhoneVerified,
+        status: user.status,
+        preferences: user.preferences,
+        addresses: user.addresses,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
       };
 
-const newAccessToken = TokenUtils.generateAccessToken(userData);
+      const newAccessToken = TokenUtils.generateAccessToken(userData);
       const newRefreshToken = TokenUtils.generateRefreshToken(userData);
 
       return {
@@ -502,6 +529,12 @@ const newAccessToken = TokenUtils.generateAccessToken(userData);
         avatar: user.avatar,
         role: user.role,
         isEmailVerified: user.isEmailVerified,
+        isPhoneVerified: user.isPhoneVerified,
+        status: user.status,
+        preferences: user.preferences,
+        addresses: user.addresses,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
       };
 
       return {
@@ -524,13 +557,12 @@ const newAccessToken = TokenUtils.generateAccessToken(userData);
     try {
       await connectDB();
 
-let user;
+      let user;
       if (token.length === 6) {
-
         const upperCode = token.toUpperCase();
         console.log("Looking for user with code:", upperCode);
 
-const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
         user = await User.findOne({
           emailVerificationToken: { $regex: `^${escapedCode}`, $options: "i" },
@@ -544,7 +576,6 @@ const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
           );
         }
       } else {
-
         user = await User.findOne({
           emailVerificationToken: token,
         });
@@ -557,7 +588,7 @@ const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         };
       }
 
-user.isEmailVerified = true;
+      user.isEmailVerified = true;
       user.emailVerificationToken = undefined;
       user.emailVerificationExpires = undefined;
       await user.save();
@@ -597,16 +628,16 @@ user.isEmailVerified = true;
         };
       }
 
-const emailVerificationToken =
+      const emailVerificationToken =
         VerificationUtils.generateVerificationToken();
       const emailVerificationExpires =
         VerificationUtils.getVerificationExpiry();
 
-user.emailVerificationToken = emailVerificationToken;
+      user.emailVerificationToken = emailVerificationToken;
       user.emailVerificationExpires = emailVerificationExpires;
       await user.save();
 
-const emailResult = await EmailService.sendEmailVerificationEmail(
+      const emailResult = await EmailService.sendEmailVerificationEmail(
         user.email,
         user.firstName,
         emailVerificationToken

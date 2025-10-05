@@ -379,7 +379,10 @@ const Checkout = () => {
                       >
                         <div className="relative w-16 h-16 flex-shrink-0">
                           <Image
-                            src={item.product.image}
+                            src={
+                              item.product.images[0]?.url ||
+                              "/placeholder-product.jpg"
+                            }
                             alt={item.product.name}
                             fill
                             className="object-cover rounded-md"
@@ -406,7 +409,9 @@ const Checkout = () => {
                               Qty: {item.quantity}
                             </span>
                             <span className="font-medium text-sm">
-                              {formatPrice(item.product.price * item.quantity)}
+                              {formatPrice(
+                                item.product.basePrice * item.quantity
+                              )}
                             </span>
                           </div>
                         </div>

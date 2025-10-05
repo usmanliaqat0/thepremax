@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { Product } from "@/lib/products";
+import { Product } from "@/lib/types";
 import ProductCard from "./ProductCard";
 import { Section, Container, SectionHeader } from "@/components/ui/layout";
 import { ProductGridWrapper } from "@/components/ui/grid";
@@ -58,7 +58,11 @@ const ProductGrid = ({
           }
         >
           {displayProducts.map((product) => (
-            <ProductCard key={product.id} product={product} variant={variant} />
+            <ProductCard
+              key={product._id}
+              product={product}
+              variant={variant}
+            />
           ))}
         </ProductGridWrapper>
       </Container>

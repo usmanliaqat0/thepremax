@@ -1,10 +1,16 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Product from "@/lib/models/Product";
+import mongoose from "mongoose";
 
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
+
+    // Ensure Category model is registered for population
+    if (!mongoose.models.Category) {
+      await import("@/lib/models/Category");
+    }
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -19,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-const filter: Record<string, unknown> = {
+    const filter: Record<string, unknown> = {
       status: "active",
     };
 
@@ -47,7 +53,7 @@ const filter: Record<string, unknown> = {
       filter.inStock = true;
     }
 
-const sort: Record<string, 1 | -1> = {};
+    const sort: Record<string, 1 | -1> = {};
     if (sortBy === "price") {
       sort.basePrice = sortOrder === "asc" ? 1 : -1;
     } else if (sortBy === "name") {
@@ -58,9 +64,9 @@ const sort: Record<string, 1 | -1> = {};
       sort[sortBy] = sortOrder === "asc" ? 1 : -1;
     }
 
-const total = await Product.countDocuments(filter);
+    const total = await Product.countDocuments(filter);
 
-const products = await Product.find(filter)
+    const products = await Product.find(filter)
       .populate("category", "name slug")
       .sort(sort)
       .skip(skip)

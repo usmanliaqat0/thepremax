@@ -24,8 +24,8 @@ import { Section, Container, SectionHeader } from "@/components/ui/layout";
 import { ProductGridWrapper } from "@/components/ui/grid";
 import { GridSkeleton } from "@/components/ui/loading";
 import { BeautifulLoader } from "@/components/ui/loader";
-import { products, Product } from "@/lib/products";
-import { processProducts, SortOption } from "@/lib/product-utils";
+import { Product, Category } from "@/lib/types";
+import { SortOption } from "@/lib/product-utils";
 import { Search, X } from "lucide-react";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 import { useSearchParams } from "next/navigation";
@@ -35,12 +35,46 @@ const ShopContent = () => {
   const [sortBy, setSortBy] = useState<SortOption>("name");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [priceRange, setPriceRange] = useState("all");
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
-  const [isLoading, setIsLoading] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const searchParams = useSearchParams();
 
   useScrollToTop();
+
+  // Fetch products and categories from API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+
+        // Fetch products
+        const productsResponse = await fetch("/api/products?limit=100");
+        const productsData = await productsResponse.json();
+
+        // Fetch categories
+        const categoriesResponse = await fetch("/api/categories");
+        const categoriesData = await categoriesResponse.json();
+
+        if (productsData.success) {
+          setProducts(productsData.data);
+          setFilteredProducts(productsData.data);
+        }
+
+        if (categoriesData.success) {
+          setCategories(categoriesData.data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const urlSearch = searchParams.get("search");
@@ -51,35 +85,86 @@ const ShopContent = () => {
 
   const getPriceRangeValues = (range: string) => {
     switch (range) {
-      case "under-10":
-        return { min: 0, max: 10 };
-      case "10-15":
-        return { min: 10, max: 15 };
-      case "over-15":
-        return { min: 15, max: 999999 };
+      case "under-50":
+        return { min: 0, max: 50 };
+      case "50-200":
+        return { min: 50, max: 200 };
+      case "200-500":
+        return { min: 200, max: 500 };
+      case "over-500":
+        return { min: 500, max: 999999 };
       default:
         return undefined;
     }
   };
 
   useEffect(() => {
+    if (products.length === 0) return;
+
     setIsLoading(true);
 
     const timer = setTimeout(() => {
-      const filters = {
-        category: categoryFilter !== "all" ? categoryFilter : undefined,
-        priceRange:
-          priceRange !== "all" ? getPriceRangeValues(priceRange) : undefined,
-      };
+      let filtered = [...products];
 
-      const processed = processProducts(products, searchTerm, filters, sortBy);
+      // Search filter
+      if (searchTerm.trim()) {
+        const searchLower = searchTerm.toLowerCase();
+        filtered = filtered.filter(
+          (product) =>
+            product.name.toLowerCase().includes(searchLower) ||
+            product.description.toLowerCase().includes(searchLower) ||
+            product.tags.some((tag) => tag.toLowerCase().includes(searchLower))
+        );
+      }
 
-      setFilteredProducts(processed);
+      // Category filter
+      if (categoryFilter !== "all") {
+        filtered = filtered.filter((product) => {
+          if (typeof product.category === "string") {
+            return product.category === categoryFilter;
+          } else if (product.category && typeof product.category === "object") {
+            return product.category.slug === categoryFilter;
+          }
+          return false;
+        });
+      }
+
+      // Price range filter
+      if (priceRange !== "all") {
+        const range = getPriceRangeValues(priceRange);
+        if (range) {
+          const { min, max } = range;
+          filtered = filtered.filter(
+            (product) => product.basePrice >= min && product.basePrice <= max
+          );
+        }
+      }
+
+      // Sort
+      filtered.sort((a, b) => {
+        switch (sortBy) {
+          case "price-low":
+            return a.basePrice - b.basePrice;
+          case "price-high":
+            return b.basePrice - a.basePrice;
+          case "name":
+            return a.name.localeCompare(b.name);
+          case "popular":
+            return (b.rating || 0) - (a.rating || 0);
+          default:
+            return (
+              new Date(b.createdAt || 0).getTime() -
+              new Date(a.createdAt || 0).getTime()
+            );
+        }
+      });
+
+      setFilteredProducts(filtered);
       setIsLoading(false);
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchTerm, categoryFilter, priceRange, sortBy]);
+  }, [products, searchTerm, categoryFilter, priceRange, sortBy]);
 
   const clearFilters = () => {
     setSearchTerm("");
@@ -132,14 +217,11 @@ const ShopContent = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Products</SelectItem>
-                  <SelectItem value="health-beauty">Health & Beauty</SelectItem>
-                  <SelectItem value="sports-recreation">
-                    Sports & Recreation
-                  </SelectItem>
-                  <SelectItem value="tools-equipment">
-                    Tools & Equipment
-                  </SelectItem>
-                  <SelectItem value="automotive">Automotive</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category._id} value={category.slug}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 
@@ -149,9 +231,10 @@ const ShopContent = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Prices</SelectItem>
-                  <SelectItem value="under-10">Under $10</SelectItem>
-                  <SelectItem value="10-15">$10 - $15</SelectItem>
-                  <SelectItem value="over-15">Over $15</SelectItem>
+                  <SelectItem value="under-50">Under $50</SelectItem>
+                  <SelectItem value="50-200">$50 - $200</SelectItem>
+                  <SelectItem value="200-500">$200 - $500</SelectItem>
+                  <SelectItem value="over-500">Over $500</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -242,7 +325,7 @@ const ShopContent = () => {
           <Container>
             <ProductGridWrapper>
               {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product._id} product={product} />
               ))}
             </ProductGridWrapper>
           </Container>

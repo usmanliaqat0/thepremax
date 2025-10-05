@@ -120,7 +120,10 @@ const Cart = () => {
                   >
                     <div className="relative w-20 h-20 flex-shrink-0">
                       <Image
-                        src={item.product.image}
+                        src={
+                          item.product.images[0]?.url ||
+                          "/placeholder-product.jpg"
+                        }
                         alt={item.product.name}
                         fill
                         className="object-cover rounded-md"
@@ -129,7 +132,7 @@ const Cart = () => {
                     <div className="flex-1">
                       <h3 className="font-semibold">{item.product.name}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {item.product.category}
+                        {item.product.category?.name || "Uncategorized"}
                       </p>
                       {item.size && (
                         <Badge variant="outline" className="mr-2 mt-1">
@@ -177,7 +180,9 @@ const Cart = () => {
                         </div>
                         <div className="flex items-center gap-3">
                           <span className="font-semibold">
-                            {formatPrice(item.product.price * item.quantity)}
+                            {formatPrice(
+                              item.product.basePrice * item.quantity
+                            )}
                           </span>
                           <Button
                             variant="ghost"

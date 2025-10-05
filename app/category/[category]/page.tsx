@@ -16,10 +16,11 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { products, Product, categories } from "@/lib/products";
+// Removed dummy data imports - now using real API data
 import { Search, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
+import { Product, Category } from "@/lib/types";
 
 const CategoryPage = () => {
   const params = useParams();
@@ -28,15 +29,17 @@ const CategoryPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [priceRange, setPriceRange] = useState("all");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
 
-  const category = categories.find((cat) => cat.id === categoryId);
+  const category = categories.find((cat) => cat._id === categoryId);
 
   useScrollToTop();
 
   useEffect(() => {
     let filtered = products.filter(
-      (product) => product.category === categoryId
+      (product) => product.categoryId === categoryId
     );
 
     if (searchTerm.trim()) {
@@ -51,20 +54,20 @@ const CategoryPage = () => {
     if (priceRange !== "all") {
       switch (priceRange) {
         case "under-15":
-          filtered = filtered.filter((product) => product.price < 15);
+          filtered = filtered.filter((product) => product.basePrice < 15);
           break;
         case "15-30":
           filtered = filtered.filter(
-            (product) => product.price >= 15 && product.price <= 30
+            (product) => product.basePrice >= 15 && product.basePrice <= 30
           );
           break;
         case "30-50":
           filtered = filtered.filter(
-            (product) => product.price >= 30 && product.price <= 50
+            (product) => product.basePrice >= 30 && product.basePrice <= 50
           );
           break;
         case "over-50":
-          filtered = filtered.filter((product) => product.price > 50);
+          filtered = filtered.filter((product) => product.basePrice > 50);
           break;
       }
     }
@@ -72,9 +75,9 @@ const CategoryPage = () => {
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "price-low":
-          return a.price - b.price;
+          return a.basePrice - b.basePrice;
         case "price-high":
-          return b.price - a.price;
+          return b.basePrice - a.basePrice;
         case "name":
           return a.name.localeCompare(b.name);
         case "rating":
@@ -148,7 +151,7 @@ const CategoryPage = () => {
                 <span className="text-primary">{category.name}</span>
               </div>
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-4xl">{category.icon}</span>
+                <span className="text-4xl">📦</span>
                 <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary">
                   {category.name}
                 </h1>
@@ -264,7 +267,8 @@ const CategoryPage = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <p className="text-muted-foreground">
-              Showing {filteredProducts.length} of {category.count} products
+              Showing {filteredProducts.length} of {category.productCount || 0}{" "}
+              products
             </p>
             {filteredProducts.length === 0 && (
               <Button variant="outline" onClick={clearFilters}>
@@ -281,7 +285,7 @@ const CategoryPage = () => {
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredProducts.map((product) => (
-                <div key={product.id}>
+                <div key={product._id}>
                   <ProductCard product={product} />
                 </div>
               ))}
