@@ -22,7 +22,7 @@ export async function GET(
 
     // Ensure Product model is registered for virtual population
     if (!mongoose.models.Product) {
-      require("@/lib/models/Product");
+      await import("@/lib/models/Product");
     }
 
     const { id } = await params;
@@ -68,7 +68,7 @@ export async function PUT(
 
     // Ensure Product model is registered for virtual population
     if (!mongoose.models.Product) {
-      require("@/lib/models/Product");
+      await import("@/lib/models/Product");
     }
 
     const { id } = await params;
@@ -177,7 +177,7 @@ export async function DELETE(
 
     // Ensure Product model is registered for virtual population
     if (!mongoose.models.Product) {
-      require("@/lib/models/Product");
+      await import("@/lib/models/Product");
     }
 
     const { id } = await params;

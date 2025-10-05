@@ -1,7 +1,6 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Category from "@/lib/models/Category";
-import Product from "@/lib/models/Product";
 import mongoose from "mongoose";
 
 export async function GET(request: NextRequest) {
@@ -10,7 +9,7 @@ export async function GET(request: NextRequest) {
 
     // Ensure Product model is registered for virtual population
     if (!mongoose.models.Product) {
-      require("@/lib/models/Product");
+      await import("@/lib/models/Product");
     }
 
     const { searchParams } = new URL(request.url);

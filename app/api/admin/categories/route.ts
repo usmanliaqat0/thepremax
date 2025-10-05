@@ -1,7 +1,6 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Category from "@/lib/models/Category";
-import Product from "@/lib/models/Product";
 import { AdminMiddleware } from "@/lib/admin-middleware";
 import mongoose from "mongoose";
 
@@ -19,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     // Ensure Product model is registered for virtual population
     if (!mongoose.models.Product) {
-      require("@/lib/models/Product");
+      await import("@/lib/models/Product");
     }
 
     const { searchParams } = new URL(request.url);
@@ -106,7 +105,7 @@ export async function POST(request: NextRequest) {
 
     // Ensure Product model is registered for virtual population
     if (!mongoose.models.Product) {
-      require("@/lib/models/Product");
+      await import("@/lib/models/Product");
     }
 
     const body = await request.json();
