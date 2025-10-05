@@ -3,6 +3,7 @@ import connectDB from "@/lib/db";
 import Category from "@/lib/models/Category";
 import Product from "@/lib/models/Product";
 import { AdminMiddleware } from "@/lib/admin-middleware";
+import mongoose from "mongoose";
 
 export async function GET(
   request: NextRequest,
@@ -18,6 +19,12 @@ export async function GET(
     }
 
     await connectDB();
+
+    // Ensure Product model is registered for virtual population
+    if (!mongoose.models.Product) {
+      require("@/lib/models/Product");
+    }
+
     const { id } = await params;
 
     const category = await Category.findById(id)
@@ -58,6 +65,12 @@ export async function PUT(
     }
 
     await connectDB();
+
+    // Ensure Product model is registered for virtual population
+    if (!mongoose.models.Product) {
+      require("@/lib/models/Product");
+    }
+
     const { id } = await params;
 
     const body = await request.json();
@@ -161,6 +174,12 @@ export async function DELETE(
     }
 
     await connectDB();
+
+    // Ensure Product model is registered for virtual population
+    if (!mongoose.models.Product) {
+      require("@/lib/models/Product");
+    }
+
     const { id } = await params;
 
     const category = await Category.findById(id);
