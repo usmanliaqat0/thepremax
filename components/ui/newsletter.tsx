@@ -39,12 +39,40 @@ export function Newsletter({
 
     setIsLoading(true);
 
-await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          source: "newsletter",
+        }),
+      });
 
-    setIsSubscribed(true);
-    setIsLoading(false);
-    toast.success("Successfully subscribed to newsletter!");
-    setEmail("");
+      const data = await response.json();
+
+      if (response.ok) {
+        setIsSubscribed(true);
+        setEmail("");
+
+        if (data.alreadySubscribed) {
+          toast.info(data.message);
+        } else if (data.resubscribed) {
+          toast.success(data.message);
+        } else {
+          toast.success(data.message);
+        }
+      } else {
+        toast.error(data.error || "Failed to subscribe. Please try again.");
+      }
+    } catch (error) {
+      console.error("Subscription error:", error);
+      toast.error("Network error. Please check your connection and try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const variants = {

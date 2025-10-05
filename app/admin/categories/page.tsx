@@ -3,13 +3,19 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Package } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Package, Eye, Edit, Trash2 } from "lucide-react";
 import CategoryDialog from "@/components/admin/CategoryDialog";
 import CategoryViewDialog from "@/components/admin/CategoryViewDialog";
-import CategoryTable from "@/components/admin/CategoryTable";
 import { toast } from "sonner";
 import { useAdminData } from "@/hooks/use-admin-data";
 import { useDialog } from "@/hooks/use-dialog";
+import {
+  AdminDataTable,
+  TableColumn,
+  TableAction,
+} from "@/components/admin/AdminDataTable";
+import { format } from "date-fns";
 
 interface Category extends Record<string, unknown> {
   _id: string;
@@ -31,6 +37,7 @@ export default function CategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [viewingCategory, setViewingCategory] = useState<Category | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [statusFilter, setStatusFilter] = useState("all");
 
   // Use the custom dialog hook for better state management
   const editDialog = useDialog({
@@ -60,16 +67,6 @@ export default function CategoriesPage() {
     endpoint: "/api/admin/categories",
     refreshTrigger,
   });
-
-  const handleEdit = (category: Category) => {
-    setEditingCategory(category);
-    editDialog.openDialog();
-  };
-
-  const handleView = (category: Category) => {
-    setViewingCategory(category);
-    viewDialog.openDialog();
-  };
 
   const handleSuccess = () => {
     setRefreshTrigger((prev) => prev + 1);
@@ -107,6 +104,101 @@ export default function CategoriesPage() {
     active: categories.filter((cat) => cat.status === "active").length,
     inactive: categories.filter((cat) => cat.status === "inactive").length,
   };
+
+  // Helper functions for rendering
+  const getStatusBadge = (status: string) => {
+    const colors = {
+      active: "bg-green-100 text-green-800",
+      inactive: "bg-gray-100 text-gray-800",
+    };
+    return (
+      <Badge
+        variant="outline"
+        className={colors[status as keyof typeof colors] || "bg-gray-100"}
+      >
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Badge>
+    );
+  };
+
+  // Table columns configuration
+  const columns: TableColumn<Category>[] = [
+    {
+      key: "name",
+      label: "Name",
+      sortable: true,
+    },
+    {
+      key: "slug",
+      label: "Slug",
+      sortable: true,
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (item) => getStatusBadge(item.status),
+    },
+    {
+      key: "order",
+      label: "Order",
+      sortable: true,
+    },
+    {
+      key: "productCount",
+      label: "Products",
+      render: () => 0, // Placeholder - you can implement product count logic here
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      render: (item) => format(new Date(item.createdAt), "MMM dd, yyyy"),
+      sortable: true,
+    },
+  ];
+
+  // Dynamic actions
+  const getActions = (): TableAction<Category>[] => {
+    const actions: TableAction<Category>[] = [];
+
+    actions.push({
+      label: "View",
+      icon: <Eye className="h-4 w-4 mr-2" />,
+      onClick: (category) => {
+        setViewingCategory(category);
+        viewDialog.openDialog();
+      },
+    });
+
+    actions.push({
+      label: "Edit",
+      icon: <Edit className="h-4 w-4 mr-2" />,
+      onClick: (category) => {
+        setEditingCategory(category);
+        editDialog.openDialog();
+      },
+    });
+
+    actions.push({
+      label: "Delete",
+      icon: <Trash2 className="h-4 w-4 mr-2" />,
+      onClick: (category) => handleDelete(category),
+      variant: "destructive",
+      confirm: {
+        title: "Delete Category",
+        description:
+          "Are you sure you want to delete this category? This action cannot be undone.",
+      },
+    });
+
+    return actions;
+  };
+
+  // Filter options
+  const statusFilterOptions = [
+    { key: "all", label: "All Status", value: "all" },
+    { key: "active", label: "Active", value: "active" },
+    { key: "inactive", label: "Inactive", value: "inactive" },
+  ];
 
   if (error) {
     return (
@@ -194,21 +286,31 @@ export default function CategoriesPage() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Category Management</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CategoryTable
-            categories={categories}
-            onEdit={handleEdit}
-            onView={handleView}
-            onRefresh={handleRefresh}
-            onDelete={handleDelete}
-            isLoading={isLoading}
-          />
-        </CardContent>
-      </Card>
+      {/* Categories Data Table */}
+      <AdminDataTable
+        title="Categories"
+        data={categories}
+        columns={columns}
+        loading={isLoading}
+        searchable={true}
+        searchPlaceholder="Search by name or slug..."
+        searchKey="name"
+        filters={[
+          {
+            key: "status",
+            label: "Filter by status",
+            options: statusFilterOptions,
+            value: statusFilter,
+            onChange: setStatusFilter,
+          },
+        ]}
+        actions={getActions}
+        onRefresh={handleRefresh}
+        emptyMessage="No categories found"
+        emptyIcon={<Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />}
+        itemsPerPage={10}
+        showPagination={true}
+      />
 
       <CategoryDialog
         open={editDialog.open}

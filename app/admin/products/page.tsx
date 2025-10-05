@@ -3,12 +3,18 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Package, TrendingUp, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Package, TrendingUp, Star, Edit, Trash2 } from "lucide-react";
 import ProductDialog from "@/components/admin/ProductDialog";
-import ProductTable from "@/components/admin/ProductTable";
 import { toast } from "sonner";
 import { useAdminData } from "@/hooks/use-admin-data";
 import { useDialog } from "@/hooks/use-dialog";
+import {
+  AdminDataTable,
+  TableColumn,
+  TableAction,
+} from "@/components/admin/AdminDataTable";
+import { format } from "date-fns";
 
 interface Category {
   _id: string;
@@ -72,6 +78,8 @@ export default function ProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
   // Use the custom dialog hook for better state management
   const productDialog = useDialog({
@@ -109,11 +117,6 @@ export default function ProductsPage() {
   useEffect(() => {
     fetchCategories();
   }, []);
-
-  const handleEdit = (product: Product) => {
-    setEditingProduct(product);
-    productDialog.openDialog();
-  };
 
   const handleCreate = () => {
     setEditingProduct(null);
@@ -167,6 +170,127 @@ export default function ProductsPage() {
         ? products.reduce((sum, p) => sum + p.rating, 0) / products.length
         : 0,
   };
+
+  // Helper functions for rendering
+  const getStatusBadge = (status: string) => {
+    const colors = {
+      active: "bg-green-100 text-green-800",
+      inactive: "bg-gray-100 text-gray-800",
+      pending: "bg-yellow-100 text-yellow-800",
+      archived: "bg-red-100 text-red-800",
+    };
+    return (
+      <Badge
+        variant="outline"
+        className={colors[status as keyof typeof colors] || "bg-gray-100"}
+      >
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Badge>
+    );
+  };
+
+  const getCategoryName = (categoryId: string) => {
+    const category = categories.find((c) => c._id === categoryId);
+    return category ? category.name : "Unknown";
+  };
+
+  // Table columns configuration
+  const columns: TableColumn<Product>[] = [
+    {
+      key: "name",
+      label: "Name",
+      sortable: true,
+    },
+    {
+      key: "categoryId",
+      label: "Category",
+      render: (item) => getCategoryName(item.categoryId),
+    },
+    {
+      key: "basePrice",
+      label: "Price",
+      render: (item) => `$${item.basePrice.toFixed(2)}`,
+      sortable: true,
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (item) => getStatusBadge(item.status),
+    },
+    {
+      key: "inStock",
+      label: "Stock",
+      render: (item) => (
+        <Badge variant={item.inStock ? "default" : "destructive"}>
+          {item.inStock ? "In Stock" : "Out of Stock"}
+        </Badge>
+      ),
+    },
+    {
+      key: "rating",
+      label: "Rating",
+      render: (item) => `${item.rating.toFixed(1)} (${item.reviewCount})`,
+      sortable: true,
+    },
+    {
+      key: "totalSold",
+      label: "Sold",
+      render: (item) => item.totalSold,
+      sortable: true,
+    },
+    {
+      key: "createdAt",
+      label: "Created",
+      render: (item) => format(new Date(item.createdAt), "MMM dd, yyyy"),
+      sortable: true,
+    },
+  ];
+
+  // Dynamic actions
+  const getActions = (): TableAction<Product>[] => {
+    const actions: TableAction<Product>[] = [];
+
+    actions.push({
+      label: "Edit",
+      icon: <Edit className="h-4 w-4 mr-2" />,
+      onClick: (product) => {
+        setEditingProduct(product);
+        productDialog.openDialog();
+      },
+    });
+
+    actions.push({
+      label: "Delete",
+      icon: <Trash2 className="h-4 w-4 mr-2" />,
+      onClick: (product) => handleDelete(product),
+      variant: "destructive",
+      confirm: {
+        title: "Delete Product",
+        description:
+          "Are you sure you want to delete this product? This action cannot be undone.",
+      },
+    });
+
+    return actions;
+  };
+
+  // Filter options
+  const statusFilterOptions = [
+    { key: "all", label: "All Status", value: "all" },
+    { key: "active", label: "Active", value: "active" },
+    { key: "inactive", label: "Inactive", value: "inactive" },
+    { key: "pending", label: "Pending", value: "pending" },
+    { key: "archived", label: "Archived", value: "archived" },
+  ];
+
+  const categoryFilterOptions = [
+    { key: "all", label: "All Categories", value: "all" },
+    ...categories.map((cat) => ({
+      key: cat._id,
+      label: cat.name,
+      value: cat._id,
+    })),
+  ];
 
   if (error) {
     return (
@@ -263,22 +387,38 @@ export default function ProductsPage() {
         </Card>
       </div>
 
-      {/* Products Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>All Products</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ProductTable
-            products={products}
-            onEdit={handleEdit}
-            onRefresh={handleRefresh}
-            onDelete={handleDelete}
-            isLoading={isLoading}
-            categories={categories}
-          />
-        </CardContent>
-      </Card>
+      {/* Products Data Table */}
+      <AdminDataTable
+        title="Products"
+        data={products}
+        columns={columns}
+        loading={isLoading}
+        searchable={true}
+        searchPlaceholder="Search by name..."
+        searchKey="name"
+        filters={[
+          {
+            key: "status",
+            label: "Filter by status",
+            options: statusFilterOptions,
+            value: statusFilter,
+            onChange: setStatusFilter,
+          },
+          {
+            key: "categoryId",
+            label: "Filter by category",
+            options: categoryFilterOptions,
+            value: categoryFilter,
+            onChange: setCategoryFilter,
+          },
+        ]}
+        actions={getActions}
+        onRefresh={handleRefresh}
+        emptyMessage="No products found"
+        emptyIcon={<Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />}
+        itemsPerPage={10}
+        showPagination={true}
+      />
 
       {/* Product Dialog */}
       <ProductDialog

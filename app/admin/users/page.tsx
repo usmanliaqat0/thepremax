@@ -1,8 +1,9 @@
 ﻿"use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Mail,
   Phone,
@@ -10,22 +11,29 @@ import {
   UserX,
   Download,
   RefreshCw,
+  Eye,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import { User } from "@/lib/types";
 import UserEditDialog from "@/components/admin/UserEditDialog";
 import UserViewDialog from "@/components/admin/UserViewDialog";
-import UserTable from "@/components/admin/UserTable";
 import { showSuccessMessage, showErrorMessage } from "@/lib/error-handler";
 import { useAdminData } from "@/hooks/use-admin-data";
 import { useDialog } from "@/hooks/use-dialog";
+import {
+  AdminDataTable,
+  TableColumn,
+  TableAction,
+} from "@/components/admin/AdminDataTable";
+import { format } from "date-fns";
 
 export default function UsersManagement() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [actionLoading, setActionLoading] = useState<{
-    [key: string]: boolean;
-  }>({});
   const [editLoading, setEditLoading] = useState(false);
   const [refreshTrigger] = useState(0);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
 
   // Use the custom dialog hook for better state management
   const viewDialog = useDialog({
@@ -57,7 +65,6 @@ export default function UsersManagement() {
   });
 
   const handleDeleteUser = async (userId: string) => {
-    setActionLoading((prev) => ({ ...prev, [`delete-${userId}`]: true }));
     try {
       const res = await fetch(`/api/admin/users/${userId}`, {
         method: "DELETE",
@@ -72,8 +79,6 @@ export default function UsersManagement() {
     } catch (error) {
       console.error("Error deleting user:", error);
       showErrorMessage("Failed to delete user. Please try again.");
-    } finally {
-      setActionLoading((prev) => ({ ...prev, [`delete-${userId}`]: false }));
     }
   };
 
@@ -81,7 +86,6 @@ export default function UsersManagement() {
     userId: string,
     newStatus: "active" | "inactive"
   ) => {
-    setActionLoading((prev) => ({ ...prev, [`toggle-${userId}`]: true }));
     try {
       const res = await fetch(`/api/admin/users/${userId}`, {
         method: "PUT",
@@ -106,8 +110,6 @@ export default function UsersManagement() {
     } catch (error) {
       console.error("Error updating user status:", error);
       showErrorMessage("Failed to update user status. Please try again.");
-    } finally {
-      setActionLoading((prev) => ({ ...prev, [`toggle-${userId}`]: false }));
     }
   };
 
@@ -124,6 +126,152 @@ export default function UsersManagement() {
     verifiedEmails: users.filter((u) => u.isEmailVerified).length,
     verifiedPhones: users.filter((u) => u.isPhoneVerified).length,
   };
+
+  // Helper functions for rendering
+  const getStatusBadge = (status: string) => {
+    const colors = {
+      active: "bg-green-100 text-green-800",
+      inactive: "bg-gray-100 text-gray-800",
+    };
+    return (
+      <Badge
+        variant="outline"
+        className={colors[status as keyof typeof colors] || "bg-gray-100"}
+      >
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Badge>
+    );
+  };
+
+  const getRoleBadge = (role: string) => {
+    const colors = {
+      admin: "bg-red-100 text-red-800",
+      customer: "bg-blue-100 text-blue-800",
+    };
+    return (
+      <Badge
+        variant="outline"
+        className={colors[role as keyof typeof colors] || "bg-gray-100"}
+      >
+        {role.charAt(0).toUpperCase() + role.slice(1)}
+      </Badge>
+    );
+  };
+
+  // Table columns configuration
+  const columns: TableColumn<User>[] = [
+    {
+      key: "email",
+      label: "Email",
+      sortable: true,
+    },
+    {
+      key: "firstName",
+      label: "Name",
+      render: (item) => `${item.firstName} ${item.lastName}`,
+      sortable: true,
+    },
+    {
+      key: "role",
+      label: "Role",
+      render: (item) => getRoleBadge(item.role),
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (item) => getStatusBadge(item.status),
+    },
+    {
+      key: "isEmailVerified",
+      label: "Email Verified",
+      render: (item) => (
+        <Badge variant={item.isEmailVerified ? "default" : "secondary"}>
+          {item.isEmailVerified ? "Yes" : "No"}
+        </Badge>
+      ),
+    },
+    {
+      key: "isPhoneVerified",
+      label: "Phone Verified",
+      render: (item) => (
+        <Badge variant={item.isPhoneVerified ? "default" : "secondary"}>
+          {item.isPhoneVerified ? "Yes" : "No"}
+        </Badge>
+      ),
+    },
+    {
+      key: "createdAt",
+      label: "Joined",
+      render: (item) => format(new Date(item.createdAt), "MMM dd, yyyy"),
+      sortable: true,
+    },
+  ];
+
+  // Dynamic actions based on user status
+  const getActions = (item: User): TableAction<User>[] => {
+    const actions: TableAction<User>[] = [];
+
+    actions.push({
+      label: "View",
+      icon: <Eye className="h-4 w-4 mr-2" />,
+      onClick: (user) => {
+        setSelectedUser(user);
+        viewDialog.openDialog();
+      },
+    });
+
+    actions.push({
+      label: "Edit",
+      icon: <Edit className="h-4 w-4 mr-2" />,
+      onClick: (user) => {
+        setSelectedUser(user);
+        editDialog.openDialog();
+      },
+    });
+
+    if (item.status !== "active") {
+      actions.push({
+        label: "Activate",
+        icon: <UserCheck className="h-4 w-4 mr-2" />,
+        onClick: (user) => handleToggleUserStatus(user.id, "active"),
+      });
+    }
+
+    if (item.status !== "inactive") {
+      actions.push({
+        label: "Deactivate",
+        icon: <UserX className="h-4 w-4 mr-2" />,
+        onClick: (user) => handleToggleUserStatus(user.id, "inactive"),
+      });
+    }
+
+    actions.push({
+      label: "Delete",
+      icon: <Trash2 className="h-4 w-4 mr-2" />,
+      onClick: (user) => handleDeleteUser(user.id),
+      variant: "destructive",
+      confirm: {
+        title: "Delete User",
+        description:
+          "Are you sure you want to delete this user? This action cannot be undone.",
+      },
+    });
+
+    return actions;
+  };
+
+  // Filter options
+  const statusFilterOptions = [
+    { key: "all", label: "All Status", value: "all" },
+    { key: "active", label: "Active", value: "active" },
+    { key: "inactive", label: "Inactive", value: "inactive" },
+  ];
+
+  const roleFilterOptions = [
+    { key: "all", label: "All Roles", value: "all" },
+    { key: "admin", label: "Admin", value: "admin" },
+    { key: "customer", label: "Customer", value: "customer" },
+  ];
 
   if (error) {
     return (
@@ -223,29 +371,41 @@ export default function UsersManagement() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Users ({stats.total})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <UserTable
-            users={users}
-            onRefresh={handleRefresh}
-            onView={(user) => {
-              setSelectedUser(user);
-              viewDialog.openDialog();
-            }}
-            onEdit={(user) => {
-              setSelectedUser(user);
-              editDialog.openDialog();
-            }}
-            onToggleStatus={handleToggleUserStatus}
-            onDelete={handleDeleteUser}
-            isLoading={loading}
-            actionLoading={actionLoading}
-          />
-        </CardContent>
-      </Card>
+      {/* Users Data Table */}
+      <AdminDataTable
+        title="Users"
+        data={users}
+        columns={columns}
+        loading={loading}
+        searchable={true}
+        searchPlaceholder="Search by email or name..."
+        searchKey="email"
+        idKey="id"
+        filters={[
+          {
+            key: "status",
+            label: "Filter by status",
+            options: statusFilterOptions,
+            value: statusFilter,
+            onChange: setStatusFilter,
+          },
+          {
+            key: "role",
+            label: "Filter by role",
+            options: roleFilterOptions,
+            value: roleFilter,
+            onChange: setRoleFilter,
+          },
+        ]}
+        actions={getActions}
+        onRefresh={handleRefresh}
+        emptyMessage="No users found"
+        emptyIcon={
+          <UserCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+        }
+        itemsPerPage={10}
+        showPagination={true}
+      />
 
       {selectedUser && (
         <>

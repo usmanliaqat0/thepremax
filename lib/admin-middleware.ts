@@ -25,7 +25,6 @@ export class AdminMiddleware {
     error?: string;
   } {
     try {
-
       let token = request.headers.get("authorization")?.replace("Bearer ", "");
 
       if (!token) {
@@ -39,16 +38,16 @@ export class AdminMiddleware {
         };
       }
 
-const decoded = TokenUtils.verifyAccessToken(token) as JWTPayload;
+      const decoded = TokenUtils.verifyAccessToken(token) as JWTPayload;
 
-if (decoded.role !== "admin") {
+      if (decoded.role !== "admin") {
         return {
           success: false,
           error: "Insufficient permissions. Admin access required.",
         };
       }
 
-return {
+      return {
         success: true,
         user: {
           id: decoded.id,
@@ -89,7 +88,7 @@ return {
         );
       }
 
-return handler(request, verification.user, ...args);
+      return handler(request, verification.user, ...args);
     };
   }
 
@@ -134,4 +133,27 @@ export function useAdminAuth() {
   };
 
   return { checkAdminAccess, isAdmin };
+}
+
+// Export a function that can be used in API routes
+export async function adminMiddleware(request: NextRequest): Promise<{
+  success: boolean;
+  user?: AdminUser;
+  error?: string;
+  status?: number;
+}> {
+  const verification = AdminMiddleware.verifyAdminToken(request);
+
+  if (!verification.success) {
+    return {
+      success: false,
+      error: verification.error || "Admin access required",
+      status: 401,
+    };
+  }
+
+  return {
+    success: true,
+    user: verification.user,
+  };
 }

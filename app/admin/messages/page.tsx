@@ -3,10 +3,23 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, RefreshCw } from "lucide-react";
-import MessageTable from "@/components/admin/MessageTable";
+import { Badge } from "@/components/ui/badge";
+import {
+  MessageSquare,
+  RefreshCw,
+  Eye,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useAdminData } from "@/hooks/use-admin-data";
+import {
+  AdminDataTable,
+  TableColumn,
+  TableAction,
+} from "@/components/admin/AdminDataTable";
+import MessageViewDialog from "@/components/admin/MessageViewDialog";
+import { format } from "date-fns";
 
 interface ContactMessage extends Record<string, unknown> {
   _id: string;
@@ -24,6 +37,11 @@ interface ContactMessage extends Record<string, unknown> {
 
 export default function MessagesPage() {
   const [refreshTrigger] = useState(0);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(
+    null
+  );
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
   // Use the new hook for fetching all messages
   const {
@@ -60,6 +78,14 @@ export default function MessagesPage() {
           )
         );
         toast.success("Message status updated");
+
+        // Update the selected message if it's the same one being updated
+        if (selectedMessage && selectedMessage._id === messageId) {
+          setSelectedMessage({
+            ...selectedMessage,
+            status: newStatus as ContactMessage["status"],
+          });
+        }
       } else {
         toast.error(data.error || "Failed to update message status");
       }
@@ -67,6 +93,11 @@ export default function MessagesPage() {
       console.error("Error updating message status:", error);
       toast.error("Failed to update message status");
     }
+  };
+
+  const handleViewMessage = (message: ContactMessage) => {
+    setSelectedMessage(message);
+    setIsViewDialogOpen(true);
   };
 
   const getStatusCounts = () => {
@@ -85,6 +116,100 @@ export default function MessagesPage() {
   };
 
   const statusCounts = getStatusCounts();
+
+  // Helper functions for rendering
+  const getStatusBadge = (status: string) => {
+    const colors = {
+      new: "bg-blue-100 text-blue-800",
+      read: "bg-gray-100 text-gray-800",
+      replied: "bg-green-100 text-green-800",
+      closed: "bg-red-100 text-red-800",
+    };
+    return (
+      <Badge
+        variant="outline"
+        className={colors[status as keyof typeof colors] || "bg-gray-100"}
+      >
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Badge>
+    );
+  };
+
+  // Table columns configuration
+  const columns: TableColumn<ContactMessage>[] = [
+    {
+      key: "name",
+      label: "Name",
+      sortable: true,
+    },
+    {
+      key: "email",
+      label: "Email",
+      sortable: true,
+    },
+    {
+      key: "subject",
+      label: "Subject",
+      render: (item) => item.subject || "No Subject",
+    },
+    {
+      key: "status",
+      label: "Status",
+      render: (item) => getStatusBadge(item.status),
+    },
+    {
+      key: "createdAt",
+      label: "Received",
+      render: (item) => format(new Date(item.createdAt), "MMM dd, yyyy"),
+      sortable: true,
+    },
+  ];
+
+  // Dynamic actions based on message status
+  const getActions = (item: ContactMessage): TableAction<ContactMessage>[] => {
+    const actions: TableAction<ContactMessage>[] = [];
+
+    actions.push({
+      label: "View",
+      icon: <Eye className="h-4 w-4 mr-2" />,
+      onClick: (message) => handleViewMessage(message),
+    });
+
+    if (item.status !== "read") {
+      actions.push({
+        label: "Mark as Read",
+        icon: <CheckCircle className="h-4 w-4 mr-2" />,
+        onClick: (message) => handleStatusUpdate(message._id, "read"),
+      });
+    }
+
+    if (item.status !== "replied") {
+      actions.push({
+        label: "Mark as Replied",
+        icon: <CheckCircle className="h-4 w-4 mr-2" />,
+        onClick: (message) => handleStatusUpdate(message._id, "replied"),
+      });
+    }
+
+    if (item.status !== "closed") {
+      actions.push({
+        label: "Close",
+        icon: <XCircle className="h-4 w-4 mr-2" />,
+        onClick: (message) => handleStatusUpdate(message._id, "closed"),
+      });
+    }
+
+    return actions;
+  };
+
+  // Filter options
+  const statusFilterOptions = [
+    { key: "all", label: "All Status", value: "all" },
+    { key: "new", label: "New", value: "new" },
+    { key: "read", label: "Read", value: "read" },
+    { key: "replied", label: "Replied", value: "replied" },
+    { key: "closed", label: "Closed", value: "closed" },
+  ];
 
   if (error) {
     return (
@@ -188,19 +313,41 @@ export default function MessagesPage() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Messages ({messages.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <MessageTable
-            messages={messages}
-            onRefresh={handleRefresh}
-            onStatusUpdate={handleStatusUpdate}
-            loading={loading}
-          />
-        </CardContent>
-      </Card>
+      {/* Messages Data Table */}
+      <AdminDataTable
+        title="Contact Messages"
+        data={messages}
+        columns={columns}
+        loading={loading}
+        searchable={true}
+        searchPlaceholder="Search by name or email..."
+        searchKey="name"
+        filters={[
+          {
+            key: "status",
+            label: "Filter by status",
+            options: statusFilterOptions,
+            value: statusFilter,
+            onChange: setStatusFilter,
+          },
+        ]}
+        actions={getActions}
+        onRefresh={handleRefresh}
+        emptyMessage="No messages found"
+        emptyIcon={
+          <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+        }
+        itemsPerPage={10}
+        showPagination={true}
+      />
+
+      {/* Message View Dialog */}
+      <MessageViewDialog
+        open={isViewDialogOpen}
+        onOpenChange={setIsViewDialogOpen}
+        message={selectedMessage}
+        onStatusUpdate={handleStatusUpdate}
+      />
     </div>
   );
 }

@@ -11,6 +11,7 @@ import {
   Tag,
   MessageCircle,
   ShoppingCart,
+  Mail,
   X,
 } from "lucide-react";
 import Image from "next/image";
@@ -46,6 +47,11 @@ const sidebarItems = [
     title: "Messages",
     href: "/admin/messages",
     icon: MessageCircle,
+  },
+  {
+    title: "Subscriptions",
+    href: "/admin/subscriptions",
+    icon: Mail,
   },
 ];
 
