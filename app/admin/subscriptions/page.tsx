@@ -328,69 +328,61 @@ export default function AdminSubscriptions() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-        <Card>
-          <CardContent className="p-3 sm:p-4 lg:p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-4 bg-blue-100 rounded-xl flex-shrink-0">
-                <Users className="h-8 w-8 text-blue-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Total Subscribers
-                </p>
-                <p className="text-2xl font-bold">{stats.total}</p>
-              </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+        <Card className="p-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+              <Users className="h-5 w-5 text-blue-600" />
             </div>
-          </CardContent>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-muted-foreground">
+                Total Subscribers
+              </p>
+              <p className="text-lg font-bold">{stats.total}</p>
+            </div>
+          </div>
         </Card>
 
-        <Card>
-          <CardContent className="p-3 sm:p-4 lg:p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-4 bg-green-100 rounded-xl flex-shrink-0">
-                <MailCheck className="h-8 w-8 text-green-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Active
-                </p>
-                <p className="text-2xl font-bold">{stats.active}</p>
-              </div>
+        <Card className="p-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
+              <MailCheck className="h-5 w-5 text-green-600" />
             </div>
-          </CardContent>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-muted-foreground">
+                Active
+              </p>
+              <p className="text-lg font-bold">{stats.active}</p>
+            </div>
+          </div>
         </Card>
 
-        <Card>
-          <CardContent className="p-3 sm:p-4 lg:p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-4 bg-yellow-100 rounded-xl flex-shrink-0">
-                <MailX className="h-8 w-8 text-yellow-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Unsubscribed
-                </p>
-                <p className="text-2xl font-bold">{stats.unsubscribed}</p>
-              </div>
+        <Card className="p-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-yellow-100 rounded-lg flex-shrink-0">
+              <MailX className="h-5 w-5 text-yellow-600" />
             </div>
-          </CardContent>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-muted-foreground">
+                Unsubscribed
+              </p>
+              <p className="text-lg font-bold">{stats.unsubscribed}</p>
+            </div>
+          </div>
         </Card>
 
-        <Card>
-          <CardContent className="p-3 sm:p-4 lg:p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-4 bg-red-100 rounded-xl flex-shrink-0">
-                <AlertTriangle className="h-8 w-8 text-red-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Bounced
-                </p>
-                <p className="text-2xl font-bold">{stats.bounced}</p>
-              </div>
+        <Card className="p-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-red-100 rounded-lg flex-shrink-0">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
             </div>
-          </CardContent>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-muted-foreground">
+                Bounced
+              </p>
+              <p className="text-lg font-bold">{stats.bounced}</p>
+            </div>
+          </div>
         </Card>
       </div>
 

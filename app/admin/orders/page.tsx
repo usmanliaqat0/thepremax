@@ -483,52 +483,44 @@ export default function OrdersManagement() {
       </div>
 
       {/* Order Statistics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <Card>
-          <CardContent className="p-3 sm:p-2">
-            <div className="flex flex-col justify-center items-center gap-2">
-              <ShoppingCart className="h-6 w-6 text-blue-600" />
-              <p className="text-xs sm:text-sm text-muted-foreground text-center">
-                Total Orders
-              </p>
-              <p className="text-xl sm:text-2xl font-bold">{stats.total}</p>
-            </div>
-          </CardContent>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+        <Card className="p-6">
+          <div className="flex flex-col items-center gap-2">
+            <ShoppingCart className="h-5 w-5 text-blue-600" />
+            <p className="text-xs text-muted-foreground text-center">
+              Total Orders
+            </p>
+            <p className="text-lg font-bold">{stats.total}</p>
+          </div>
         </Card>
-        <Card>
-          <CardContent className="p-3 sm:p-2">
-            <div className="flex flex-col justify-center items-center gap-2">
-              <DollarSign className="h-6 w-6 text-green-600" />
-              <p className="text-xs sm:text-sm text-muted-foreground text-center">
-                Total Revenue
-              </p>
-              <p className="text-xl sm:text-2xl font-bold">
-                {formatPrice(stats.totalRevenue)}
-              </p>
-            </div>
-          </CardContent>
+        <Card className="p-6">
+          <div className="flex flex-col items-center gap-2">
+            <DollarSign className="h-5 w-5 text-green-600" />
+            <p className="text-xs text-muted-foreground text-center">
+              Total Revenue
+            </p>
+            <p className="text-lg font-bold">
+              {formatPrice(stats.totalRevenue)}
+            </p>
+          </div>
         </Card>
-        <Card>
-          <CardContent className="p-3 sm:p-2">
-            <div className="flex flex-col justify-center items-center gap-2">
-              <Clock className="h-6 w-6 text-yellow-600" />
-              <p className="text-xs sm:text-sm text-muted-foreground text-center">
-                Pending Orders
-              </p>
-              <p className="text-xl sm:text-2xl font-bold">{stats.pending}</p>
-            </div>
-          </CardContent>
+        <Card className="p-6">
+          <div className="flex flex-col items-center gap-2">
+            <Clock className="h-5 w-5 text-yellow-600" />
+            <p className="text-xs text-muted-foreground text-center">
+              Pending Orders
+            </p>
+            <p className="text-lg font-bold">{stats.pending}</p>
+          </div>
         </Card>
-        <Card>
-          <CardContent className="p-3 sm:p-2">
-            <div className="flex flex-col justify-center items-center gap-2">
-              <Truck className="h-6 w-6 text-purple-600" />
-              <p className="text-xs sm:text-sm text-muted-foreground text-center">
-                Shipped Orders
-              </p>
-              <p className="text-xl sm:text-2xl font-bold">{stats.shipped}</p>
-            </div>
-          </CardContent>
+        <Card className="p-6">
+          <div className="flex flex-col items-center gap-2">
+            <Truck className="h-5 w-5 text-purple-600" />
+            <p className="text-xs text-muted-foreground text-center">
+              Shipped Orders
+            </p>
+            <p className="text-lg font-bold">{stats.shipped}</p>
+          </div>
         </Card>
       </div>
 

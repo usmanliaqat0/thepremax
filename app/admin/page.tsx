@@ -33,169 +33,142 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      <div className="bg-gradient-to-r from-accent/10 to-accent/5 rounded-xl p-4 sm:p-6 lg:p-8 border border-accent/20 shadow-sm">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground mb-2 sm:mb-3">
-          Welcome to ThePreMax Admin Panel
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base lg:text-lg max-w-2xl">
-          Manage your e-commerce platform, users, products, and orders from this
-          central dashboard.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 lg:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
         {loading || !stats ? (
           Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground bg-muted h-4 w-24 animate-pulse rounded" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold bg-muted h-8 w-20 animate-pulse rounded" />
-                <div className="flex items-center text-sm bg-muted h-4 w-16 animate-pulse rounded mt-2" />
-              </CardContent>
+            <Card key={i} className="p-3">
+              <div className="flex items-center justify-between">
+                <div className="bg-muted h-3 w-16 animate-pulse rounded" />
+                <div className="bg-muted h-4 w-4 animate-pulse rounded" />
+              </div>
+              <div className="space-y-1">
+                <div className="bg-muted h-6 w-12 animate-pulse rounded" />
+                <div className="bg-muted h-3 w-20 animate-pulse rounded" />
+              </div>
             </Card>
           ))
         ) : (
           <>
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+            <Card className="hover:shadow-md transition-shadow p-6">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-medium text-muted-foreground">
                   Total Users
                 </CardTitle>
-                <Users className="h-5 w-5 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stats.users.total}</div>
-                <div className="flex items-center text-sm mt-2">
-                  <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-xl font-bold">{stats.users.total}</div>
+                <div className="flex items-center text-xs">
+                  <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
                   <span className="text-green-600 font-medium">
                     {stats.users.growth}
                   </span>
-                  <span className="text-muted-foreground ml-1">
-                    from last month
-                  </span>
                 </div>
-              </CardContent>
+              </div>
             </Card>
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+            <Card className="hover:shadow-md transition-shadow p-6">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-medium text-muted-foreground">
                   Active Users
                 </CardTitle>
-                <Users className="h-5 w-5 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stats.users.active}</div>
-                <div className="flex items-center text-sm mt-2">
-                  <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-xl font-bold">{stats.users.active}</div>
+                <div className="flex items-center text-xs">
+                  <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
                   <span className="text-green-600 font-medium">
                     {stats.users.activeGrowth}
                   </span>
-                  <span className="text-muted-foreground ml-1">
-                    from last month
-                  </span>
                 </div>
-              </CardContent>
+              </div>
             </Card>
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+            <Card className="hover:shadow-md transition-shadow p-6">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-medium text-muted-foreground">
                   Email Verified
                 </CardTitle>
-                <Users className="h-5 w-5 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-xl font-bold">
                   {stats.verification.emailVerified}
                 </div>
-                <div className="flex items-center text-sm mt-2">
-                  <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
+                <div className="flex items-center text-xs">
+                  <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
                   <span className="text-green-600 font-medium">
                     {stats.verification.emailGrowth}
                   </span>
-                  <span className="text-muted-foreground ml-1">
-                    from last month
-                  </span>
                 </div>
-              </CardContent>
+              </div>
             </Card>
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+            <Card className="hover:shadow-md transition-shadow p-6">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-medium text-muted-foreground">
                   Phone Verified
                 </CardTitle>
-                <Users className="h-5 w-5 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-xl font-bold">
                   {stats.verification.phoneVerified}
                 </div>
-                <div className="flex items-center text-sm mt-2">
-                  <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
+                <div className="flex items-center text-xs">
+                  <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
                   <span className="text-green-600 font-medium">
                     {stats.verification.phoneGrowth}
                   </span>
-                  <span className="text-muted-foreground ml-1">
-                    from last month
-                  </span>
                 </div>
-              </CardContent>
+              </div>
             </Card>
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+            <Card className="hover:shadow-md transition-shadow p-6">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-medium text-muted-foreground">
                   Total Orders
                 </CardTitle>
-                <ShoppingCart className="h-5 w-5 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stats.orders.total}</div>
-                <div className="flex items-center text-sm mt-2">
-                  <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
+                <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-xl font-bold">{stats.orders.total}</div>
+                <div className="flex items-center text-xs">
+                  <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
                   <span className="text-green-600 font-medium">
                     {stats.orders.growth}
                   </span>
-                  <span className="text-muted-foreground ml-1">
-                    from last month
-                  </span>
                 </div>
-              </CardContent>
+              </div>
             </Card>
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+            <Card className="hover:shadow-md transition-shadow p-6">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xs font-medium text-muted-foreground">
                   Total Revenue
                 </CardTitle>
-                <DollarSign className="h-5 w-5 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-xl font-bold">
                   ${stats.orders.totalRevenue.toLocaleString()}
                 </div>
-                <div className="flex items-center text-sm mt-2">
-                  <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
+                <div className="flex items-center text-xs">
+                  <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
                   <span className="text-green-600 font-medium">
                     {stats.orders.revenueGrowth}
                   </span>
-                  <span className="text-muted-foreground ml-1">
-                    from last month
-                  </span>
                 </div>
-              </CardContent>
+              </div>
             </Card>
           </>
         )}
       </div>
 
       <Card className="shadow-sm">
-        <CardHeader className="pb-3 sm:pb-6">
+        <CardHeader className="pb-3">
           <CardTitle className="text-lg sm:text-xl">Recent Users</CardTitle>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             Latest registered users
           </p>
         </CardHeader>
-        <CardContent className="p-0 sm:p-6">
+        <CardContent className="p-2">
           {loading || !stats ? (
             <div className="space-y-3 sm:space-y-4 p-4 sm:p-0">
               {Array.from({ length: 5 }).map((_, i) => (

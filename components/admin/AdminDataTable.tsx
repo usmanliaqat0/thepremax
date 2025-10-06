@@ -296,7 +296,7 @@ export function AdminDataTable<T extends Record<string, unknown>>({
 
       {/* Data Table */}
       <Card>
-        <CardHeader className="p-3 sm:p-6">
+        <CardHeader className="p-3 sm:px-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
             <div>
               <CardTitle className="text-lg sm:text-xl">
@@ -313,7 +313,7 @@ export function AdminDataTable<T extends Record<string, unknown>>({
             )}
           </div>
         </CardHeader>
-        <CardContent className="p-0 sm:p-6">
+        <CardContent className="p-0 sm:px-6">
           {loading ? (
             <div className="flex justify-center items-center h-32">
               <RefreshCw className="h-6 w-6 animate-spin" />

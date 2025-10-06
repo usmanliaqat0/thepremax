@@ -323,54 +323,42 @@ export default function UsersManagement() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <Card>
-          <CardContent className="p-3 sm:p-2">
-            <div className="flex flex-col justify-center items-center gap-2">
-              <UserCheck className="h-6 w-6 text-green-600" />
-              <p className="text-xs sm:text-sm text-muted-foreground text-center">
-                Active Users
-              </p>
-              <p className="text-xl sm:text-2xl font-bold">{stats.active}</p>
-            </div>
-          </CardContent>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+        <Card className="p-6">
+          <div className="flex flex-col items-center justify-center gap-2">
+            <UserCheck className="h-5 w-5 text-green-600" />
+            <p className="text-xs text-muted-foreground text-center">
+              Active Users
+            </p>
+            <p className="text-lg font-bold">{stats.active}</p>
+          </div>
         </Card>
-        <Card>
-          <CardContent className="p-3 sm:p-2">
-            <div className="flex flex-col justify-center items-center gap-2">
-              <UserX className="h-6 w-6 text-red-600" />
-              <p className="text-xs sm:text-sm text-muted-foreground text-center">
-                Inactive Users
-              </p>
-              <p className="text-xl sm:text-2xl font-bold">{stats.inactive}</p>
-            </div>
-          </CardContent>
+        <Card className="p-6">
+          <div className="flex flex-col items-center gap-2">
+            <UserX className="h-5 w-5 text-red-600" />
+            <p className="text-xs text-muted-foreground text-center">
+              Inactive Users
+            </p>
+            <p className="text-lg font-bold">{stats.inactive}</p>
+          </div>
         </Card>
-        <Card>
-          <CardContent className="p-3 sm:p-2">
-            <div className="flex flex-col justify-center items-center gap-2">
-              <Mail className="h-6 w-6 text-blue-600" />
-              <p className="text-xs sm:text-sm text-muted-foreground text-center">
-                Verified Emails
-              </p>
-              <p className="text-xl sm:text-2xl font-bold">
-                {stats.verifiedEmails}
-              </p>
-            </div>
-          </CardContent>
+        <Card className="p-6">
+          <div className="flex flex-col items-center gap-2">
+            <Mail className="h-5 w-5 text-blue-600" />
+            <p className="text-xs text-muted-foreground text-center">
+              Verified Emails
+            </p>
+            <p className="text-lg font-bold">{stats.verifiedEmails}</p>
+          </div>
         </Card>
-        <Card>
-          <CardContent className="p-3 sm:p-2">
-            <div className="flex flex-col justify-center items-center gap-2">
-              <Phone className="h-6 w-6 text-purple-600" />
-              <p className="text-xs sm:text-sm text-muted-foreground text-center">
-                Verified Phones
-              </p>
-              <p className="text-xl sm:text-2xl font-bold">
-                {stats.verifiedPhones}
-              </p>
-            </div>
-          </CardContent>
+        <Card className="p-6">
+          <div className="flex flex-col items-center gap-2">
+            <Phone className="h-5 w-5 text-purple-600" />
+            <p className="text-xs text-muted-foreground text-center">
+              Verified Phones
+            </p>
+            <p className="text-lg font-bold">{stats.verifiedPhones}</p>
+          </div>
         </Card>
       </div>
 

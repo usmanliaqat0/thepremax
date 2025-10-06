@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RefreshLoader } from "@/components/ui/loader";
@@ -254,65 +254,65 @@ export default function MessagesPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+        <Card className="p-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xs font-medium text-muted-foreground">
               New Messages
             </CardTitle>
-            <MessageSquare className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold text-blue-600">
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div className="space-y-1">
+            <div className="text-lg font-bold text-blue-600">
               {statusCounts.new}
             </div>
             <p className="text-xs text-muted-foreground">Unread messages</p>
-          </CardContent>
+          </div>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">
+        <Card className="p-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xs font-medium text-muted-foreground">
               Read
             </CardTitle>
-            <MessageSquare className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold text-gray-600">
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div className="space-y-1">
+            <div className="text-lg font-bold text-gray-600">
               {statusCounts.read}
             </div>
             <p className="text-xs text-muted-foreground">Read messages</p>
-          </CardContent>
+          </div>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">
+        <Card className="p-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xs font-medium text-muted-foreground">
               Replied
             </CardTitle>
-            <MessageSquare className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold text-green-600">
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div className="space-y-1">
+            <div className="text-lg font-bold text-green-600">
               {statusCounts.replied}
             </div>
             <p className="text-xs text-muted-foreground">Replied messages</p>
-          </CardContent>
+          </div>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xs sm:text-sm font-medium">
+        <Card className="p-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xs font-medium text-muted-foreground">
               Closed
             </CardTitle>
-            <MessageSquare className="h-5 w-5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl sm:text-2xl font-bold text-red-600">
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div className="space-y-1">
+            <div className="text-lg font-bold text-red-600">
               {statusCounts.closed}
             </div>
             <p className="text-xs text-muted-foreground">Closed messages</p>
-          </CardContent>
+          </div>
         </Card>
       </div>
 
