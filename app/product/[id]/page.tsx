@@ -40,6 +40,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { formatPrice } from "@/lib/currency";
 import { Product } from "@/lib/types";
 
@@ -47,13 +48,8 @@ const ProductDetail = () => {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  const {
-    addToCart,
-    addToWishlist,
-    removeFromWishlist,
-    isInWishlist,
-    isInCart,
-  } = useCart();
+  const { addToCart, isInCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   const productId = params.id as string;
 
@@ -165,19 +161,11 @@ const ProductDetail = () => {
     }
   };
 
-  const handleToggleWishlist = () => {
+  const handleToggleWishlist = async () => {
     if (isInWishlist(product._id)) {
-      removeFromWishlist(product._id);
-      toast({
-        title: "Removed from wishlist",
-        description: `${product.name} has been removed from your wishlist.`,
-      });
+      await removeFromWishlist(product._id);
     } else {
-      addToWishlist(product);
-      toast({
-        title: "Added to wishlist",
-        description: `${product.name} has been added to your wishlist.`,
-      });
+      await addToWishlist(product, selectedSize, selectedColor);
     }
   };
 

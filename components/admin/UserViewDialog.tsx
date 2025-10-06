@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +9,9 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
 import { User } from "@/lib/types";
+import { WishlistItem } from "@/context/WishlistContext";
 import {
   Mail,
   Phone,
@@ -16,8 +19,11 @@ import {
   Heart,
   User as UserIcon,
   Settings,
+  Star,
 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
+import { formatPrice } from "@/lib/currency";
+import Image from "next/image";
 
 interface UserViewDialogProps {
   user: User;
@@ -30,6 +36,42 @@ export default function UserViewDialog({
   open,
   onOpenChange,
 }: UserViewDialogProps) {
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  const fetchUserWishlist = useCallback(async () => {
+    try {
+      setWishlistLoading(true);
+      const token = localStorage.getItem("auth_token");
+
+      if (!token) return;
+
+      const response = await fetch(
+        `/api/admin/user-wishlist?userId=${user.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+      if (result.success) {
+        setWishlist(result.wishlist?.items || []);
+      }
+    } catch (error) {
+      console.error("Error fetching user wishlist:", error);
+    } finally {
+      setWishlistLoading(false);
+    }
+  }, [user.id]);
+
+  useEffect(() => {
+    if (open && user.id) {
+      fetchUserWishlist();
+    }
+  }, [open, user.id, fetchUserWishlist]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -214,6 +256,74 @@ export default function UserViewDialog({
               </div>
             </div>
           )}
+
+          {/* Wishlist Section */}
+          <div>
+            <h4 className="font-semibold flex items-center gap-2 mb-3">
+              <Heart className="h-4 w-4" />
+              Wishlist ({wishlist.length} items)
+            </h4>
+            {wishlistLoading ? (
+              <div className="text-center py-4 text-muted-foreground">
+                Loading wishlist...
+              </div>
+            ) : wishlist.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                {wishlist.map((item) => (
+                  <Card key={item.productId} className="p-3">
+                    <div className="flex gap-3">
+                      <div className="relative w-16 h-16 flex-shrink-0">
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="object-cover rounded-md"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h5 className="font-medium text-sm line-clamp-2 mb-1">
+                          {item.name}
+                        </h5>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-semibold text-primary">
+                            {formatPrice(item.price)}
+                          </span>
+                          {item.originalPrice &&
+                            item.originalPrice > item.price && (
+                              <span className="text-xs text-muted-foreground line-through">
+                                {formatPrice(item.originalPrice)}
+                              </span>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            <span>{item.rating}</span>
+                            <span>({item.reviewCount})</span>
+                          </div>
+                          <Badge
+                            variant={item.inStock ? "default" : "secondary"}
+                            className="text-xs"
+                          >
+                            {item.inStock ? "In Stock" : "Out of Stock"}
+                          </Badge>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Added{" "}
+                          {format(new Date(item.dateAdded), "MMM d, yyyy")}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Heart className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p>No items in wishlist</p>
+              </div>
+            )}
+          </div>
 
           <div className="bg-muted/50 rounded-lg p-4">
             <h4 className="font-semibold mb-3">Account Status</h4>

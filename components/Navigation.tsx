@@ -19,6 +19,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart, CartItem } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useCallback, useState, useEffect } from "react";
 import { Category } from "@/lib/types";
@@ -26,6 +27,7 @@ import { Category } from "@/lib/types";
 const Navigation = () => {
   const { getCartItemsCount, state } = useCart();
   const { isAdmin } = useAuth();
+  const { state: wishlistState } = useWishlist();
   const router = useRouter();
   const pathname = usePathname();
   const [categories, setCategories] = useState<Category[]>([]);
@@ -93,7 +95,7 @@ const Navigation = () => {
 
               <div className="absolute top-full left-0 mt-1 w-56 bg-background border border-border rounded-md shadow-fashion-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                 <div className="py-2">
-                  {categories.map((category) => (
+                  {categories.slice(0, 6).map((category) => (
                     <Link
                       key={category._id}
                       href={`/category/${category.slug}`}
@@ -128,7 +130,7 @@ const Navigation = () => {
                       href="/shop"
                       className="flex items-center justify-between px-4 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors font-medium rounded-sm mx-1"
                     >
-                      <span>View All Products</span>
+                      <span>View All Categories</span>
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>
@@ -172,12 +174,12 @@ const Navigation = () => {
             >
               <Link href="/wishlist">
                 <Heart className="h-5 w-5" />
-                {state.wishlist.length > 0 && (
+                {wishlistState.items.length > 0 && (
                   <Badge
                     variant="destructive"
                     className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs font-bold min-w-[1.25rem] bg-red-600 text-white border-2 border-background"
                   >
-                    {state.wishlist.length}
+                    {wishlistState.items.length}
                   </Badge>
                 )}
               </Link>
@@ -327,7 +329,7 @@ const Navigation = () => {
                       <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                         Categories
                       </h3>
-                      {categories.map((category) => (
+                      {categories.slice(0, 6).map((category) => (
                         <Button
                           key={category._id}
                           variant={
@@ -365,6 +367,16 @@ const Navigation = () => {
                           </Link>
                         </Button>
                       ))}
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start h-10 text-base pl-4 transition-colors hover:bg-accent/10 font-medium text-muted-foreground hover:text-foreground"
+                        asChild
+                      >
+                        <Link href="/shop" className="flex items-center">
+                          <span>View All Categories</span>
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
                     </div>
 
                     <div className="space-y-1 pt-2 border-t">
@@ -388,12 +400,12 @@ const Navigation = () => {
                         >
                           <Heart className="h-5 w-5" />
                           Wishlist
-                          {state.wishlist.length > 0 && (
+                          {wishlistState.items.length > 0 && (
                             <Badge
                               variant="destructive"
                               className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs font-bold min-w-[1.25rem] ml-auto"
                             >
-                              {state.wishlist.length}
+                              {wishlistState.items.length}
                             </Badge>
                           )}
                         </Link>

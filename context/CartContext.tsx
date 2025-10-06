@@ -19,14 +19,8 @@ export interface CartItem {
   color: string;
 }
 
-export interface WishlistItem {
-  id: string;
-  product: Product;
-}
-
 interface CartState {
   items: CartItem[];
-  wishlist: WishlistItem[];
 }
 
 type CartAction =
@@ -48,13 +42,6 @@ type CartAction =
       payload: { id: string; size: string; color: string; quantity: number };
     }
   | { type: "CLEAR_CART" }
-  | { type: "ADD_TO_WISHLIST"; payload: { product: Product } }
-  | { type: "REMOVE_FROM_WISHLIST"; payload: { id: string } }
-  | { type: "CLEAR_WISHLIST" }
-  | {
-      type: "MOVE_TO_CART";
-      payload: { product: Product; size: string; color: string };
-    }
   | { type: "LOAD_STATE"; payload: CartState };
 
 const cartReducer = (state: CartState, action: CartAction): CartState => {
@@ -117,59 +104,6 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case "CLEAR_CART":
       return { ...state, items: [] };
 
-    case "ADD_TO_WISHLIST": {
-      const { product } = action.payload;
-      const existingItem = state.wishlist.find(
-        (item) => item.id === product._id
-      );
-      if (existingItem) {
-        return state;
-      }
-      const newWishlistItem: WishlistItem = {
-        id: product._id,
-        product,
-      };
-      return { ...state, wishlist: [...state.wishlist, newWishlistItem] };
-    }
-
-    case "REMOVE_FROM_WISHLIST": {
-      const { id } = action.payload;
-      return {
-        ...state,
-        wishlist: state.wishlist.filter((item) => item.id !== id),
-      };
-    }
-
-    case "CLEAR_WISHLIST":
-      return { ...state, wishlist: [] };
-
-    case "MOVE_TO_CART": {
-      const { product, size, color } = action.payload;
-      const updatedWishlist = state.wishlist.filter(
-        (item) => item.id !== product._id
-      );
-      const existingItemIndex = state.items.findIndex(
-        (item) =>
-          item.id === product._id && item.size === size && item.color === color
-      );
-
-      let updatedItems = [...state.items];
-      if (existingItemIndex >= 0) {
-        updatedItems[existingItemIndex].quantity += 1;
-      } else {
-        const newItem: CartItem = {
-          id: product._id,
-          product,
-          quantity: 1,
-          size,
-          color,
-        };
-        updatedItems.push(newItem);
-      }
-
-      return { ...state, items: updatedItems, wishlist: updatedWishlist };
-    }
-
     case "LOAD_STATE":
       return action.payload;
 
@@ -194,21 +128,15 @@ interface CartContextValue {
     quantity: number
   ) => void;
   clearCart: () => void;
-  addToWishlist: (product: Product) => void;
-  removeFromWishlist: (id: string) => void;
-  clearWishlist: () => void;
-  moveToCart: (product: Product, size: string, color: string) => void;
   getCartTotal: () => number;
   getCartItemsCount: () => number;
   isInCart: (id: string, size?: string, color?: string) => boolean;
-  isInWishlist: (id: string) => boolean;
 }
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 
 const initialState: CartState = {
   items: [],
-  wishlist: [],
 };
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -268,29 +196,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     toast.success("Cart cleared");
   }, []);
 
-  const addToWishlist = useCallback((product: Product) => {
-    dispatch({ type: "ADD_TO_WISHLIST", payload: { product } });
-    toast.success(`${product.name} added to wishlist!`);
-  }, []);
-
-  const removeFromWishlist = useCallback((id: string) => {
-    dispatch({ type: "REMOVE_FROM_WISHLIST", payload: { id } });
-    toast.success("Item removed from wishlist");
-  }, []);
-
-  const clearWishlist = useCallback(() => {
-    dispatch({ type: "CLEAR_WISHLIST" });
-    toast.success("Wishlist cleared");
-  }, []);
-
-  const moveToCart = useCallback(
-    (product: Product, size: string, color: string) => {
-      dispatch({ type: "MOVE_TO_CART", payload: { product, size, color } });
-      toast.success(`${product.name} moved to cart!`);
-    },
-    []
-  );
-
   const cartTotal = useMemo(() => {
     return state.items.reduce(
       (total, item) => total + item.product.basePrice * item.quantity,
@@ -317,27 +222,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     [state.items]
   );
 
-  const isInWishlist = useCallback(
-    (id: string) => {
-      return state.wishlist.some((item) => item.id === id);
-    },
-    [state.wishlist]
-  );
-
   const value: CartContextValue = {
     state,
     addToCart,
     removeFromCart,
     updateQuantity,
     clearCart,
-    addToWishlist,
-    removeFromWishlist,
-    clearWishlist,
-    moveToCart,
     getCartTotal,
     getCartItemsCount,
     isInCart,
-    isInWishlist,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

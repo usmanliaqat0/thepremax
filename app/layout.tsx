@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import { Toaster } from "@/components/ui/sonner";
 
 const poppins = Poppins({
@@ -118,20 +119,22 @@ export default function RootLayout({
       >
         <AuthProvider>
           <CartProvider>
-            {children}
-            <Toaster
-              position="bottom-right"
-              toastOptions={{
-                style: {
-                  background: "white",
-                  color: "black",
-                  border: "1px solid #e5e5e5",
-                  borderRadius: "8px",
-                  boxShadow:
-                    "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-                },
-              }}
-            />
+            <WishlistProvider>
+              {children}
+              <Toaster
+                position="bottom-right"
+                toastOptions={{
+                  style: {
+                    background: "white",
+                    color: "black",
+                    border: "1px solid #e5e5e5",
+                    borderRadius: "8px",
+                    boxShadow:
+                      "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                  },
+                }}
+              />
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </body>

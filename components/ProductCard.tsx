@@ -9,6 +9,7 @@ import { Product } from "@/lib/types";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { formatPrice } from "@/lib/currency";
 
 import { cn } from "@/lib/utils";
@@ -24,8 +25,8 @@ const ProductCard = ({
   variant = "default",
   className,
 }: ProductCardProps) => {
-  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } =
-    useCart();
+  const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -35,13 +36,15 @@ const ProductCard = ({
     addToCart(product, defaultSize, defaultColor, 1);
   };
 
-  const handleToggleWishlist = (e: React.MouseEvent) => {
+  const handleToggleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (isInWishlist(product._id)) {
-      removeFromWishlist(product._id);
+      await removeFromWishlist(product._id);
     } else {
-      addToWishlist(product);
+      const defaultSize = product.sizes?.[0];
+      const defaultColor = product.colors?.[0];
+      await addToWishlist(product, defaultSize, defaultColor);
     }
   };
 
