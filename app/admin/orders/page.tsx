@@ -15,10 +15,8 @@ import {
   RefreshCw,
   Download,
   Eye,
-  Edit,
   Trash2,
   User,
-  MapPin,
   CreditCard,
 } from "lucide-react";
 import { useDialog } from "@/hooks/use-dialog";
@@ -42,7 +40,7 @@ interface OrderItem {
   color?: string;
 }
 
-interface Order {
+interface Order extends Record<string, unknown> {
   _id: string;
   orderNumber: string;
   userId: string;
@@ -78,7 +76,6 @@ interface Order {
 
 export default function OrdersManagement() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [editLoading, setEditLoading] = useState(false);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -533,7 +530,7 @@ export default function OrdersManagement() {
       </div>
 
       {/* Orders Data Table */}
-      <AdminDataTable
+      <AdminDataTable<Order>
         title="Orders"
         data={orders}
         columns={columns}

@@ -265,7 +265,7 @@ const OrderHistorySection = () => {
             <div className="space-y-4">
               {filteredOrders.map((order) => (
                 <div
-                  key={order.id}
+                  key={order._id}
                   className="border rounded-lg p-6 hover:shadow-md transition-shadow"
                 >
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
@@ -313,7 +313,7 @@ const OrderHistorySection = () => {
                     <div className="flex -space-x-2">
                       {order.items.slice(0, 3).map((item, index) => (
                         <div
-                          key={item.id}
+                          key={item.productId}
                           className="w-12 h-12 rounded-lg border-2 border-white bg-gray-100 flex items-center justify-center overflow-hidden"
                           style={{ zIndex: order.items.length - index }}
                         >

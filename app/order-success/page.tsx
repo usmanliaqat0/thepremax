@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -39,28 +39,20 @@ interface OrderData {
     phone: string;
     email?: string;
   };
+  estimatedDelivery?: string;
+  trackingNumber?: string;
   createdAt: string;
 }
 
-const OrderSuccess = () => {
+const OrderSuccessContent = () => {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
-  const { user } = useAuth();
+  const { state } = useAuth();
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-
-    if (orderId) {
-      fetchOrderData();
-    } else {
-      setLoading(false);
-    }
-  }, [orderId]);
-
-  const fetchOrderData = async () => {
+  const fetchOrderData = useCallback(async () => {
     try {
       const response = await fetch(`/api/orders/${orderId}`);
       if (!response.ok) {
@@ -75,7 +67,17 @@ const OrderSuccess = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [orderId]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+
+    if (orderId) {
+      fetchOrderData();
+    } else {
+      setLoading(false);
+    }
+  }, [orderId, fetchOrderData]);
 
   if (loading) {
     return (
@@ -230,7 +232,7 @@ const OrderSuccess = () => {
                     <p className="text-sm text-muted-foreground">
                       You&apos;ll receive an order confirmation email at{" "}
                       <span className="font-medium">
-                        {user?.email ||
+                        {state.user?.email ||
                           orderData.shippingAddress.email ||
                           "your registered email"}
                       </span>
@@ -357,6 +359,29 @@ const OrderSuccess = () => {
 
       <Footer />
     </div>
+  );
+};
+
+const OrderSuccess = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background">
+          <Navigation />
+          <div className="container mx-auto px-4 py-16">
+            <div className="flex items-center justify-center">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <p>Loading...</p>
+              </div>
+            </div>
+          </div>
+          <Footer />
+        </div>
+      }
+    >
+      <OrderSuccessContent />
+    </Suspense>
   );
 };
 

@@ -9,15 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  Package,
-  User,
-  MapPin,
-  CreditCard,
-  Calendar,
-  Truck,
-  DollarSign,
-} from "lucide-react";
+import { Package, User, MapPin, Calendar, DollarSign } from "lucide-react";
 import { format } from "date-fns";
 import { formatPrice } from "@/lib/currency";
 

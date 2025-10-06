@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search");
     const all = searchParams.get("all") === "true";
 
-    const query: any = {};
+    const query: Record<string, unknown> = {};
 
     if (status) {
       query.status = status;

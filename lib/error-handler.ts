@@ -1,4 +1,5 @@
 ﻿import { toast } from "sonner";
+import { NextResponse } from "next/server";
 import { AuthResponse } from "@/lib/types";
 
 export interface ApiError {
@@ -7,7 +8,38 @@ export interface ApiError {
   type: "validation" | "auth" | "network" | "server";
 }
 
+// For API routes - returns NextResponse
 export function handleApiError(
+  error: unknown,
+  defaultMessage: string
+): NextResponse {
+  console.error("API Error:", error);
+
+  let message = defaultMessage;
+  let status = 500;
+
+  if (error instanceof Error) {
+    message = error.message;
+  } else if (typeof error === "string") {
+    message = error;
+  }
+
+  // Determine status code based on error type
+  if (message.includes("not found")) {
+    status = 404;
+  } else if (message.includes("unauthorized") || message.includes("access")) {
+    status = 401;
+  } else if (message.includes("forbidden")) {
+    status = 403;
+  } else if (message.includes("validation") || message.includes("required")) {
+    status = 400;
+  }
+
+  return NextResponse.json({ error: message }, { status });
+}
+
+// For client-side error handling - returns ApiError[]
+export function handleClientError(
   response: AuthResponse,
   defaultMessage: string
 ): ApiError[] {

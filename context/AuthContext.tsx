@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { AuthUser, SignupData, SigninData, AuthResponse } from "@/lib/types";
 import {
-  handleApiError,
+  handleClientError,
   displayApiErrors,
   showSuccessMessage,
   showErrorMessage,
@@ -176,11 +176,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           payload: { user: result.user, token: result.token },
         });
 
-if (!result.user.isEmailVerified && result.user.role !== "admin") {
-
+        if (!result.user.isEmailVerified && result.user.role !== "admin") {
           localStorage.setItem("pending_verification_email", result.user.email);
 
-window.location.href = `/verify-code?email=${encodeURIComponent(
+          window.location.href = `/verify-code?email=${encodeURIComponent(
             result.user.email
           )}`;
           return { success: true };
@@ -190,7 +189,7 @@ window.location.href = `/verify-code?email=${encodeURIComponent(
         return { success: true };
       } else {
         dispatch({ type: "AUTH_FAILURE" });
-        const apiErrors = handleApiError(result, "Sign in failed");
+        const apiErrors = handleClientError(result, "Sign in failed");
         const fieldErrors = displayApiErrors(apiErrors);
         return { success: false, errors: fieldErrors };
       }
@@ -218,7 +217,6 @@ window.location.href = `/verify-code?email=${encodeURIComponent(
 
       if (result.success && result.user) {
         if (result.requiresVerification && result.token) {
-
           localStorage.setItem("auth_token", result.token);
           localStorage.setItem("user_data", JSON.stringify(result.user));
 
@@ -227,9 +225,9 @@ window.location.href = `/verify-code?email=${encodeURIComponent(
             payload: { user: result.user, token: result.token },
           });
 
-localStorage.setItem("pending_verification_email", result.user.email);
+          localStorage.setItem("pending_verification_email", result.user.email);
 
-window.location.href = `/verify-code?email=${encodeURIComponent(
+          window.location.href = `/verify-code?email=${encodeURIComponent(
             result.user.email
           )}`;
           return { success: true };
@@ -245,12 +243,11 @@ window.location.href = `/verify-code?email=${encodeURIComponent(
           showSuccessMessage("Account created successfully!");
           return { success: true };
         } else {
-
           return { success: true };
         }
       } else {
         dispatch({ type: "AUTH_FAILURE" });
-        const apiErrors = handleApiError(result, "Sign up failed");
+        const apiErrors = handleClientError(result, "Sign up failed");
         const fieldErrors = displayApiErrors(apiErrors);
         return { success: false, errors: fieldErrors };
       }

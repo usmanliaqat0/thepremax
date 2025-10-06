@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status");
 
     // Handle both string and ObjectId userIds
-    const query: any = {
+    const query: Record<string, unknown> = {
       $or: [
         { userId: user.id },
         { userId: new mongoose.Types.ObjectId(user.id) },
