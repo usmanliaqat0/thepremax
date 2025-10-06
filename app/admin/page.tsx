@@ -189,42 +189,97 @@ export default function AdminDashboard() {
       </div>
 
       <Card className="shadow-sm">
-        <CardHeader>
+        <CardHeader className="pb-3 sm:pb-6">
           <CardTitle className="text-lg sm:text-xl">Recent Users</CardTitle>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+            Latest registered users
+          </p>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3 sm:space-y-4">
-            {loading || !stats
-              ? Array.from({ length: 5 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between border-b border-border pb-3 last:border-b-0"
-                  >
-                    <div className="bg-muted h-4 w-32 animate-pulse rounded" />
-                    <span className="bg-muted h-4 w-16 animate-pulse rounded" />
-                  </div>
-                ))
-              : stats.recentUsers.map((user) => (
+        <CardContent className="p-0 sm:p-6">
+          {loading || !stats ? (
+            <div className="space-y-3 sm:space-y-4 p-4 sm:p-0">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between border-b border-border pb-3 last:border-b-0"
+                >
+                  <div className="bg-muted h-4 w-32 animate-pulse rounded" />
+                  <span className="bg-muted h-4 w-16 animate-pulse rounded" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <>
+              {/* Mobile Card Layout */}
+              <div className="block sm:hidden space-y-3 p-4">
+                {stats.recentUsers.map((user, index) => (
                   <div
                     key={user.id}
-                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border pb-3 last:border-b-0"
+                    className="bg-gradient-to-r from-background to-muted/30 rounded-lg p-4 border border-border/50 shadow-sm hover:shadow-md transition-all duration-200"
                   >
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">
-                        {user.firstName} {user.lastName}
-                      </p>
-                      <p className="text-muted-foreground text-xs truncate">
-                        {user.email}
-                      </p>
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-primary font-semibold text-sm">
+                          {user.firstName?.charAt(0)?.toUpperCase() || "U"}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm text-foreground break-words leading-tight">
+                          {user.firstName} {user.lastName}
+                        </p>
+                        <p className="text-muted-foreground text-xs break-all leading-tight mt-1">
+                          {user.email}
+                        </p>
+                      </div>
                     </div>
-                    <span className="text-muted-foreground text-xs flex-shrink-0">
-                      {formatDistanceToNow(new Date(user.createdAt), {
-                        addSuffix: true,
-                      })}
-                    </span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+                        #{index + 1}
+                      </span>
+                      <span className="text-xs text-muted-foreground text-right">
+                        {formatDistanceToNow(new Date(user.createdAt), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                    </div>
                   </div>
                 ))}
-          </div>
+              </div>
+
+              {/* Desktop Table Layout */}
+              <div className="hidden sm:block">
+                <div className="space-y-3 sm:space-y-4">
+                  {stats.recentUsers.map((user) => (
+                    <div
+                      key={user.id}
+                      className="flex items-start justify-between border-b border-border pb-3 last:border-b-0 hover:bg-muted/30 transition-colors duration-200 rounded-md px-2 py-2"
+                    >
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-primary font-semibold text-xs">
+                            {user.firstName?.charAt(0)?.toUpperCase() || "U"}
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm break-words leading-tight">
+                            {user.firstName} {user.lastName}
+                          </p>
+                          <p className="text-muted-foreground text-xs break-all leading-tight mt-1">
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-muted-foreground text-xs flex-shrink-0 ml-4 text-right min-w-fit">
+                        {formatDistanceToNow(new Date(user.createdAt), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
