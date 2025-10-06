@@ -12,7 +12,7 @@ const buttonVariants = cva(
         default:
           "bg-primary text-primary-foreground shadow-fashion-sm hover:bg-primary/90 hover:shadow-fashion-md hover:-translate-y-0.5",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-fashion-sm hover:bg-destructive/90 hover:shadow-fashion-md hover:-translate-y-0.5",
+          "bg-destructive text-white shadow-fashion-sm hover:bg-destructive/90 hover:shadow-fashion-md hover:-translate-y-0.5",
         outline:
           "border border-border bg-background shadow-fashion-sm hover:bg-accent hover:text-accent-foreground hover:shadow-fashion-md hover:-translate-y-0.5",
         secondary:

@@ -34,6 +34,7 @@ const Cart = () => {
   } = useCart();
   const [promoCode, setPromoCode] = useState("");
   const [appliedPromo, setAppliedPromo] = useState("");
+  const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
   useScrollToTop();
 
@@ -149,14 +150,24 @@ const Cart = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() =>
-                              updateQuantity(
-                                item.id,
-                                item.size,
-                                item.color,
-                                Math.max(0, item.quantity - 1)
-                              )
+                            disabled={
+                              isUpdating ===
+                              `${item.id}-${item.size}-${item.color}`
                             }
+                            onClick={async () => {
+                              const key = `${item.id}-${item.size}-${item.color}`;
+                              setIsUpdating(key);
+                              try {
+                                updateQuantity(
+                                  item.id,
+                                  item.size,
+                                  item.color,
+                                  Math.max(0, item.quantity - 1)
+                                );
+                              } finally {
+                                setTimeout(() => setIsUpdating(null), 500);
+                              }
+                            }}
                           >
                             <Minus className="h-4 w-4" />
                           </Button>
@@ -166,14 +177,24 @@ const Cart = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() =>
-                              updateQuantity(
-                                item.id,
-                                item.size,
-                                item.color,
-                                item.quantity + 1
-                              )
+                            disabled={
+                              isUpdating ===
+                              `${item.id}-${item.size}-${item.color}`
                             }
+                            onClick={async () => {
+                              const key = `${item.id}-${item.size}-${item.color}`;
+                              setIsUpdating(key);
+                              try {
+                                updateQuantity(
+                                  item.id,
+                                  item.size,
+                                  item.color,
+                                  item.quantity + 1
+                                );
+                              } finally {
+                                setTimeout(() => setIsUpdating(null), 500);
+                              }
+                            }}
                           >
                             <Plus className="h-4 w-4" />
                           </Button>

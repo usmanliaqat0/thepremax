@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Section, Container, SectionHeader } from "@/components/ui/layout";
 import { IconFeature, FeatureGrid } from "@/components/ui/features";
 import { ProductGridWrapper } from "@/components/ui/grid";
+import { GridSkeleton } from "@/components/ui/loading";
 import { Product, Category } from "@/lib/types";
 import Link from "next/link";
 import Image from "next/image";
@@ -44,9 +45,15 @@ export default function Home() {
   const [topRatedProducts, setTopRatedProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
+
         // Fetch featured products
         const featuredResponse = await fetch(
           "/api/products?featured=true&limit=8"
@@ -76,6 +83,9 @@ export default function Home() {
         }
       } catch (error) {
         console.error("Error fetching data:", error);
+        setError("Failed to load content. Please try again.");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -193,59 +203,79 @@ export default function Home() {
             title="Shop by Category"
             subtitle="Explore our diverse range of products across multiple categories"
           />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {categories.slice(0, 4).map((category) => (
-              <Card
-                key={category._id}
-                className="group cursor-pointer border-0 shadow-fashion-sm hover:shadow-fashion-product transition-fashion h-full overflow-hidden bg-card transform hover:-translate-y-1 p-0 gap-0"
-              >
-                <Link
-                  href={`/category/${category.slug}`}
-                  className="h-full flex flex-col"
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-muted rounded-lg h-48 mb-4"></div>
+                  <div className="h-6 bg-muted rounded mb-2"></div>
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground mb-4">{error}</p>
+              <Button onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {categories.slice(0, 4).map((category) => (
+                <Card
+                  key={category._id}
+                  className="group cursor-pointer border-0 shadow-fashion-sm hover:shadow-fashion-product transition-fashion h-full overflow-hidden bg-card transform hover:-translate-y-1 p-0 gap-0"
                 >
-                  {/* Image Section */}
-                  <div className="relative h-48 overflow-hidden">
-                    {category.image ? (
-                      <Image
-                        src={category.image}
-                        alt={category.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-accent/20 to-accent/40 flex items-center justify-center">
-                        <div className="text-6xl opacity-60">📦</div>
-                      </div>
-                    )}
-                    {/* Overlay */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
-                    {/* Hover Effect */}
-                    <div className="absolute top-4 right-4 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                      <ArrowRight className="w-4 h-4 text-accent" />
-                    </div>
-                  </div>
-
-                  {/* Content Section */}
-                  <div className="p-6 flex-1 flex flex-col justify-center">
-                    <h3 className="font-bold text-xl mb-3 group-hover:text-accent transition-colors duration-300 text-center">
-                      {category.name}
-                    </h3>
-                    <p className="text-muted-foreground text-sm text-center leading-relaxed">
-                      {category.description || "Explore our amazing collection"}
-                    </p>
-
-                    {/* Bottom Action */}
-                    <div className="mt-4 flex justify-center">
-                      <div className="inline-flex items-center text-accent text-sm font-medium opacity-100 transition-all duration-300">
-                        Shop Now
-                        <ArrowRight className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                  <Link
+                    href={`/category/${category.slug}`}
+                    className="h-full flex flex-col"
+                  >
+                    {/* Image Section */}
+                    <div className="relative h-48 overflow-hidden">
+                      {category.image ? (
+                        <Image
+                          src={category.image}
+                          alt={category.name}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-accent/20 to-accent/40 flex items-center justify-center">
+                          <div className="text-6xl opacity-60">📦</div>
+                        </div>
+                      )}
+                      {/* Overlay */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
+                      {/* Hover Effect */}
+                      <div className="absolute top-4 right-4 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                        <ArrowRight className="w-4 h-4 text-accent" />
                       </div>
                     </div>
-                  </div>
-                </Link>
-              </Card>
-            ))}
-          </div>
+
+                    {/* Content Section */}
+                    <div className="p-6 flex-1 flex flex-col justify-center">
+                      <h3 className="font-bold text-xl mb-3 group-hover:text-accent transition-colors duration-300 text-center">
+                        {category.name}
+                      </h3>
+                      <p className="text-muted-foreground text-sm text-center leading-relaxed">
+                        {category.description ||
+                          "Explore our amazing collection"}
+                      </p>
+
+                      {/* Bottom Action */}
+                      <div className="mt-4 flex justify-center">
+                        <div className="inline-flex items-center text-accent text-sm font-medium opacity-100 transition-all duration-300">
+                          Shop Now
+                          <ArrowRight className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </Card>
+              ))}
+            </div>
+          )}
         </Container>
       </Section>
 
@@ -255,11 +285,22 @@ export default function Home() {
             title="Top Rated Products"
             subtitle="Highly rated items across all categories with excellent customer reviews"
           />
-          <ProductGridWrapper>
-            {topRatedProducts.slice(0, 4).map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))}
-          </ProductGridWrapper>
+          {isLoading ? (
+            <GridSkeleton items={4} />
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground mb-4">{error}</p>
+              <Button onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+            </div>
+          ) : (
+            <ProductGridWrapper>
+              {topRatedProducts.slice(0, 4).map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </ProductGridWrapper>
+          )}
         </Container>
       </Section>
 
@@ -270,20 +311,33 @@ export default function Home() {
             subtitle="Discover amazing deals across all categories - from health & beauty to automotive parts."
           />
 
-          <ProductGridWrapper className="mb-12">
-            {featuredProducts.slice(0, 4).map((product) => (
-              <ProductCard key={product._id} product={product} />
-            ))}
-          </ProductGridWrapper>
+          {isLoading ? (
+            <GridSkeleton items={4} />
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground mb-4">{error}</p>
+              <Button onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+            </div>
+          ) : (
+            <>
+              <ProductGridWrapper className="mb-12">
+                {featuredProducts.slice(0, 4).map((product) => (
+                  <ProductCard key={product._id} product={product} />
+                ))}
+              </ProductGridWrapper>
 
-          <div className="text-center">
-            <Button asChild size="lg" variant="luxury">
-              <Link href="/shop">
-                Shop All Categories
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-          </div>
+              <div className="text-center">
+                <Button asChild size="lg" variant="luxury">
+                  <Link href="/shop">
+                    Shop All Categories
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+              </div>
+            </>
+          )}
         </Container>
       </Section>
 
