@@ -51,6 +51,7 @@ const OrderSuccessContent = () => {
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
 
   const fetchOrderData = useCallback(async () => {
     try {
@@ -68,6 +69,66 @@ const OrderSuccessContent = () => {
       setLoading(false);
     }
   }, [orderId]);
+
+  const handleDownloadInvoice = async (orderId: string) => {
+    setDownloadingInvoice(true);
+
+    try {
+      // Get the access token from localStorage or cookies
+      let token = localStorage.getItem("auth_token");
+
+      if (!token) {
+        // Try to get from cookies
+        const cookieMatch = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("accessToken="));
+        token = cookieMatch?.split("=")[1] || null;
+      }
+
+      if (!token) {
+        throw new Error("No authentication token found. Please log in again.");
+      }
+
+      const response = await fetch(`/api/orders/${orderId}/invoice`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Authentication failed. Please log in again.");
+        } else if (response.status === 403) {
+          throw new Error(
+            "You don't have permission to download this invoice."
+          );
+        } else {
+          throw new Error("Failed to download invoice");
+        }
+      }
+
+      const htmlContent = await response.text();
+      const blob = new Blob([htmlContent], { type: "text/html" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.target = "_blank";
+      a.download = `invoice-${orderData?.orderNumber || "order"}.html`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      // You could add a toast notification here if you have a toast system
+    } catch (error) {
+      console.error("Failed to download invoice:", error);
+    } finally {
+      setDownloadingInvoice(false);
+    }
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -317,15 +378,29 @@ const OrderSuccessContent = () => {
         {}
         <div className="max-w-4xl mx-auto mt-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link href="/profile">
+            <Link href={`/track-order?orderNumber=${orderData.orderNumber}`}>
               <Button variant="outline" className="w-full">
                 <Package className="mr-2 h-4 w-4" />
                 Track Order
               </Button>
             </Link>
-            <Button variant="outline" className="w-full">
-              <Download className="mr-2 h-4 w-4" />
-              Download Invoice
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => handleDownloadInvoice(orderData._id)}
+              disabled={downloadingInvoice}
+            >
+              {downloadingInvoice ? (
+                <>
+                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+                  Downloading...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Invoice
+                </>
+              )}
             </Button>
             <Link href="/shop">
               <Button className="w-full">Continue Shopping</Button>

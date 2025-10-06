@@ -288,6 +288,19 @@ const Navigation = () => {
                       >
                         <Link href="/contact">Contact</Link>
                       </Button>
+                      <Button
+                        variant={
+                          pathname === "/track-order" ? "secondary" : "ghost"
+                        }
+                        className={`w-full justify-start h-10 text-base transition-colors ${
+                          pathname === "/track-order"
+                            ? "bg-accent text-accent-foreground font-medium"
+                            : ""
+                        }`}
+                        asChild
+                      >
+                        <Link href="/track-order">Track Order</Link>
+                      </Button>
                       {isAdmin() && (
                         <Button
                           variant={

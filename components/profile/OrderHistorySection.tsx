@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import {
@@ -76,11 +77,15 @@ interface Order {
 
 const OrderHistorySection = () => {
   const { state } = useAuth();
+  const { toast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [downloadingInvoices, setDownloadingInvoices] = useState<Set<string>>(
+    new Set()
+  );
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -158,12 +163,91 @@ const OrderHistorySection = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const handleTrackOrder = (trackingNumber: string) => {
-    window.open(`https://example-tracking.com/${trackingNumber}`, "_blank");
+  const handleTrackOrder = (orderNumber: string) => {
+    window.open(
+      `/track-order?orderNumber=${encodeURIComponent(orderNumber)}`,
+      "_blank"
+    );
   };
 
-  const handleDownloadInvoice = (orderNumber: string) => {
-    console.log(`Downloading invoice for order ${orderNumber}`);
+  const handleDownloadInvoice = async (
+    orderId: string,
+    orderNumber: string
+  ) => {
+    // Add to downloading set
+    setDownloadingInvoices((prev) => new Set(prev).add(orderId));
+
+    try {
+      // Get the access token from localStorage or cookies
+      let token = localStorage.getItem("auth_token");
+
+      if (!token) {
+        // Try to get from cookies
+        const cookieMatch = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("accessToken="));
+        token = cookieMatch?.split("=")[1] || null;
+      }
+
+      if (!token) {
+        throw new Error("No authentication token found. Please log in again.");
+      }
+
+      const response = await fetch(`/api/orders/${orderId}/invoice`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Authentication failed. Please log in again.");
+        } else if (response.status === 403) {
+          throw new Error(
+            "You don't have permission to download this invoice."
+          );
+        } else {
+          throw new Error("Failed to download invoice");
+        }
+      }
+
+      const htmlContent = await response.text();
+      const blob = new Blob([htmlContent], { type: "text/html" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.target = "_blank";
+      a.download = `invoice-${orderNumber}.html`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Invoice Downloaded",
+        description: "Your invoice has been downloaded successfully",
+      });
+    } catch (error) {
+      console.error("Invoice download error:", error);
+      toast({
+        title: "Download Failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to download invoice. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      // Remove from downloading set
+      setDownloadingInvoices((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(orderId);
+        return newSet;
+      });
+    }
   };
 
   const handleReorder = (order: Order) => {
@@ -488,26 +572,34 @@ const OrderHistorySection = () => {
                         </DialogContent>
                       </Dialog>
 
-                      {order.trackingNumber && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleTrackOrder(order.trackingNumber!)
-                          }
-                        >
-                          <Truck className="w-4 h-4 mr-2" />
-                          Track
-                        </Button>
-                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleTrackOrder(order.orderNumber)}
+                      >
+                        <Truck className="w-4 h-4 mr-2" />
+                        Track
+                      </Button>
 
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDownloadInvoice(order.orderNumber)}
+                        onClick={() =>
+                          handleDownloadInvoice(order._id, order.orderNumber)
+                        }
+                        disabled={downloadingInvoices.has(order._id)}
                       >
-                        <Download className="w-4 h-4 mr-2" />
-                        Invoice
+                        {downloadingInvoices.has(order._id) ? (
+                          <>
+                            <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+                            Downloading...
+                          </>
+                        ) : (
+                          <>
+                            <Download className="w-4 h-4 mr-2" />
+                            Invoice
+                          </>
+                        )}
                       </Button>
 
                       {order.status === "pending" && (
