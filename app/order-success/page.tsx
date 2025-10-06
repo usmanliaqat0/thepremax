@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { RefreshLoader } from "@/components/ui/loader";
 import {
   CheckCircle,
   Package,
@@ -392,7 +393,7 @@ const OrderSuccessContent = () => {
             >
               {downloadingInvoice ? (
                 <>
-                  <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+                  <RefreshLoader size="sm" variant="muted" className="mr-2" />
                   Downloading...
                 </>
               ) : (
@@ -446,7 +447,7 @@ const OrderSuccess = () => {
           <div className="container mx-auto px-4 py-16">
             <div className="flex items-center justify-center">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                <RefreshLoader size="lg" className="mx-auto mb-4" />
                 <p>Loading...</p>
               </div>
             </div>

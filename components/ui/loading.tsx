@@ -1,5 +1,6 @@
 ﻿import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
+import { RefreshLoader } from "@/components/ui/loader";
 
 interface SkeletonProps {
   className?: string;
@@ -73,7 +74,7 @@ export function PageLoading({
 }: PageLoadingProps) {
   return (
     <div className="min-h-[400px] flex flex-col items-center justify-center space-y-4">
-      <div className="animate-spin rounded-full h-12 w-12 border-4 border-muted border-t-primary"></div>
+      <RefreshLoader size="xl" />
       {showHeader && (
         <>
           <h2 className="text-xl font-semibold text-primary">{title}</h2>

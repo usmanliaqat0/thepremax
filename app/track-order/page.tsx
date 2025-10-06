@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { RefreshLoader } from "@/components/ui/loader";
 import {
   Search,
   Package,
@@ -410,7 +411,11 @@ const TrackOrderContent = () => {
                     >
                       {downloadingInvoice ? (
                         <>
-                          <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+                          <RefreshLoader
+                            size="sm"
+                            variant="muted"
+                            className="mr-2"
+                          />
                           Downloading...
                         </>
                       ) : (
@@ -611,7 +616,7 @@ const TrackOrderPage = () => {
           <Navigation />
           <div className="container mx-auto px-4 py-8 max-w-4xl">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <RefreshLoader size="xl" className="mx-auto mb-4" />
               <p className="text-gray-600">Loading...</p>
             </div>
           </div>

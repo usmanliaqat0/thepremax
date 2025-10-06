@@ -14,6 +14,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { RefreshLoader } from "@/components/ui/loader";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { ArrowLeft, CheckCircle, AlertCircle } from "lucide-react";
@@ -112,7 +113,7 @@ const ResetPasswordForm = () => {
           <Card>
             <CardContent className="py-12">
               <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <RefreshLoader size="lg" className="mx-auto mb-4" />
                 <p className="text-gray-600">Verifying reset link...</p>
               </div>
             </CardContent>
@@ -281,7 +282,7 @@ const ResetPassword = () => {
             <Card>
               <CardContent className="py-12">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <RefreshLoader size="lg" className="mx-auto mb-4" />
                 </div>
               </CardContent>
             </Card>

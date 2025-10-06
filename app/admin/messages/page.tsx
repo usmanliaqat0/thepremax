@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { RefreshLoader } from "@/components/ui/loader";
 import {
   MessageSquare,
   RefreshCw,
@@ -244,10 +245,12 @@ export default function MessagesPage() {
           disabled={loading}
           className="w-full sm:w-auto"
         >
-          <RefreshCw
-            className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
-          />
-          Refresh
+          {loading ? (
+            <RefreshLoader size="sm" className="mr-2" />
+          ) : (
+            <RefreshCw className="h-4 w-4 mr-2" />
+          )}
+          {loading ? "Refreshing..." : "Refresh"}
         </Button>
       </div>
 

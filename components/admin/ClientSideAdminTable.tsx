@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RefreshLoader } from "@/components/ui/loader";
 import {
   Select,
   SelectContent,
@@ -293,7 +294,7 @@ export default function ClientSideAdminTable<
         {isTableLoading && (
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
             <div className="flex items-center space-x-2">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+              <RefreshLoader size="default" />
             </div>
           </div>
         )}
@@ -412,7 +413,7 @@ export default function ClientSideAdminTable<
         {isTableLoading && (
           <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-center justify-center">
             <div className="flex items-center space-x-2">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+              <RefreshLoader size="default" />
             </div>
           </div>
         )}

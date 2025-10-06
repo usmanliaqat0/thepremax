@@ -9,6 +9,7 @@ import ProductGrid from "@/components/ProductGrid";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { RefreshLoader } from "@/components/ui/loader";
 
 import {
   Breadcrumb,
@@ -116,7 +117,7 @@ const ProductDetail = () => {
         <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center min-h-[400px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary border-t-transparent"></div>
+            <RefreshLoader size="xl" />
           </div>
         </div>
         <Footer />
@@ -424,7 +425,11 @@ const ProductDetail = () => {
                 >
                   {isBuyingNow ? (
                     <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
+                      <RefreshLoader
+                        size="sm"
+                        variant="light"
+                        className="mr-2"
+                      />
                       Processing...
                     </div>
                   ) : (

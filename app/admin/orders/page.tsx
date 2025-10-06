@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { RefreshLoader } from "@/components/ui/loader";
 import {
   ShoppingCart,
   DollarSign,
@@ -467,9 +468,11 @@ export default function OrdersManagement() {
             disabled={loading}
             className="w-full sm:w-auto"
           >
-            <RefreshCw
-              className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
-            />
+            {loading ? (
+              <RefreshLoader size="sm" className="mr-2" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-2" />
+            )}
             {loading ? "Refreshing..." : "Refresh"}
           </Button>
           <Button variant="outline" className="w-full sm:w-auto">

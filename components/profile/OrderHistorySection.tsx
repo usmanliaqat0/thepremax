@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { RefreshLoader } from "@/components/ui/loader";
 import Image from "next/image";
 import {
   Card,
@@ -330,7 +331,7 @@ const OrderHistorySection = () => {
         <CardContent>
           {loading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <RefreshLoader size="lg" className="mx-auto mb-4" />
               <p className="text-muted-foreground">Loading orders...</p>
             </div>
           ) : filteredOrders.length === 0 ? (
@@ -591,7 +592,11 @@ const OrderHistorySection = () => {
                       >
                         {downloadingInvoices.has(order._id) ? (
                           <>
-                            <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+                            <RefreshLoader
+                              size="sm"
+                              variant="muted"
+                              className="mr-2"
+                            />
                             Downloading...
                           </>
                         ) : (

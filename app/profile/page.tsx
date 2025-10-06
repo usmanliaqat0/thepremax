@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { RefreshLoader } from "@/components/ui/loader";
 import {
   Dialog,
   DialogContent,
@@ -34,7 +35,6 @@ import {
   Shield,
   Upload,
   Trash2,
-  RefreshCw,
   Edit3,
   Check,
   X,
@@ -434,7 +434,7 @@ const Profile = () => {
                   >
                     {isUploading ? (
                       <>
-                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                        <RefreshLoader size="sm" className="mr-2" />
                         Uploading...
                       </>
                     ) : (
