@@ -146,7 +146,7 @@ export default function ProductViewDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-2 sm:mx-4">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
@@ -154,13 +154,13 @@ export default function ProductViewDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Product Header */}
-          <div className="flex items-start gap-6">
+          <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
             {/* Product Image */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 self-center sm:self-start">
               {primaryImage ? (
-                <div className="relative w-32 h-32 rounded-lg overflow-hidden border">
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden border">
                   <Image
                     src={primaryImage.url}
                     alt={primaryImage.alt || product.name}
@@ -169,22 +169,24 @@ export default function ProductViewDialog({
                   />
                 </div>
               ) : (
-                <div className="w-32 h-32 rounded-lg bg-gray-100 flex items-center justify-center border">
-                  <Package className="h-8 w-8 text-gray-400" />
+                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg bg-gray-100 flex items-center justify-center border">
+                  <Package className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
                 </div>
               )}
             </div>
 
             {/* Product Basic Info */}
-            <div className="flex-1 space-y-3">
-              <div className="flex items-start justify-between">
+            <div className="flex-1 space-y-3 text-center sm:text-left">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div>
-                  <h2 className="text-2xl font-bold">{product.name}</h2>
-                  <p className="text-muted-foreground text-sm">
+                  <h2 className="text-xl sm:text-2xl font-bold">
+                    {product.name}
+                  </h2>
+                  <p className="text-muted-foreground text-xs sm:text-sm">
                     SKU: {product.slug} • ID: {product._id}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
                   {getStatusBadge(product.status)}
                   {product.inStock ? (
                     <Badge
@@ -203,8 +205,8 @@ export default function ProductViewDialog({
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                <div className="flex items-center justify-center sm:justify-start gap-1">
                   <Star className="h-4 w-4 text-yellow-500 fill-current" />
                   <span className="font-medium">
                     {product.rating.toFixed(1)}
@@ -213,24 +215,29 @@ export default function ProductViewDialog({
                     ({product.reviewCount} reviews)
                   </span>
                 </div>
-                <div className="flex items-center gap-1 text-muted-foreground">
+                <div className="flex items-center justify-center sm:justify-start gap-1 text-muted-foreground">
                   <ShoppingCart className="h-4 w-4" />
                   <span className="text-sm">{product.totalSold} sold</span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-green-600">
-                  {formatPrice(product.basePrice)}
-                </span>
-                {product.compareAtPrice &&
-                  product.compareAtPrice > product.basePrice && (
-                    <span className="text-lg text-muted-foreground line-through">
-                      {formatPrice(product.compareAtPrice)}
-                    </span>
-                  )}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <div className="flex items-center justify-center sm:justify-start gap-2">
+                  <span className="text-xl sm:text-2xl font-bold text-green-600">
+                    {formatPrice(product.basePrice)}
+                  </span>
+                  {product.compareAtPrice &&
+                    product.compareAtPrice > product.basePrice && (
+                      <span className="text-lg text-muted-foreground line-through">
+                        {formatPrice(product.compareAtPrice)}
+                      </span>
+                    )}
+                </div>
                 {product.onSale && (
-                  <Badge variant="destructive" className="ml-2">
+                  <Badge
+                    variant="destructive"
+                    className="self-center sm:self-start"
+                  >
                     On Sale
                   </Badge>
                 )}
@@ -239,7 +246,7 @@ export default function ProductViewDialog({
           </div>
 
           {/* Product Flags */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap justify-center sm:justify-start gap-2">
             {product.featured && (
               <Badge variant="outline" className="bg-blue-100 text-blue-800">
                 <Star className="h-3 w-3 mr-1" />

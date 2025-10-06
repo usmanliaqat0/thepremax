@@ -260,7 +260,7 @@ export default function MessagesPage() {
             <CardTitle className="text-xs sm:text-sm font-medium">
               New Messages
             </CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            <MessageSquare className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-blue-600">
@@ -275,7 +275,7 @@ export default function MessagesPage() {
             <CardTitle className="text-xs sm:text-sm font-medium">
               Read
             </CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            <MessageSquare className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-gray-600">
@@ -290,7 +290,7 @@ export default function MessagesPage() {
             <CardTitle className="text-xs sm:text-sm font-medium">
               Replied
             </CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            <MessageSquare className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-green-600">
@@ -305,7 +305,7 @@ export default function MessagesPage() {
             <CardTitle className="text-xs sm:text-sm font-medium">
               Closed
             </CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            <MessageSquare className="h-5 w-5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-xl sm:text-2xl font-bold text-red-600">

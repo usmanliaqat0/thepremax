@@ -315,81 +315,79 @@ export default function AdminSubscriptions() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Email Subscriptions
-        </h1>
-        <p className="text-gray-600">
-          Manage newsletter subscriptions and track engagement
-        </p>
+    <div className="space-y-3 sm:space-y-4 lg:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
+            Email Subscriptions
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
+            Manage newsletter subscriptions and track engagement
+          </p>
+        </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Users className="h-6 w-6 text-blue-600" />
+          <CardContent className="p-3 sm:p-4 lg:p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-4 bg-blue-100 rounded-xl flex-shrink-0">
+                <Users className="h-8 w-8 text-blue-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-muted-foreground">
                   Total Subscribers
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.total}
-                </p>
+                <p className="text-2xl font-bold">{stats.total}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <MailCheck className="h-6 w-6 text-green-600" />
+          <CardContent className="p-3 sm:p-4 lg:p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-4 bg-green-100 rounded-xl flex-shrink-0">
+                <MailCheck className="h-8 w-8 text-green-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.active}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Active
                 </p>
+                <p className="text-2xl font-bold">{stats.active}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <MailX className="h-6 w-6 text-yellow-600" />
+          <CardContent className="p-3 sm:p-4 lg:p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-4 bg-yellow-100 rounded-xl flex-shrink-0">
+                <MailX className="h-8 w-8 text-yellow-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-muted-foreground">
                   Unsubscribed
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.unsubscribed}
-                </p>
+                <p className="text-2xl font-bold">{stats.unsubscribed}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
+          <CardContent className="p-3 sm:p-4 lg:p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-4 bg-red-100 rounded-xl flex-shrink-0">
+                <AlertTriangle className="h-8 w-8 text-red-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Bounced</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.bounced}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Bounced
                 </p>
+                <p className="text-2xl font-bold">{stats.bounced}</p>
               </div>
             </div>
           </CardContent>
@@ -398,21 +396,21 @@ export default function AdminSubscriptions() {
 
       {/* Source Stats */}
       {sourceStats.length > 0 && (
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <TrendingUp className="h-5 w-5 mr-2" />
+        <Card>
+          <CardHeader className="p-3 sm:p-6">
+            <CardTitle className="flex items-center text-lg sm:text-xl">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
               Subscriptions by Source
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <CardContent className="p-3 sm:p-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               {sourceStats.map((stat) => (
                 <div key={stat._id} className="text-center">
-                  <p className="text-2xl font-bold text-gray-900">
-                    {stat.count}
+                  <p className="text-xl sm:text-2xl font-bold">{stat.count}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground capitalize">
+                    {stat._id}
                   </p>
-                  <p className="text-sm text-gray-600 capitalize">{stat._id}</p>
                 </div>
               ))}
             </div>
@@ -449,7 +447,7 @@ export default function AdminSubscriptions() {
         onRefresh={fetchAllSubscriptions}
         emptyMessage="No subscriptions found"
         emptyIcon={<Mail className="h-12 w-12 text-gray-400 mx-auto mb-4" />}
-        itemsPerPage={5}
+        itemsPerPage={10}
         showPagination={true}
       />
     </div>

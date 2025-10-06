@@ -487,7 +487,7 @@ export default function OrdersManagement() {
         <Card>
           <CardContent className="p-3 sm:p-2">
             <div className="flex flex-col justify-center items-center gap-2">
-              <ShoppingCart className="h-5 w-5 text-blue-600" />
+              <ShoppingCart className="h-6 w-6 text-blue-600" />
               <p className="text-xs sm:text-sm text-muted-foreground text-center">
                 Total Orders
               </p>
@@ -498,7 +498,7 @@ export default function OrdersManagement() {
         <Card>
           <CardContent className="p-3 sm:p-2">
             <div className="flex flex-col justify-center items-center gap-2">
-              <DollarSign className="h-5 w-5 text-green-600" />
+              <DollarSign className="h-6 w-6 text-green-600" />
               <p className="text-xs sm:text-sm text-muted-foreground text-center">
                 Total Revenue
               </p>
@@ -511,7 +511,7 @@ export default function OrdersManagement() {
         <Card>
           <CardContent className="p-3 sm:p-2">
             <div className="flex flex-col justify-center items-center gap-2">
-              <Clock className="h-5 w-5 text-yellow-600" />
+              <Clock className="h-6 w-6 text-yellow-600" />
               <p className="text-xs sm:text-sm text-muted-foreground text-center">
                 Pending Orders
               </p>
@@ -522,7 +522,7 @@ export default function OrdersManagement() {
         <Card>
           <CardContent className="p-3 sm:p-2">
             <div className="flex flex-col justify-center items-center gap-2">
-              <Truck className="h-5 w-5 text-purple-600" />
+              <Truck className="h-6 w-6 text-purple-600" />
               <p className="text-xs sm:text-sm text-muted-foreground text-center">
                 Shipped Orders
               </p>

@@ -221,9 +221,9 @@ export function AdminDataTable<T extends Record<string, unknown>>({
   return (
     <div className={className}>
       {/* Filters and Search */}
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
+      <Card className="mb-3 sm:mb-4 lg:mb-6">
+        <CardContent className="p-3 sm:p-4 lg:p-6">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
             {searchable && (
               <div className="flex-1">
                 <div className="relative">
@@ -254,7 +254,7 @@ export function AdminDataTable<T extends Record<string, unknown>>({
                 value={filter.value}
                 onValueChange={(value) => handleFilterChange(filter.key, value)}
               >
-                <SelectTrigger className="w-full md:w-48">
+                <SelectTrigger className="w-full sm:w-48">
                   <SelectValue placeholder={filter.label} />
                 </SelectTrigger>
                 <SelectContent>
@@ -267,38 +267,53 @@ export function AdminDataTable<T extends Record<string, unknown>>({
               </Select>
             ))}
 
-            {hasActiveFilters && (
-              <Button onClick={clearFilters} variant="outline">
-                <X className="h-4 w-4 mr-2" />
-                Clear Filters
-              </Button>
-            )}
+            <div className="flex flex-col sm:flex-row gap-2">
+              {hasActiveFilters && (
+                <Button
+                  onClick={clearFilters}
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Clear Filters
+                </Button>
+              )}
 
-            {onRefresh && (
-              <Button onClick={onRefresh} variant="outline">
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-            )}
+              {onRefresh && (
+                <Button
+                  onClick={onRefresh}
+                  variant="outline"
+                  className="w-full sm:w-auto"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Data Table */}
       <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>
-              {title} ({filteredData.length})
-            </CardTitle>
+        <CardHeader className="p-3 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+            <div>
+              <CardTitle className="text-lg sm:text-xl">
+                {title} ({filteredData.length})
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-1 sm:hidden">
+                Swipe to see all data • Tap cards for details
+              </p>
+            </div>
             {hasActiveFilters && (
-              <div className="text-sm text-muted-foreground">
+              <div className="text-xs sm:text-sm text-muted-foreground">
                 Filtered from {data.length} total
               </div>
             )}
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 sm:p-6">
           {loading ? (
             <div className="flex justify-center items-center h-32">
               <RefreshCw className="h-6 w-6 animate-spin" />
@@ -310,140 +325,258 @@ export function AdminDataTable<T extends Record<string, unknown>>({
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
+              {/* Mobile Card Layout */}
+              <div className="block sm:hidden space-y-4 p-3 pt-6">
+                {paginatedData.map((item, index) => (
+                  <Card
+                    key={String(item[idKey])}
+                    className="p-4 shadow-sm border-l-4 border-l-primary/20"
+                  >
+                    <div className="space-y-3">
+                      {/* Mobile Card Header */}
+                      <div className="flex items-center justify-between pb-2 border-b">
+                        <span className="text-xs font-semibold text-primary uppercase tracking-wide">
+                          #{index + 1 + (currentPage - 1) * itemsPerPage}
+                        </span>
+                        <div className="text-xs text-muted-foreground">
+                          {typeof actions === "function"
+                            ? actions(item).length
+                            : actions.length}{" "}
+                          actions
+                        </div>
+                      </div>
+                      {/* Mobile Card Content */}
                       {columns.map((column) => (
-                        <TableHead
+                        <div
                           key={String(column.key)}
-                          className={
-                            column.sortable
-                              ? "cursor-pointer hover:bg-gray-50"
-                              : ""
-                          }
-                          onClick={() =>
-                            column.sortable && handleSort(column.key)
-                          }
-                          style={{ width: column.width }}
+                          className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2"
                         >
-                          <div className="flex items-center gap-2">
-                            {column.label}
-                            {column.sortable && sortKey === column.key && (
-                              <span className="text-xs">
-                                {sortDirection === "asc" ? "↑" : "↓"}
-                              </span>
-                            )}
-                          </div>
-                        </TableHead>
-                      ))}
-                      {actions && <TableHead>Actions</TableHead>}
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paginatedData.map((item) => (
-                      <TableRow key={String(item[idKey])}>
-                        {columns.map((column) => (
-                          <TableCell key={String(column.key)}>
+                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            {column.label}:
+                          </span>
+                          <div className="text-sm break-words min-w-0">
                             {renderCellContent(item, column)}
-                          </TableCell>
-                        ))}
-                        {actions && (
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                {(typeof actions === "function"
-                                  ? actions(item)
-                                  : actions
-                                ).map((action, index) => (
-                                  <div key={index}>
-                                    {action.confirm ? (
-                                      <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                          <DropdownMenuItem
-                                            onSelect={(e) => e.preventDefault()}
-                                            className={
-                                              action.variant === "destructive"
-                                                ? "text-red-600"
-                                                : ""
-                                            }
-                                          >
-                                            {action.icon}
-                                            {action.label}
-                                          </DropdownMenuItem>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                          <AlertDialogHeader>
-                                            <AlertDialogTitle>
-                                              {action.confirm.title}
-                                            </AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                              {action.confirm.description}
-                                            </AlertDialogDescription>
-                                          </AlertDialogHeader>
-                                          <AlertDialogFooter>
-                                            <AlertDialogCancel>
-                                              Cancel
-                                            </AlertDialogCancel>
-                                            <AlertDialogAction
-                                              onClick={() =>
-                                                action.onClick(item)
-                                              }
-                                              className={
-                                                action.variant === "destructive"
-                                                  ? "bg-red-600 hover:bg-red-700"
-                                                  : ""
-                                              }
-                                            >
-                                              {action.label}
-                                            </AlertDialogAction>
-                                          </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                      </AlertDialog>
-                                    ) : (
-                                      <DropdownMenuItem
-                                        onClick={() => action.onClick(item)}
-                                        className={
-                                          action.variant === "destructive"
-                                            ? "text-red-600"
-                                            : ""
-                                        }
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Mobile Actions */}
+                      {actions && (
+                        <div className="pt-4 mt-3 border-t">
+                          <div className="flex flex-wrap gap-2">
+                            {(typeof actions === "function"
+                              ? actions(item)
+                              : actions
+                            ).map((action, index) => (
+                              <div key={index}>
+                                {action.confirm ? (
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button
+                                        variant={action.variant || "outline"}
+                                        size="sm"
+                                        className="text-xs"
                                       >
                                         {action.icon}
                                         {action.label}
-                                      </DropdownMenuItem>
-                                    )}
-                                  </div>
-                                ))}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        )}
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                          {action.confirm.title}
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          {action.confirm.description}
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>
+                                          Cancel
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction
+                                          onClick={() => action.onClick(item)}
+                                          className={
+                                            action.variant === "destructive"
+                                              ? "bg-red-600 hover:bg-red-700"
+                                              : ""
+                                          }
+                                        >
+                                          {action.label}
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                ) : (
+                                  <Button
+                                    variant={action.variant || "outline"}
+                                    size="sm"
+                                    onClick={() => action.onClick(item)}
+                                    className="text-xs"
+                                  >
+                                    {action.icon}
+                                    {action.label}
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Desktop Table Layout */}
+              <div className="hidden sm:block">
+                <div className="overflow-x-auto">
+                  <Table className="min-w-full">
+                    <TableHeader>
+                      <TableRow>
+                        {columns.map((column) => (
+                          <TableHead
+                            key={String(column.key)}
+                            className={
+                              column.sortable
+                                ? "cursor-pointer hover:bg-gray-50"
+                                : ""
+                            }
+                            onClick={() =>
+                              column.sortable && handleSort(column.key)
+                            }
+                            style={{ width: column.width }}
+                          >
+                            <div className="flex items-center gap-2">
+                              {column.label}
+                              {column.sortable && sortKey === column.key && (
+                                <span className="text-xs">
+                                  {sortDirection === "asc" ? "↑" : "↓"}
+                                </span>
+                              )}
+                            </div>
+                          </TableHead>
+                        ))}
+                        {actions && <TableHead>Actions</TableHead>}
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {paginatedData.map((item) => (
+                        <TableRow key={String(item[idKey])}>
+                          {columns.map((column) => (
+                            <TableCell
+                              key={String(column.key)}
+                              className="max-w-0 truncate"
+                            >
+                              <div
+                                className="truncate"
+                                title={String(item[column.key as keyof T])}
+                              >
+                                {renderCellContent(item, column)}
+                              </div>
+                            </TableCell>
+                          ))}
+                          {actions && (
+                            <TableCell className="w-20 min-w-20">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  {(typeof actions === "function"
+                                    ? actions(item)
+                                    : actions
+                                  ).map((action, index) => (
+                                    <div key={index}>
+                                      {action.confirm ? (
+                                        <AlertDialog>
+                                          <AlertDialogTrigger asChild>
+                                            <DropdownMenuItem
+                                              onSelect={(e) =>
+                                                e.preventDefault()
+                                              }
+                                              className={
+                                                action.variant === "destructive"
+                                                  ? "text-red-600"
+                                                  : ""
+                                              }
+                                            >
+                                              {action.icon}
+                                              {action.label}
+                                            </DropdownMenuItem>
+                                          </AlertDialogTrigger>
+                                          <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                              <AlertDialogTitle>
+                                                {action.confirm.title}
+                                              </AlertDialogTitle>
+                                              <AlertDialogDescription>
+                                                {action.confirm.description}
+                                              </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                              <AlertDialogCancel>
+                                                Cancel
+                                              </AlertDialogCancel>
+                                              <AlertDialogAction
+                                                onClick={() =>
+                                                  action.onClick(item)
+                                                }
+                                                className={
+                                                  action.variant ===
+                                                  "destructive"
+                                                    ? "bg-red-600 hover:bg-red-700"
+                                                    : ""
+                                                }
+                                              >
+                                                {action.label}
+                                              </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                          </AlertDialogContent>
+                                        </AlertDialog>
+                                      ) : (
+                                        <DropdownMenuItem
+                                          onClick={() => action.onClick(item)}
+                                          className={
+                                            action.variant === "destructive"
+                                              ? "text-red-600"
+                                              : ""
+                                          }
+                                        >
+                                          {action.icon}
+                                          {action.label}
+                                        </DropdownMenuItem>
+                                      )}
+                                    </div>
+                                  ))}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
 
               {/* Pagination */}
               {showPagination && totalPages > 1 && (
-                <div className="flex items-center justify-between mt-6">
-                  <p className="text-sm text-gray-700">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4 sm:mt-6 p-3 sm:p-0">
+                  <p className="text-xs sm:text-sm text-gray-700 text-center sm:text-left">
                     Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
                     {Math.min(currentPage * itemsPerPage, filteredData.length)}{" "}
                     of {filteredData.length} results
                   </p>
-                  <div className="flex space-x-2">
+                  <div className="flex justify-center sm:justify-end space-x-2">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => setCurrentPage(currentPage - 1)}
                       disabled={!hasPrev}
+                      className="text-xs sm:text-sm"
                     >
                       Previous
                     </Button>
@@ -452,6 +585,7 @@ export function AdminDataTable<T extends Record<string, unknown>>({
                       size="sm"
                       onClick={() => setCurrentPage(currentPage + 1)}
                       disabled={!hasNext}
+                      className="text-xs sm:text-sm"
                     >
                       Next
                     </Button>

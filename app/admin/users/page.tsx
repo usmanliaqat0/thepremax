@@ -327,7 +327,7 @@ export default function UsersManagement() {
         <Card>
           <CardContent className="p-3 sm:p-2">
             <div className="flex flex-col justify-center items-center gap-2">
-              <UserCheck className="h-5 w-5 text-green-600" />
+              <UserCheck className="h-6 w-6 text-green-600" />
               <p className="text-xs sm:text-sm text-muted-foreground text-center">
                 Active Users
               </p>
@@ -338,7 +338,7 @@ export default function UsersManagement() {
         <Card>
           <CardContent className="p-3 sm:p-2">
             <div className="flex flex-col justify-center items-center gap-2">
-              <UserX className="h-5 w-5 text-red-600" />
+              <UserX className="h-6 w-6 text-red-600" />
               <p className="text-xs sm:text-sm text-muted-foreground text-center">
                 Inactive Users
               </p>
@@ -349,7 +349,7 @@ export default function UsersManagement() {
         <Card>
           <CardContent className="p-3 sm:p-2">
             <div className="flex flex-col justify-center items-center gap-2">
-              <Mail className="h-5 w-5 text-blue-600" />
+              <Mail className="h-6 w-6 text-blue-600" />
               <p className="text-xs sm:text-sm text-muted-foreground text-center">
                 Verified Emails
               </p>
@@ -362,7 +362,7 @@ export default function UsersManagement() {
         <Card>
           <CardContent className="p-3 sm:p-2">
             <div className="flex flex-col justify-center items-center gap-2">
-              <Phone className="h-5 w-5 text-purple-600" />
+              <Phone className="h-6 w-6 text-purple-600" />
               <p className="text-xs sm:text-sm text-muted-foreground text-center">
                 Verified Phones
               </p>
