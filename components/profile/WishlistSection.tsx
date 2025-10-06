@@ -28,17 +28,12 @@ import {
   List,
   Filter,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import ProductCard from "@/components/ProductCard";
 
 const WishlistSection = () => {
   const { state } = useAuth();
   const router = useRouter();
-  const {
-    state: wishlistState,
-    removeFromWishlist,
-    refreshWishlist,
-  } = useWishlist();
+  const { state: wishlistState, refreshWishlist } = useWishlist();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<string>("dateAdded");
