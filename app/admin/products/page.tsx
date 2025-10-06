@@ -4,8 +4,17 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Package, TrendingUp, Star, Edit, Trash2 } from "lucide-react";
+import {
+  Plus,
+  Package,
+  TrendingUp,
+  Star,
+  Edit,
+  Trash2,
+  Eye,
+} from "lucide-react";
 import ProductDialog from "@/components/admin/ProductDialog";
+import ProductViewDialog from "@/components/admin/ProductViewDialog";
 import { toast } from "sonner";
 import { useAdminData } from "@/hooks/use-admin-data";
 import { useDialog } from "@/hooks/use-dialog";
@@ -77,6 +86,7 @@ interface Product extends Record<string, unknown> {
 export default function ProductsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -86,6 +96,14 @@ export default function ProductsPage() {
     onOpenChange: (open) => {
       if (!open) {
         setEditingProduct(null);
+      }
+    },
+  });
+
+  const productViewDialog = useDialog({
+    onOpenChange: (open) => {
+      if (!open) {
+        setViewingProduct(null);
       }
     },
   });
@@ -250,6 +268,15 @@ export default function ProductsPage() {
   // Dynamic actions
   const getActions = (): TableAction<Product>[] => {
     const actions: TableAction<Product>[] = [];
+
+    actions.push({
+      label: "View",
+      icon: <Eye className="h-4 w-4 mr-2" />,
+      onClick: (product) => {
+        setViewingProduct(product);
+        productViewDialog.openDialog();
+      },
+    });
 
     actions.push({
       label: "Edit",
@@ -428,6 +455,14 @@ export default function ProductsPage() {
         product={editingProduct}
         categories={categories}
         onSuccess={handleProductSaved}
+      />
+
+      {/* Product View Dialog */}
+      <ProductViewDialog
+        product={viewingProduct}
+        open={productViewDialog.open}
+        onOpenChange={productViewDialog.onOpenChange}
+        categories={categories}
       />
     </div>
   );
