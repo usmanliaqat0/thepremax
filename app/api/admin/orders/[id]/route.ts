@@ -10,11 +10,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await adminMiddleware(request);
-    if (!user) {
+    const authResult = await adminMiddleware(request);
+    if (!authResult.success) {
       return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 }
+        { error: authResult.error || "Admin access required" },
+        { status: authResult.status || 401 }
       );
     }
 
@@ -41,11 +41,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await adminMiddleware(request);
-    if (!user) {
+    const authResult = await adminMiddleware(request);
+    if (!authResult.success) {
       return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 }
+        { error: authResult.error || "Admin access required" },
+        { status: authResult.status || 401 }
       );
     }
 
@@ -102,11 +102,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await adminMiddleware(request);
-    if (!user) {
+    const authResult = await adminMiddleware(request);
+    if (!authResult.success) {
       return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 403 }
+        { error: authResult.error || "Admin access required" },
+        { status: authResult.status || 401 }
       );
     }
 

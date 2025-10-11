@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
         { orderNumber: { $regex: search, $options: "i" } },
         { "shippingAddress.firstName": { $regex: search, $options: "i" } },
         { "shippingAddress.lastName": { $regex: search, $options: "i" } },
-        { "shippingAddress.email": { $regex: search, $options: "i" } },
+        { "shippingAddress.phone": { $regex: search, $options: "i" } },
       ];
     }
 

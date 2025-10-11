@@ -89,7 +89,7 @@ export async function GET(
       orderNumber: order.orderNumber,
       orderDate: new Date(order.createdAt).toLocaleDateString(),
       customerName: `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`,
-      customerEmail: order.shippingAddress.phone, // Using phone as contact
+      customerEmail: (order as unknown as { userId?: { email?: string } }).userId?.email || "",
       shippingAddress: order.shippingAddress,
       items: order.items,
       subtotal: order.subtotal,

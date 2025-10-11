@@ -57,7 +57,7 @@ export async function PUT(
     }
 
     // Regular users can only cancel their own orders
-    if (user.role !== "admin" && order.userId !== user.id) {
+    if (user.role !== "admin" && order.userId?.toString() !== user.id) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 

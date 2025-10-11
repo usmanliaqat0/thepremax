@@ -196,7 +196,8 @@ export class VerificationUtils {
   }
 
   static getVerificationExpiry(): Date {
-    return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    // 24 hours expiry for verification codes
+    return new Date(Date.now() + 24 * 60 * 60 * 1000);
   }
 }
 

@@ -1,4 +1,4 @@
-﻿import * as brevo from "@getbrevo/brevo";
+import * as brevo from "@getbrevo/brevo";
 
 let apiInstance: brevo.TransactionalEmailsApi;
 
@@ -146,11 +146,6 @@ static async sendPasswordResetVerificationEmail(
       }
 
       const verificationCode = verificationToken.substring(0, 6).toUpperCase();
-      console.log(
-        "Generated password reset verification code:",
-        verificationCode
-      );
-      console.log("Full token:", verificationToken);
 
       const resetUrl = `${
         process.env.NEXT_PUBLIC_APP_URL
@@ -309,8 +304,6 @@ static async sendEmailVerificationEmail(
       }
 
       const verificationCode = verificationToken.substring(0, 6).toUpperCase();
-      console.log("Generated verification code:", verificationCode);
-      console.log("Full token:", verificationToken);
 
       const verificationUrl = `${
         process.env.NEXT_PUBLIC_APP_URL
@@ -344,11 +337,7 @@ try {
         const verificationCode = verificationToken
           .substring(0, 6)
           .toUpperCase();
-        console.log(
-          "Fallback - Generated verification code:",
-          verificationCode
-        );
-        console.log("Fallback - Full token:", verificationToken);
+        // Avoid logging tokens in fallback as well
 
         const verificationUrl = `${
           process.env.NEXT_PUBLIC_APP_URL

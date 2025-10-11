@@ -1,9 +1,17 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import User from "@/lib/models/User";
 import connectDB from "@/lib/db";
+import { AdminMiddleware } from "@/lib/admin-middleware";
 
 export async function GET(req: NextRequest) {
   try {
+    const auth = AdminMiddleware.verifyAdminToken(req);
+    if (!auth.success) {
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 401 }
+      );
+    }
     await connectDB();
 
     const { searchParams } = new URL(req.url);
@@ -16,25 +24,20 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    console.log("Testing verification code:", code);
+    // Intentionally avoid logging sensitive codes in production
 
 const users = await User.find({
       emailVerificationToken: { $exists: true, $ne: null },
       isEmailVerified: false,
     }).select("email emailVerificationToken");
 
-    console.log("Found users with verification tokens:", users.length);
+    // Avoid verbose token logging
 
     const matchingUsers = users.filter((user) => {
       if (user.emailVerificationToken) {
         const tokenStart = user.emailVerificationToken
           .substring(0, 6)
           .toUpperCase();
-        console.log(
-          `User ${
-            user.email
-          }: token starts with ${tokenStart}, looking for ${code.toUpperCase()}`
-        );
         return tokenStart === code.toUpperCase();
       }
       return false;
@@ -47,7 +50,6 @@ const users = await User.find({
       users: users.map((u) => ({
         email: u.email,
         tokenStart: u.emailVerificationToken?.substring(0, 6).toUpperCase(),
-        fullToken: u.emailVerificationToken?.substring(0, 10) + "...",
       })),
       matches: matchingUsers.map((u) => ({
         email: u.email,
