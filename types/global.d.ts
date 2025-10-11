@@ -1,4 +1,4 @@
-// Global type declarations for Next.js compatibility
+﻿
 
 declare global {
   interface ObjectConstructor {

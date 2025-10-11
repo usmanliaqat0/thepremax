@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,31 +18,36 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { useCart, CartItem } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { useRouter, usePathname } from "next/navigation";
-import { useMemo, useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
+import { Category } from "@/lib/types";
 
 const Navigation = () => {
   const { getCartItemsCount, state } = useCart();
+  const { isAdmin } = useAuth();
+  const { state: wishlistState } = useWishlist();
   const router = useRouter();
   const pathname = usePathname();
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  const categories = useMemo(
-    () => [
-      { name: "Health & Beauty", href: "/category/health-beauty", icon: "💄" },
-      {
-        name: "Sports & Recreation",
-        href: "/category/sports-recreation",
-        icon: "🏀",
-      },
-      {
-        name: "Tools & Equipment",
-        href: "/category/tools-equipment",
-        icon: "🔧",
-      },
-      { name: "Automotive", href: "/category/automotive", icon: "🚗" },
-    ],
-    []
-  );
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/categories");
+        const data = await response.json();
+        if (data.success) {
+          setCategories(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleSearch = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -90,16 +95,34 @@ const Navigation = () => {
 
               <div className="absolute top-full left-0 mt-1 w-56 bg-background border border-border rounded-md shadow-fashion-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                 <div className="py-2">
-                  {categories.map((category) => (
+                  {categories.slice(0, 6).map((category) => (
                     <Link
-                      key={category.name}
-                      href={category.href}
-                      className="flex items-center px-4 py-3 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+                      key={category._id}
+                      href={`/category/${category.slug}`}
+                      className="flex items-center px-4 py-4 text-sm text-foreground hover:bg-accent hover:text-accent-foreground transition-fashion hover:scale-[1.02] group"
                     >
-                      <span className="mr-3 text-lg">{category.icon}</span>
-                      <div>
-                        <div className="font-medium">{category.name}</div>
+                      <div className="mr-3 w-10 h-10 flex items-center justify-center rounded-lg overflow-hidden shadow-fashion-sm">
+                        {category.image ? (
+                          <Image
+                            src={category.image}
+                            alt={category.name}
+                            width={40}
+                            height={40}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-accent/20 to-accent/40 flex items-center justify-center">
+                            <span className="text-lg">📦</span>
+                          </div>
+                        )}
                       </div>
+                      <div className="flex-1">
+                        <div className="font-semibold">{category.name}</div>
+                        <div className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          Explore products
+                        </div>
+                      </div>
+                      <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-1 group-hover:translate-x-0" />
                     </Link>
                   ))}
                   <div className="border-t border-border mt-2 pt-2">
@@ -107,7 +130,7 @@ const Navigation = () => {
                       href="/shop"
                       className="flex items-center justify-between px-4 py-3 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors font-medium rounded-sm mx-1"
                     >
-                      <span>View All Products</span>
+                      <span>View All Categories</span>
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>
@@ -121,6 +144,13 @@ const Navigation = () => {
             <Button variant="nav" asChild>
               <Link href="/contact">Contact</Link>
             </Button>
+            {isAdmin() && (
+              <Button variant="nav" asChild>
+                <Link href="/admin" className="text-accent font-semibold">
+                  Admin
+                </Link>
+              </Button>
+            )}
           </div>
 
           <div className="hidden lg:flex items-center space-x-2 flex-1 max-w-md mx-8">
@@ -144,12 +174,12 @@ const Navigation = () => {
             >
               <Link href="/wishlist">
                 <Heart className="h-5 w-5" />
-                {state.wishlist.length > 0 && (
+                {wishlistState.items.length > 0 && (
                   <Badge
                     variant="destructive"
                     className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs font-bold min-w-[1.25rem] bg-red-600 text-white border-2 border-background"
                   >
-                    {state.wishlist.length}
+                    {wishlistState.items.length}
                   </Badge>
                 )}
               </Link>
@@ -160,7 +190,7 @@ const Navigation = () => {
               className="hidden sm:flex"
               asChild
             >
-              <Link href="/profile">
+              <Link href={isAdmin() ? "/admin" : "/profile"}>
                 <User className="h-5 w-5" />
               </Link>
             </Button>
@@ -260,36 +290,93 @@ const Navigation = () => {
                       >
                         <Link href="/contact">Contact</Link>
                       </Button>
-                    </div>
-
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                        Categories
-                      </h3>
-                      {categories.map((category) => (
+                      <Button
+                        variant={
+                          pathname === "/track-order" ? "secondary" : "ghost"
+                        }
+                        className={`w-full justify-start h-10 text-base transition-colors ${
+                          pathname === "/track-order"
+                            ? "bg-accent text-accent-foreground font-medium"
+                            : ""
+                        }`}
+                        asChild
+                      >
+                        <Link href="/track-order">Track Order</Link>
+                      </Button>
+                      {isAdmin() && (
                         <Button
-                          key={category.name}
                           variant={
-                            pathname === category.href ? "secondary" : "ghost"
+                            pathname === "/admin" ? "secondary" : "ghost"
                           }
-                          className={`w-full justify-start h-10 text-base pl-4 transition-colors ${
-                            pathname === category.href
+                          className={`w-full justify-start h-10 text-base transition-colors ${
+                            pathname === "/admin"
                               ? "bg-accent text-accent-foreground font-medium"
                               : ""
                           }`}
                           asChild
                         >
                           <Link
-                            href={category.href}
+                            href="/admin"
+                            className="text-accent font-semibold"
+                          >
+                            Admin Panel
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                        Categories
+                      </h3>
+                      {categories.slice(0, 6).map((category) => (
+                        <Button
+                          key={category._id}
+                          variant={
+                            pathname === `/category/${category.slug}`
+                              ? "secondary"
+                              : "ghost"
+                          }
+                          className={`w-full justify-start h-12 text-base pl-4 transition-fashion hover:bg-accent/10 hover:scale-[1.02] ${
+                            pathname === `/category/${category.slug}`
+                              ? "bg-accent text-accent-foreground font-medium shadow-fashion-sm"
+                              : "hover:shadow-fashion-sm"
+                          }`}
+                          asChild
+                        >
+                          <Link
+                            href={`/category/${category.slug}`}
                             className="flex items-center"
                           >
-                            <span className="mr-3 text-lg">
-                              {category.icon}
-                            </span>
-                            {category.name}
+                            <div className="mr-3 w-10 h-10 flex items-center justify-center rounded-lg overflow-hidden shadow-fashion-sm">
+                              {category.image ? (
+                                <Image
+                                  src={category.image}
+                                  alt={category.name}
+                                  width={40}
+                                  height={40}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-accent/20 to-accent/40 flex items-center justify-center">
+                                  <span className="text-lg">📦</span>
+                                </div>
+                              )}
+                            </div>
+                            <span className="font-medium">{category.name}</span>
                           </Link>
                         </Button>
                       ))}
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start h-10 text-base pl-4 transition-colors hover:bg-accent/10 font-medium text-muted-foreground hover:text-foreground"
+                        asChild
+                      >
+                        <Link href="/shop" className="flex items-center">
+                          <span>View All Categories</span>
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
                     </div>
 
                     <div className="space-y-1 pt-2 border-t">
@@ -313,12 +400,12 @@ const Navigation = () => {
                         >
                           <Heart className="h-5 w-5" />
                           Wishlist
-                          {state.wishlist.length > 0 && (
+                          {wishlistState.items.length > 0 && (
                             <Badge
                               variant="destructive"
                               className="h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs font-bold min-w-[1.25rem] ml-auto"
                             >
-                              {state.wishlist.length}
+                              {wishlistState.items.length}
                             </Badge>
                           )}
                         </Link>
@@ -326,21 +413,25 @@ const Navigation = () => {
 
                       <Button
                         variant={
-                          pathname === "/profile" ? "secondary" : "ghost"
+                          pathname === "/profile" ||
+                          (isAdmin() && pathname === "/admin")
+                            ? "secondary"
+                            : "ghost"
                         }
                         className={`w-full justify-start h-10 text-base transition-colors ${
-                          pathname === "/profile"
+                          pathname === "/profile" ||
+                          (isAdmin() && pathname === "/admin")
                             ? "bg-accent text-accent-foreground font-medium"
                             : ""
                         }`}
                         asChild
                       >
                         <Link
-                          href="/profile"
+                          href={isAdmin() ? "/admin" : "/profile"}
                           className="flex items-center gap-3"
                         >
                           <User className="h-5 w-5" />
-                          Profile
+                          {isAdmin() ? "Admin Panel" : "Profile"}
                         </Link>
                       </Button>
 

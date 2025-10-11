@@ -1,14 +1,15 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Product } from "@/lib/products";
+import { Product } from "@/lib/types";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { formatPrice } from "@/lib/currency";
 
 import { cn } from "@/lib/utils";
@@ -24,8 +25,8 @@ const ProductCard = ({
   variant = "default",
   className,
 }: ProductCardProps) => {
-  const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } =
-    useCart();
+  const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -35,13 +36,15 @@ const ProductCard = ({
     addToCart(product, defaultSize, defaultColor, 1);
   };
 
-  const handleToggleWishlist = (e: React.MouseEvent) => {
+  const handleToggleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
+    if (isInWishlist(product._id)) {
+      await removeFromWishlist(product._id);
     } else {
-      addToWishlist(product);
+      const defaultSize = product.sizes?.[0];
+      const defaultColor = product.colors?.[0];
+      await addToWishlist(product, defaultSize, defaultColor);
     }
   };
 
@@ -76,12 +79,11 @@ const ProductCard = ({
 
   return (
     <Card className={cn(variantStyles.card, "p-0 gap-0", className)}>
-      <Link href={`/product/${product.id}`}>
+      <Link href={`/product/${product._id}`}>
         <div className="relative overflow-hidden">
-          {/* Product Image */}
           <div className={cn(variantStyles.image, "overflow-hidden bg-muted")}>
             <Image
-              src={product.image}
+              src={product.images?.[0]?.url || "/placeholder.jpg"}
               alt={product.name}
               width={400}
               height={400}
@@ -94,9 +96,8 @@ const ProductCard = ({
             />
           </div>
 
-          {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
-            {product.sale && (
+            {product.onSale && (
               <Badge
                 variant="destructive"
                 className="text-xs font-medium shadow-fashion-sm"
@@ -119,7 +120,6 @@ const ProductCard = ({
             )}
           </div>
 
-          {/* Wishlist Button */}
           <Button
             variant="ghost"
             size={variant === "compact" ? "icon-sm" : "icon"}
@@ -129,14 +129,13 @@ const ProductCard = ({
             <Heart
               className={cn(
                 variant === "compact" ? "h-3.5 w-3.5" : "h-4 w-4",
-                isInWishlist(product.id)
+                isInWishlist(product._id)
                   ? "fill-red-500 text-red-500"
                   : "text-muted-foreground"
               )}
             />
           </Button>
 
-          {/* Quick Add to Cart */}
           <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <Button
               onClick={handleAddToCart}
@@ -156,16 +155,7 @@ const ProductCard = ({
         </div>
 
         <CardContent className={variantStyles.content}>
-          {/* Brand & Category */}
-          <div className="flex items-center justify-between">
-            <span
-              className={cn(
-                "text-muted-foreground font-medium",
-                variant === "featured" ? "text-sm" : "text-xs"
-              )}
-            >
-              {product.brand}
-            </span>
+          <div className="flex items-center justify-end">
             <Badge
               variant="outline"
               className={cn(
@@ -173,14 +163,12 @@ const ProductCard = ({
                 variant === "compact" && "text-xs px-1.5 py-0.5"
               )}
             >
-              {product.category.replace("-", " ")}
+              {product.category?.name || "Uncategorized"}
             </Badge>
           </div>
 
-          {/* Product Name */}
           <h3 className={variantStyles.title}>{product.name}</h3>
 
-          {/* Rating & Reviews */}
           <div className="flex items-center gap-2">
             <div className="flex items-center">
               <span className="text-yellow-500">★</span>
@@ -203,24 +191,22 @@ const ProductCard = ({
             </span>
           </div>
 
-          {/* Price */}
           <div className="flex items-center gap-2">
             <span className={variantStyles.price}>
-              {formatPrice(product.price)}
+              {formatPrice(product.basePrice)}
             </span>
-            {product.originalPrice && (
+            {product.compareAtPrice && (
               <span
                 className={cn(
                   "text-muted-foreground line-through",
                   variant === "featured" ? "text-base" : "text-sm"
                 )}
               >
-                {formatPrice(product.originalPrice)}
+                {formatPrice(product.compareAtPrice)}
               </span>
             )}
           </div>
 
-          {/* Stock Status & Shipping */}
           <div className="flex items-center justify-between">
             <span
               className={cn(

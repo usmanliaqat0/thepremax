@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
 import { TokenUtils } from "@/lib/auth-service";
 
-// Get user profile
 export async function GET(req: NextRequest) {
   try {
     const authHeader = req.headers.get("authorization");
@@ -63,7 +62,6 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// Update user profile
 export async function PUT(req: NextRequest) {
   try {
     const authHeader = req.headers.get("authorization");
@@ -78,8 +76,7 @@ export async function PUT(req: NextRequest) {
     const decoded = TokenUtils.verifyAccessToken(token);
     const updates = await req.json();
 
-    // Remove sensitive fields that shouldn't be updated through this route
-    const allowedUpdates = {
+const allowedUpdates = {
       firstName: updates.firstName,
       lastName: updates.lastName,
       phone: updates.phone,
@@ -90,8 +87,7 @@ export async function PUT(req: NextRequest) {
       addresses: updates.addresses,
     };
 
-    // Remove undefined values
-    Object.keys(allowedUpdates).forEach((key) => {
+Object.keys(allowedUpdates).forEach((key) => {
       if (allowedUpdates[key as keyof typeof allowedUpdates] === undefined) {
         delete allowedUpdates[key as keyof typeof allowedUpdates];
       }

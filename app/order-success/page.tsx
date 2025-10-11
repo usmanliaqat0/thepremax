@@ -1,12 +1,14 @@
-"use client";
+﻿"use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { RefreshLoader } from "@/components/ui/loader";
 import {
   CheckCircle,
   Package,
@@ -15,38 +17,179 @@ import {
   Phone,
   Home,
   Download,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { formatPrice } from "@/lib/currency";
+import { useAuth } from "@/context/AuthContext";
 
-const OrderSuccess = () => {
-  // Generate a random order number
-  const orderNumber = `FM-${Math.random()
-    .toString(36)
-    .substr(2, 9)
-    .toUpperCase()}`;
+interface OrderData {
+  _id: string;
+  orderNumber: string;
+  total: number;
+  status: string;
+  paymentStatus: string;
+  items: Array<{
+    name: string;
+    quantity: number;
+    price: number;
+  }>;
+  shippingAddress: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    email?: string;
+  };
+  estimatedDelivery?: string;
+  trackingNumber?: string;
+  createdAt: string;
+}
+
+const OrderSuccessContent = () => {
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get("orderId");
+  const { state } = useAuth();
+  const [orderData, setOrderData] = useState<OrderData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false);
+
+  const fetchOrderData = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/orders/${orderId}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch order data");
+      }
+      const data = await response.json();
+      setOrderData(data.order);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to load order data"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [orderId]);
+
+  const handleDownloadInvoice = async (orderId: string) => {
+    setDownloadingInvoice(true);
+
+    try {
+      // Get the access token from localStorage or cookies
+      let token = localStorage.getItem("auth_token");
+
+      if (!token) {
+        // Try to get from cookies
+        const cookieMatch = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("accessToken="));
+        token = cookieMatch?.split("=")[1] || null;
+      }
+
+      if (!token) {
+        throw new Error("No authentication token found. Please log in again.");
+      }
+
+      const response = await fetch(`/api/orders/${orderId}/invoice`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Authentication failed. Please log in again.");
+        } else if (response.status === 403) {
+          throw new Error(
+            "You don't have permission to download this invoice."
+          );
+        } else {
+          throw new Error("Failed to download invoice");
+        }
+      }
+
+      const htmlContent = await response.text();
+      const blob = new Blob([htmlContent], { type: "text/html" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.target = "_blank";
+      a.download = `invoice-${orderData?.orderNumber || "order"}.html`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      // You could add a toast notification here if you have a toast system
+    } catch (error) {
+      console.error("Failed to download invoice:", error);
+    } finally {
+      setDownloadingInvoice(false);
+    }
+  };
 
   useEffect(() => {
-    // Scroll to top when component mounts
     window.scrollTo(0, 0);
-  }, []);
 
-  // Mock order data
-  const orderData = {
-    orderNumber,
-    total: 15800,
-    items: 3,
-    estimatedDelivery: "3-5 business days",
-    email: "customer@example.com",
-    phone: "+1 512-355-5110",
-  };
+    if (orderId) {
+      fetchOrderData();
+    } else {
+      setLoading(false);
+    }
+  }, [orderId, fetchOrderData]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-2xl mx-auto text-center">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading order details...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !orderData) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-2xl mx-auto text-center">
+            <h1 className="text-4xl font-heading font-bold text-primary mb-4">
+              Order Not Found
+            </h1>
+            <p className="text-muted-foreground text-lg mb-6">
+              {error ||
+                "The order you're looking for doesn't exist or you don't have permission to view it."}
+            </p>
+            <Link href="/profile">
+              <Button>View My Orders</Button>
+            </Link>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  const totalItems = orderData.items.reduce(
+    (sum, item) => sum + item.quantity,
+    0
+  );
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
 
       <div className="container mx-auto px-4 py-16">
-        {/* Success Message */}
+        {}
         <div className="max-w-2xl mx-auto text-center mb-12">
           <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="h-12 w-12 text-green-600" />
@@ -61,7 +204,7 @@ const OrderSuccess = () => {
         </div>
 
         <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Order Details */}
+          {}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -85,12 +228,40 @@ const OrderSuccess = () => {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Items:</span>
-                  <span>{orderData.items} items</span>
+                  <span>{totalItems} items</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Status:</span>
-                  <Badge className="bg-blue-100 text-blue-800">
-                    Processing
+                  <Badge
+                    className={`${
+                      orderData.status === "pending"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : orderData.status === "processing"
+                        ? "bg-blue-100 text-blue-800"
+                        : orderData.status === "shipped"
+                        ? "bg-purple-100 text-purple-800"
+                        : orderData.status === "delivered"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {orderData.status.charAt(0).toUpperCase() +
+                      orderData.status.slice(1)}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Payment Status:</span>
+                  <Badge
+                    className={`${
+                      orderData.paymentStatus === "paid"
+                        ? "bg-green-100 text-green-800"
+                        : orderData.paymentStatus === "pending"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {orderData.paymentStatus.charAt(0).toUpperCase() +
+                      orderData.paymentStatus.slice(1)}
                   </Badge>
                 </div>
                 <Separator />
@@ -106,7 +277,7 @@ const OrderSuccess = () => {
             </CardContent>
           </Card>
 
-          {/* Contact Information */}
+          {}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -122,7 +293,11 @@ const OrderSuccess = () => {
                     <h4 className="font-medium">Confirmation Email</h4>
                     <p className="text-sm text-muted-foreground">
                       You&apos;ll receive an order confirmation email at{" "}
-                      <span className="font-medium">{orderData.email}</span>
+                      <span className="font-medium">
+                        {state.user?.email ||
+                          orderData.shippingAddress.email ||
+                          "your registered email"}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -142,7 +317,9 @@ const OrderSuccess = () => {
                     <h4 className="font-medium">Tracking Information</h4>
                     <p className="text-sm text-muted-foreground">
                       You&apos;ll receive tracking details via SMS at{" "}
-                      <span className="font-medium">{orderData.phone}</span>
+                      <span className="font-medium">
+                        {orderData.shippingAddress.phone}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -151,17 +328,17 @@ const OrderSuccess = () => {
           </Card>
         </div>
 
-        {/* Order Timeline */}
+        {}
         <Card className="max-w-4xl mx-auto mt-8">
           <CardHeader>
             <CardTitle>Order Timeline</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row justify-between relative">
-              {/* Timeline Line */}
+              {}
               <div className="hidden md:block absolute top-8 left-0 right-0 h-0.5 bg-muted" />
 
-              {/* Steps */}
+              {}
               <div className="flex flex-col md:flex-row justify-between w-full relative z-10">
                 <div className="flex flex-col items-center text-center mb-6 md:mb-0">
                   <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center mb-2">
@@ -199,18 +376,32 @@ const OrderSuccess = () => {
           </CardContent>
         </Card>
 
-        {/* Actions */}
+        {}
         <div className="max-w-4xl mx-auto mt-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link href="/profile">
+            <Link href={`/track-order?orderNumber=${orderData.orderNumber}`}>
               <Button variant="outline" className="w-full">
                 <Package className="mr-2 h-4 w-4" />
                 Track Order
               </Button>
             </Link>
-            <Button variant="outline" className="w-full">
-              <Download className="mr-2 h-4 w-4" />
-              Download Invoice
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => handleDownloadInvoice(orderData._id)}
+              disabled={downloadingInvoice}
+            >
+              {downloadingInvoice ? (
+                <>
+                  <RefreshLoader size="sm" variant="muted" className="mr-2" />
+                  Downloading...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download Invoice
+                </>
+              )}
             </Button>
             <Link href="/shop">
               <Button className="w-full">Continue Shopping</Button>
@@ -218,7 +409,7 @@ const OrderSuccess = () => {
           </div>
         </div>
 
-        {/* Support */}
+        {}
         <Card className="max-w-4xl mx-auto mt-8">
           <CardContent className="text-center py-8">
             <h3 className="font-semibold mb-2">Need Help?</h3>
@@ -244,6 +435,29 @@ const OrderSuccess = () => {
 
       <Footer />
     </div>
+  );
+};
+
+const OrderSuccess = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background">
+          <Navigation />
+          <div className="container mx-auto px-4 py-16">
+            <div className="flex items-center justify-center">
+              <div className="text-center">
+                <RefreshLoader size="lg" className="mx-auto mb-4" />
+                <p>Loading...</p>
+              </div>
+            </div>
+          </div>
+          <Footer />
+        </div>
+      }
+    >
+      <OrderSuccessContent />
+    </Suspense>
   );
 };
 

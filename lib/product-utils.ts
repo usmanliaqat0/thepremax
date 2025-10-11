@@ -1,8 +1,4 @@
-import { Product } from "./products";
-
-/**
- * Product utility functions for enhanced functionality
- */
+﻿import { Product } from "./types";
 
 export type SortOption =
   | "name"
@@ -26,9 +22,6 @@ export type FilterOptions = {
   topRated?: boolean;
 };
 
-/**
- * Search products by name, description, or category
- */
 export function searchProducts(
   products: Product[],
   searchTerm: string
@@ -41,7 +34,7 @@ export function searchProducts(
     (product) =>
       product.name.toLowerCase().includes(lowercaseSearch) ||
       product.description.toLowerCase().includes(lowercaseSearch) ||
-      product.category.toLowerCase().includes(lowercaseSearch) ||
+      product.category?.name.toLowerCase().includes(lowercaseSearch) ||
       product.colors.some((color) =>
         color.toLowerCase().includes(lowercaseSearch)
       ) ||
@@ -49,52 +42,42 @@ export function searchProducts(
   );
 }
 
-/**
- * Filter products based on multiple criteria
- */
 export function filterProducts(
   products: Product[],
   filters: FilterOptions
 ): Product[] {
   return products.filter((product) => {
-    // Category filter
-    if (filters.category && product.category !== filters.category) {
+    if (filters.category && product.categoryId !== filters.category) {
       return false;
     }
 
-    // Price range filter
     if (filters.priceRange) {
       const { min, max } = filters.priceRange;
-      if (product.price < min || product.price > max) {
+      if (product.basePrice < min || product.basePrice > max) {
         return false;
       }
     }
 
-    // Size filter
     if (filters.sizes && filters.sizes.length > 0) {
       if (!filters.sizes.some((size) => product.sizes.includes(size))) {
         return false;
       }
     }
 
-    // Color filter
     if (filters.colors && filters.colors.length > 0) {
       if (!filters.colors.some((color) => product.colors.includes(color))) {
         return false;
       }
     }
 
-    // Stock filter
     if (filters.inStock !== undefined && product.inStock !== filters.inStock) {
       return false;
     }
 
-    // Sale filter
-    if (filters.onSale !== undefined && product.sale !== filters.onSale) {
+    if (filters.onSale !== undefined && product.onSale !== filters.onSale) {
       return false;
     }
 
-    // Featured filter
     if (
       filters.featured !== undefined &&
       product.featured !== filters.featured
@@ -102,7 +85,6 @@ export function filterProducts(
       return false;
     }
 
-    // Top rated filter
     if (
       filters.topRated !== undefined &&
       product.topRated !== filters.topRated
@@ -114,9 +96,6 @@ export function filterProducts(
   });
 }
 
-/**
- * Sort products by specified criteria
- */
 export function sortProducts(
   products: Product[],
   sortBy: SortOption
@@ -128,10 +107,10 @@ export function sortProducts(
       return sorted.sort((a, b) => a.name.localeCompare(b.name));
 
     case "price-low":
-      return sorted.sort((a, b) => a.price - b.price);
+      return sorted.sort((a, b) => a.basePrice - b.basePrice);
 
     case "price-high":
-      return sorted.sort((a, b) => b.price - a.price);
+      return sorted.sort((a, b) => b.basePrice - a.basePrice);
 
     case "featured":
       return sorted.sort((a, b) => {
@@ -141,11 +120,12 @@ export function sortProducts(
       });
 
     case "newest":
-      // Assuming newer products have higher IDs (you might want to add a createdAt field)
-      return sorted.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+      return sorted.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
 
     case "popular":
-      // Sort by featured and top rated first, then by name
       return sorted.sort((a, b) => {
         const aScore = (a.featured ? 2 : 0) + (a.topRated ? 1 : 0);
         const bScore = (b.featured ? 2 : 0) + (b.topRated ? 1 : 0);
@@ -158,17 +138,16 @@ export function sortProducts(
   }
 }
 
-/**
- * Get available filter values from a product array
- */
 export function getAvailableFilters(products: Product[]) {
-  const categories = [...new Set(products.map((p) => p.category))];
+  const categories = [
+    ...new Set(products.map((p) => p.category?.name).filter(Boolean)),
+  ];
   const sizes = [...new Set(products.flatMap((p) => p.sizes))];
   const colors = [...new Set(products.flatMap((p) => p.colors))];
 
   const priceRange = {
-    min: Math.min(...products.map((p) => p.price)),
-    max: Math.max(...products.map((p) => p.price)),
+    min: Math.min(...products.map((p) => p.basePrice)),
+    max: Math.max(...products.map((p) => p.basePrice)),
   };
 
   return {
@@ -179,9 +158,6 @@ export function getAvailableFilters(products: Product[]) {
   };
 }
 
-/**
- * Calculate discount percentage
- */
 export function getDiscountPercentage(
   price: number,
   originalPrice?: number
@@ -190,23 +166,22 @@ export function getDiscountPercentage(
   return Math.round(((originalPrice - price) / originalPrice) * 100);
 }
 
-/**
- * Check if product has discount
- */
 export function hasDiscount(product: Product): boolean {
-  return !!(product.originalPrice && product.originalPrice > product.price);
+  return !!(
+    product.compareAtPrice && product.compareAtPrice > product.basePrice
+  );
 }
 
-/**
- * Get product badges
- */
 export function getProductBadges(product: Product) {
   const badges = [];
 
-  if (product.sale || hasDiscount(product)) {
+  if (product.onSale || hasDiscount(product)) {
     badges.push({
       text: hasDiscount(product)
-        ? `${getDiscountPercentage(product.price, product.originalPrice)}% OFF`
+        ? `${getDiscountPercentage(
+            product.basePrice,
+            product.compareAtPrice
+          )}% OFF`
         : "SALE",
       variant: "destructive" as const,
     });
@@ -236,9 +211,6 @@ export function getProductBadges(product: Product) {
   return badges;
 }
 
-/**
- * Combine search, filter, and sort operations
- */
 export function processProducts(
   products: Product[],
   searchTerm?: string,
@@ -247,25 +219,19 @@ export function processProducts(
 ): Product[] {
   let result = [...products];
 
-  // Apply search
   if (searchTerm) {
     result = searchProducts(result, searchTerm);
   }
 
-  // Apply filters
   if (filters) {
     result = filterProducts(result, filters);
   }
 
-  // Apply sorting
   result = sortProducts(result, sortBy);
 
   return result;
 }
 
-/**
- * Get related products (same category, excluding current product)
- */
 export function getRelatedProducts(
   products: Product[],
   currentProduct: Product,
@@ -274,19 +240,17 @@ export function getRelatedProducts(
   return products
     .filter(
       (p) =>
-        p.id !== currentProduct.id && p.category === currentProduct.category
+        p._id !== currentProduct._id &&
+        p.categoryId === currentProduct.categoryId
     )
     .slice(0, limit);
 }
 
-/**
- * Get recently viewed products (this would typically use localStorage or user data)
- */
 export function getRecentlyViewed(
   productIds: string[],
   allProducts: Product[]
 ): Product[] {
   return productIds
-    .map((id) => allProducts.find((p) => p.id === id))
+    .map((id) => allProducts.find((p) => p._id === id))
     .filter((product): product is Product => product !== undefined);
 }

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
@@ -101,15 +102,15 @@ const Signup = () => {
       <main className="flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-lg">
           <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
-            <CardHeader className="space-y-2 pb-6">
-              <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+            <CardHeader className="space-y-2 pb-6 px-4 sm:px-6">
+              <CardTitle className="text-2xl sm:text-3xl font-bold text-center bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
                 Create Account
               </CardTitle>
-              <CardDescription className="text-center text-gray-600 text-base">
+              <CardDescription className="text-center text-gray-600 text-sm sm:text-base">
                 Join ThePreMax and discover premium fashion
               </CardDescription>
             </CardHeader>
-            <CardContent className="px-8 pb-8">
+            <CardContent className="px-4 sm:px-6 pb-6 sm:pb-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -192,9 +193,8 @@ const Signup = () => {
                   >
                     Password
                   </Label>
-                  <Input
+                  <PasswordInput
                     id="password"
-                    type="password"
                     value={formData.password}
                     onChange={(e) =>
                       handleInputChange("password", e.target.value)
@@ -218,9 +218,8 @@ const Signup = () => {
                   >
                     Confirm Password
                   </Label>
-                  <Input
+                  <PasswordInput
                     id="confirmPassword"
-                    type="password"
                     value={formData.confirmPassword}
                     onChange={(e) =>
                       handleInputChange("confirmPassword", e.target.value)
@@ -238,36 +237,39 @@ const Signup = () => {
                   )}
                 </div>
                 <div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-start space-x-3">
                     <Checkbox
                       id="agreeToTerms"
                       checked={formData.agreeToTerms}
                       onCheckedChange={(checked) =>
                         handleInputChange("agreeToTerms", !!checked)
                       }
+                      className="mt-0.5 flex-shrink-0"
                     />
-                    <Label
-                      htmlFor="agreeToTerms"
-                      className="text-sm text-gray-600"
-                    >
-                      I agree to the{" "}
-                      <Link
-                        href="/terms"
-                        className="text-gray-900 hover:text-gray-700 underline font-medium transition-colors"
+                    <div className="flex-1 min-w-0">
+                      <Label
+                        htmlFor="agreeToTerms"
+                        className="text-sm text-gray-700 leading-relaxed cursor-pointer block"
                       >
-                        Terms of Service
-                      </Link>{" "}
-                      and{" "}
-                      <Link
-                        href="/privacy"
-                        className="text-gray-900 hover:text-gray-700 underline font-medium transition-colors"
-                      >
-                        Privacy Policy
-                      </Link>
-                    </Label>
+                        I agree to the{" "}
+                        <Link
+                          href="/terms"
+                          className="text-gray-900 hover:text-gray-700 underline font-semibold transition-colors"
+                        >
+                          Terms of Service
+                        </Link>{" "}
+                        and{" "}
+                        <Link
+                          href="/privacy"
+                          className="text-gray-900 hover:text-gray-700 underline font-semibold transition-colors"
+                        >
+                          Privacy Policy
+                        </Link>
+                      </Label>
+                    </div>
                   </div>
                   {errors.agreeToTerms && (
-                    <p className="text-sm text-red-500 mt-1">
+                    <p className="text-sm text-red-500 mt-2 ml-7">
                       {errors.agreeToTerms}
                     </p>
                   )}

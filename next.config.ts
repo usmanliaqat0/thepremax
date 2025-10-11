@@ -1,9 +1,6 @@
-import type { NextConfig } from "next";
+﻿import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   images: {
     formats: ["image/webp", "image/avif"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -70,17 +67,6 @@ const nextConfig: NextConfig = {
       },
     },
   },
-
-  ...(process.env.ANALYZE === "true" && {
-    webpack: (config: any) => {
-      config.plugins.push(
-        new (require("@next/bundle-analyzer")())({
-          enabled: true,
-        })
-      );
-      return config;
-    },
-  }),
 };
 
 export default nextConfig;

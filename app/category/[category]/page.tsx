@@ -7,6 +7,7 @@ import ProductCard from "@/components/ProductCard";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RefreshLoader } from "@/components/ui/loader";
 import {
   Select,
   SelectContent,
@@ -16,32 +17,67 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { products, Product, categories } from "@/lib/products";
+// Removed dummy data imports - now using real API data
 import { Search, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
+import { Product, Category } from "@/lib/types";
 
 const CategoryPage = () => {
   const params = useParams();
-  const categoryId = params.category as string;
+  const categorySlug = params.category as string;
 
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [priceRange, setPriceRange] = useState("all");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const category = categories.find((cat) => cat.id === categoryId);
+  const category = categories.find((cat) => cat.slug === categorySlug);
 
-  // Scroll to top when navigating to category page
   useScrollToTop();
 
-  // Filter and sort products
+  // Fetch data from API
   useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+
+        // Fetch products
+        const productsResponse = await fetch("/api/products?limit=1000");
+        const productsData = await productsResponse.json();
+
+        // Fetch categories
+        const categoriesResponse = await fetch("/api/categories");
+        const categoriesData = await categoriesResponse.json();
+
+        if (productsData.success) {
+          setProducts(productsData.data);
+        }
+
+        if (categoriesData.success) {
+          setCategories(categoriesData.data);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (!category) return;
+
     let filtered = products.filter(
-      (product) => product.category === categoryId
+      (product) => product.categoryId === category._id
     );
 
-    // Search filter
     if (searchTerm.trim()) {
       const lowercaseSearch = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -51,39 +87,35 @@ const CategoryPage = () => {
       );
     }
 
-    // Price range filter
     if (priceRange !== "all") {
       switch (priceRange) {
         case "under-15":
-          filtered = filtered.filter((product) => product.price < 15);
+          filtered = filtered.filter((product) => product.basePrice < 15);
           break;
         case "15-30":
           filtered = filtered.filter(
-            (product) => product.price >= 15 && product.price <= 30
+            (product) => product.basePrice >= 15 && product.basePrice <= 30
           );
           break;
         case "30-50":
           filtered = filtered.filter(
-            (product) => product.price >= 30 && product.price <= 50
+            (product) => product.basePrice >= 30 && product.basePrice <= 50
           );
           break;
         case "over-50":
-          filtered = filtered.filter((product) => product.price > 50);
+          filtered = filtered.filter((product) => product.basePrice > 50);
           break;
       }
     }
 
-    // Sort products
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "price-low":
-          return a.price - b.price;
+          return a.basePrice - b.basePrice;
         case "price-high":
-          return b.price - a.price;
+          return b.basePrice - a.basePrice;
         case "name":
           return a.name.localeCompare(b.name);
-        case "brand":
-          return a.brand.localeCompare(b.brand);
         case "rating":
           return b.rating - a.rating;
         case "featured":
@@ -94,7 +126,7 @@ const CategoryPage = () => {
     });
 
     setFilteredProducts(filtered);
-  }, [categoryId, searchTerm, sortBy, priceRange]);
+  }, [category, products, searchTerm, sortBy, priceRange]);
 
   const clearFilters = () => {
     setSearchTerm("");
@@ -106,6 +138,21 @@ const CategoryPage = () => {
     searchTerm.trim() !== "",
     priceRange !== "all",
   ].filter(Boolean).length;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-16">
+          <div className="text-center">
+            <RefreshLoader size="xl" className="mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading category...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!category) {
     return (
@@ -154,11 +201,28 @@ const CategoryPage = () => {
                 <span>/</span>
                 <span className="text-primary">{category.name}</span>
               </div>
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-4xl">{category.icon}</span>
-                <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary">
-                  {category.name}
-                </h1>
+              <div className="flex items-center gap-6 mb-4">
+                <div className="w-20 h-20 flex items-center justify-center rounded-lg overflow-hidden shadow-fashion-sm">
+                  {category.image ? (
+                    <Image
+                      src={category.image}
+                      alt={category.name}
+                      width={80}
+                      height={80}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-accent/20 to-accent/40 flex items-center justify-center">
+                      <span className="text-4xl">📦</span>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-2">
+                    {category.name}
+                  </h1>
+                  <div className="w-16 h-1 bg-gradient-to-r from-accent to-accent/60 rounded-full"></div>
+                </div>
               </div>
               <p className="text-muted-foreground mb-2">
                 {category.description}
@@ -271,7 +335,8 @@ const CategoryPage = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <p className="text-muted-foreground">
-              Showing {filteredProducts.length} of {category.count} products
+              Showing {filteredProducts.length} of {category.productCount || 0}{" "}
+              products
             </p>
             {filteredProducts.length === 0 && (
               <Button variant="outline" onClick={clearFilters}>
@@ -288,7 +353,7 @@ const CategoryPage = () => {
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredProducts.map((product) => (
-                <div key={product.id}>
+                <div key={product._id}>
                   <ProductCard product={product} />
                 </div>
               ))}

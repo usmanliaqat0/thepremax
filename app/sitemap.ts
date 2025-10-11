@@ -1,9 +1,8 @@
-import { MetadataRoute } from "next";
+﻿import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://thepremax.com";
 
-  // Static pages
   const staticPages = [
     {
       url: baseUrl,
@@ -31,7 +30,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Category pages
   const categories = [
     "health-beauty",
     "sports-recreation",
@@ -46,7 +44,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  // Legal pages
   const legalPages = [
     {
       url: `${baseUrl}/privacy`,

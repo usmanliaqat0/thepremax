@@ -1,73 +1,70 @@
-import { LucideIcon } from "lucide-react";
+﻿// Shared types for the application
 
-export type ID = string;
-export type Timestamp = string;
-export type Currency = "USD" | "EUR" | "PKR";
-export type Status = "active" | "inactive" | "pending" | "archived";
-
-export interface User {
-  id: ID;
-  email: string;
-  firstName: string;
-  lastName: string;
-  phone?: string;
-  avatar?: string;
-  dateOfBirth?: string;
-  gender?: "male" | "female" | "other";
-  preferences: UserPreferences;
-  addresses: Address[];
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  isEmailVerified: boolean;
-  isPhoneVerified: boolean;
-  role: "customer" | "admin" | "staff";
-  status: Status;
+export interface Product {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  basePrice: number;
+  compareAtPrice?: number;
+  categoryId: string;
+  category?: {
+    _id: string;
+    name: string;
+    slug: string;
+  };
+  tags: string[];
+  variants?: Array<{
+    id: string;
+    size: string;
+    color: string;
+    sku: string;
+    stock: number;
+    price: number;
+    images: string[];
+  }>;
+  images: Array<{
+    id: string;
+    url: string;
+    alt: string;
+    isPrimary: boolean;
+    order: number;
+  }>;
+  totalSold: number;
+  featured: boolean;
+  topRated: boolean;
+  onSale: boolean;
+  status: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  rating: number;
+  reviewCount: number;
+  specifications: string[];
+  sizes: string[];
+  colors: string[];
+  inStock: boolean;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
 }
 
-export interface AuthUser {
-  id: ID;
-  email: string;
-  firstName: string;
-  lastName: string;
-  phone?: string;
-  gender?: "male" | "female" | "other";
-  avatar?: string;
-  dateOfBirth?: string;
-  role: "customer" | "admin" | "staff";
-  addresses?: Address[];
-  preferences?: UserPreferences;
-}
-
-export interface SignupData {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  gender?: "male" | "female" | "other";
-  phone?: string;
-}
-
-export interface SigninData {
-  email: string;
-  password: string;
-}
-
-export interface AuthResponse {
-  success: boolean;
-  message: string;
-  user?: AuthUser;
-  token?: string;
-}
-
-export interface UserPreferences {
-  currency: Currency;
-  language: string;
-  theme: "light" | "dark" | "auto";
-  favoriteCategories: string[];
+export interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  image: string;
+  order: number;
+  status: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  createdAt: string;
+  updatedAt: string;
+  productCount?: number;
 }
 
 export interface Address {
-  id: ID;
+  id: string;
   type: "shipping" | "billing";
   firstName: string;
   lastName: string;
@@ -80,344 +77,84 @@ export interface Address {
   isDefault: boolean;
 }
 
-export interface ProductVariant {
-  id: ID;
-  size: string;
-  color: string;
-  sku: string;
-  stock: number;
-  price?: number;
-  images?: string[];
-}
-
-export interface ProductImage {
-  id: ID;
-  url: string;
-  alt: string;
-  isPrimary: boolean;
-  order: number;
-  variant?: {
-    size?: string;
-    color?: string;
-  };
-}
-
-export interface EnhancedProduct {
-  id: ID;
-  name: string;
-  slug: string;
-  description: string;
-  shortDescription?: string;
-  basePrice: number;
-  compareAtPrice?: number;
-  currency: Currency;
-  category: ProductCategory;
-  tags: string[];
-  variants: ProductVariant[];
-  images: ProductImage[];
-
-  totalSold: number;
-  featured: boolean;
-  topRated: boolean;
-  onSale: boolean;
-  status: Status;
-  seoTitle?: string;
-  seoDescription?: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  publishedAt?: Timestamp;
-}
-
-export interface ProductCategory {
-  id: ID;
-  name: string;
-  slug: string;
-  description?: string;
-  image?: string;
-  parentId?: ID;
-  order: number;
-  status: Status;
-  seoTitle?: string;
-  seoDescription?: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-}
-
-export interface CartItem {
-  id: ID;
-  productId: ID;
-  variantId: ID;
-  quantity: number;
-  addedAt: Timestamp;
-}
-
-export interface Cart {
-  id: ID;
-  userId?: ID;
-  sessionId?: string;
-  items: CartItem[];
-  subtotal: number;
-  taxes: number;
-  shipping: number;
-  discount: number;
-  total: number;
-  currency: Currency;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  expiresAt: Timestamp;
-}
-
-export interface OrderItem {
-  id: ID;
-  productId: ID;
-  productName: string;
-  productImage: string;
-  variantId: ID;
-  size: string;
-  color: string;
-  quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-}
-
-export interface Order {
-  id: ID;
-  orderNumber: string;
-  userId: ID;
-  items: OrderItem[];
-  subtotal: number;
-  taxes: number;
-  shipping: number;
-  discount: number;
-  total: number;
-  currency: Currency;
-  status: OrderStatus;
-  paymentStatus: PaymentStatus;
-  shippingAddress: Address;
-  billingAddress: Address;
-  paymentMethod: PaymentMethod;
-  trackingNumber?: string;
-  notes?: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  shippedAt?: Timestamp;
-  deliveredAt?: Timestamp;
-}
-
-export type OrderStatus =
-  | "pending"
-  | "confirmed"
-  | "processing"
-  | "shipped"
-  | "delivered"
-  | "cancelled"
-  | "refunded";
-
-export type PaymentStatus =
-  | "pending"
-  | "processing"
-  | "completed"
-  | "failed"
-  | "refunded"
-  | "cancelled";
-
-export type PaymentMethod =
-  | "card"
-  | "cod" // Cash on Delivery
-  | "bank_transfer"
-  | "digital_wallet";
-
-// Wishlist
-export interface WishlistItem {
-  id: ID;
-  productId: ID;
-  addedAt: Timestamp;
-}
-
-export interface Wishlist {
-  id: ID;
-  userId: ID;
-  items: WishlistItem[];
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-}
-
-// Navigation & UI
-export interface NavigationItem {
-  id: ID;
-  label: string;
-  href: string;
-  icon?: LucideIcon;
-  badge?: string;
-  children?: NavigationItem[];
-  order: number;
-  isActive?: boolean;
-  isExternal?: boolean;
-}
-
-export interface Breadcrumb {
-  label: string;
-  href?: string;
-}
-
-// API & State Management
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-  pagination?: PaginationData;
-}
-
-export interface PaginationData {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
-}
-
-export interface LoadingState {
-  isLoading: boolean;
-  error?: string;
-  lastFetch?: Timestamp;
-}
-
-// Feature Components
-export interface FeatureItem {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-}
-
-export interface StatItem {
-  value: string | number;
-  label: string;
-  icon?: LucideIcon;
-  trend?: {
-    value: number;
-    isPositive: boolean;
-  };
-}
-
-export interface TestimonialItem {
-  id: ID;
-  name: string;
+export interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
   avatar?: string;
-  comment: string;
-  title?: string;
-  location?: string;
-  verified: boolean;
+  dateOfBirth?: string;
+  gender?: "male" | "female" | "other";
+  isEmailVerified: boolean;
+  isPhoneVerified: boolean;
+  role: "customer" | "admin" | "staff";
+  status: "active" | "inactive" | "pending" | "archived";
+  preferences: {
+    currency: "USD" | "EUR" | "PKR";
+    language: string;
+    theme: "light" | "dark" | "auto";
+    favoriteCategories: string[];
+  };
+  addresses: Address[];
+  createdAt: string;
+  updatedAt: string;
+  [key: string]: unknown;
 }
 
-// Forms
-export interface FormField<T = unknown> {
-  name: keyof T;
-  label: string;
-  type:
-    | "text"
-    | "email"
-    | "password"
-    | "tel"
-    | "select"
-    | "textarea"
-    | "checkbox"
-    | "radio"
-    | "file"
-    | "date";
-  placeholder?: string;
-  required?: boolean;
-  validation?: {
-    required?: boolean;
-    minLength?: number;
-    maxLength?: number;
-    pattern?: RegExp;
-    custom?: (value: T[keyof T]) => string | null;
+export type AuthUser = User;
+
+export interface SigninData {
+  email: string;
+  password: string;
+}
+
+export interface SignupData {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  gender?: "male" | "female" | "other";
+  phone?: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  user?: User;
+  token?: string;
+  requiresVerification?: boolean;
+}
+
+export interface AdminStats {
+  users: {
+    total: number;
+    active: number;
+    growth: string;
+    activeGrowth: string;
   };
-  options?: Array<{
-    value: string;
-    label: string;
+  verification: {
+    emailVerified: number;
+    phoneVerified: number;
+    emailGrowth: string;
+    phoneGrowth: string;
+  };
+  orders: {
+    total: number;
+    totalRevenue: number;
+    pending: number;
+    processing: number;
+    shipped: number;
+    delivered: number;
+    cancelled: number;
+    growth: string;
+    revenueGrowth: string;
+  };
+  recentUsers: Array<{
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    createdAt: string;
   }>;
 }
-
-// Search & Filtering
-export interface SearchFilters {
-  query?: string;
-  categories?: string[];
-  priceRange?: {
-    min: number;
-    max: number;
-  };
-  sizes?: string[];
-  colors?: string[];
-
-  inStock?: boolean;
-  onSale?: boolean;
-  featured?: boolean;
-}
-
-export interface SortOption {
-  value: string;
-  label: string;
-  order: "asc" | "desc";
-}
-
-// Analytics & Tracking
-export interface AnalyticsEvent {
-  event: string;
-  properties: Record<string, unknown>;
-  timestamp: Timestamp;
-}
-
-export interface ProductAnalytics {
-  views: number;
-  addToCart: number;
-  purchases: number;
-  conversionRate: number;
-}
-
-// Newsletter & Communication
-export interface NewsletterSubscription {
-  id: ID;
-  email: string;
-  isActive: boolean;
-  preferences: {
-    newProducts: boolean;
-    sales: boolean;
-    tips: boolean;
-  };
-  subscribedAt: Timestamp;
-  unsubscribedAt?: Timestamp;
-}
-
-// Configuration
-export interface SiteConfig {
-  name: string;
-  description: string;
-  url: string;
-  currency: Currency;
-  shipping: {
-    freeThreshold: number;
-    standardRate: number;
-    expressRate: number;
-  };
-  social: {
-    facebook?: string;
-    instagram?: string;
-    twitter?: string;
-    youtube?: string;
-  };
-  contact: {
-    email: string;
-    phone: string;
-    address: string;
-  };
-}
-
-// Utility types
-export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
-export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
-export type DeepPartial<T> = {
-  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
-};

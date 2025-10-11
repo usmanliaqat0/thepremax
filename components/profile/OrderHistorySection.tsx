@@ -1,8 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { RefreshLoader } from "@/components/ui/loader";
 import Image from "next/image";
 import {
   Card,
@@ -40,7 +42,7 @@ import {
 } from "lucide-react";
 
 interface OrderItem {
-  id: string;
+  productId: string;
   name: string;
   image: string;
   price: number;
@@ -50,21 +52,25 @@ interface OrderItem {
 }
 
 interface Order {
-  id: string;
+  _id: string;
   orderNumber: string;
-  date: string;
+  createdAt: string;
   status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  paymentStatus: "pending" | "paid" | "failed" | "refunded";
   items: OrderItem[];
   subtotal: number;
   shipping: number;
   tax: number;
   total: number;
   shippingAddress: {
-    name: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
     address: string;
     city: string;
     state: string;
     postalCode: string;
+    country: string;
   };
   trackingNumber?: string;
   estimatedDelivery?: string;
@@ -72,27 +78,36 @@ interface Order {
 
 const OrderHistorySection = () => {
   const { state } = useAuth();
+  const { toast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [downloadingInvoices, setDownloadingInvoices] = useState<Set<string>>(
+    new Set()
+  );
 
-  // Fetch orders from API
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!state.token) return;
+      if (!state.token) {
+        setLoading(false);
+        return;
+      }
 
       try {
-        const response = await fetch("/api/profile/orders", {
+        const response = await fetch("/api/orders", {
           headers: {
             Authorization: `Bearer ${state.token}`,
           },
         });
 
-        const result = await response.json();
-        if (result.success) {
+        if (response.ok) {
+          const result = await response.json();
           setOrders(result.orders || []);
+        } else {
+          const errorData = await response.json();
+          console.error("Orders API error:", errorData);
         }
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -149,19 +164,126 @@ const OrderHistorySection = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const handleTrackOrder = (trackingNumber: string) => {
-    // Simulate opening tracking page
-    window.open(`https://example-tracking.com/${trackingNumber}`, "_blank");
+  const handleTrackOrder = (orderNumber: string) => {
+    window.open(
+      `/track-order?orderNumber=${encodeURIComponent(orderNumber)}`,
+      "_blank"
+    );
   };
 
-  const handleDownloadInvoice = (orderNumber: string) => {
-    // Simulate downloading invoice
-    console.log(`Downloading invoice for order ${orderNumber}`);
+  const handleDownloadInvoice = async (
+    orderId: string,
+    orderNumber: string
+  ) => {
+    // Add to downloading set
+    setDownloadingInvoices((prev) => new Set(prev).add(orderId));
+
+    try {
+      // Get the access token from localStorage or cookies
+      let token = localStorage.getItem("auth_token");
+
+      if (!token) {
+        // Try to get from cookies
+        const cookieMatch = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("accessToken="));
+        token = cookieMatch?.split("=")[1] || null;
+      }
+
+      if (!token) {
+        throw new Error("No authentication token found. Please log in again.");
+      }
+
+      const response = await fetch(`/api/orders/${orderId}/invoice`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Authentication failed. Please log in again.");
+        } else if (response.status === 403) {
+          throw new Error(
+            "You don't have permission to download this invoice."
+          );
+        } else {
+          throw new Error("Failed to download invoice");
+        }
+      }
+
+      const htmlContent = await response.text();
+      const blob = new Blob([htmlContent], { type: "text/html" });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.target = "_blank";
+      a.download = `invoice-${orderNumber}.html`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Invoice Downloaded",
+        description: "Your invoice has been downloaded successfully",
+      });
+    } catch (error) {
+      console.error("Invoice download error:", error);
+      toast({
+        title: "Download Failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to download invoice. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      // Remove from downloading set
+      setDownloadingInvoices((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(orderId);
+        return newSet;
+      });
+    }
   };
 
   const handleReorder = (order: Order) => {
-    // Simulate reordering
     console.log(`Reordering items from order ${order.orderNumber}`);
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (!state.token) return;
+
+    try {
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${state.token}`,
+        },
+        body: JSON.stringify({ status: "cancelled" }),
+      });
+
+      if (response.ok) {
+        // Refresh orders
+        const ordersResponse = await fetch("/api/orders", {
+          headers: {
+            Authorization: `Bearer ${state.token}`,
+          },
+        });
+
+        if (ordersResponse.ok) {
+          const result = await ordersResponse.json();
+          setOrders(result.orders || []);
+        }
+      }
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+    }
   };
 
   return (
@@ -177,7 +299,7 @@ const OrderHistorySection = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-              {/* Search */}
+              {}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
@@ -188,7 +310,7 @@ const OrderHistorySection = () => {
                 />
               </div>
 
-              {/* Status Filter */}
+              {}
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-full sm:w-40">
                   <SelectValue placeholder="Filter by status" />
@@ -207,7 +329,12 @@ const OrderHistorySection = () => {
         </CardHeader>
 
         <CardContent>
-          {filteredOrders.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-8">
+              <RefreshLoader size="lg" className="mx-auto mb-4" />
+              <p className="text-muted-foreground">Loading orders...</p>
+            </div>
+          ) : filteredOrders.length === 0 ? (
             <div className="text-center py-8">
               <Package className="w-12 h-12 mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -223,11 +350,11 @@ const OrderHistorySection = () => {
             <div className="space-y-4">
               {filteredOrders.map((order) => (
                 <div
-                  key={order.id}
+                  key={order._id}
                   className="border rounded-lg p-6 hover:shadow-md transition-shadow"
                 >
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-                    {/* Order Info */}
+                    {}
                     <div className="space-y-2">
                       <div className="flex items-center space-x-4">
                         <h3 className="font-semibold text-lg">
@@ -245,7 +372,8 @@ const OrderHistorySection = () => {
 
                       <div className="text-sm text-gray-600 space-y-1">
                         <p>
-                          Placed on {new Date(order.date).toLocaleDateString()}
+                          Placed on{" "}
+                          {new Date(order.createdAt).toLocaleDateString()}
                         </p>
                         <p>
                           {order.items.length} item
@@ -266,11 +394,11 @@ const OrderHistorySection = () => {
                       </div>
                     </div>
 
-                    {/* Order Items Preview */}
+                    {}
                     <div className="flex -space-x-2">
                       {order.items.slice(0, 3).map((item, index) => (
                         <div
-                          key={item.id}
+                          key={item.productId}
                           className="w-12 h-12 rounded-lg border-2 border-white bg-gray-100 flex items-center justify-center overflow-hidden"
                           style={{ zIndex: order.items.length - index }}
                         >
@@ -290,7 +418,7 @@ const OrderHistorySection = () => {
                       )}
                     </div>
 
-                    {/* Actions */}
+                    {}
                     <div className="flex flex-wrap gap-2">
                       <Dialog>
                         <DialogTrigger asChild>
@@ -311,13 +439,13 @@ const OrderHistorySection = () => {
                             </DialogTitle>
                             <DialogDescription>
                               Placed on{" "}
-                              {new Date(order.date).toLocaleDateString()}
+                              {new Date(order.createdAt).toLocaleDateString()}
                             </DialogDescription>
                           </DialogHeader>
 
                           {selectedOrder && (
                             <div className="space-y-6">
-                              {/* Order Status */}
+                              {}
                               <div className="flex items-center space-x-2">
                                 <Badge
                                   className={`flex items-center space-x-1 ${getStatusColor(
@@ -345,7 +473,7 @@ const OrderHistorySection = () => {
                                 )}
                               </div>
 
-                              {/* Order Items */}
+                              {}
                               <div>
                                 <h4 className="font-medium mb-3">
                                   Items Ordered
@@ -353,7 +481,7 @@ const OrderHistorySection = () => {
                                 <div className="space-y-3">
                                   {selectedOrder.items.map((item) => (
                                     <div
-                                      key={item.id}
+                                      key={item.productId}
                                       className="flex items-center space-x-4 p-3 border rounded-lg"
                                     >
                                       <Image
@@ -393,7 +521,7 @@ const OrderHistorySection = () => {
                                 </div>
                               </div>
 
-                              {/* Order Summary */}
+                              {}
                               <div className="border-t pt-4">
                                 <div className="space-y-2">
                                   <div className="flex justify-between">
@@ -421,14 +549,15 @@ const OrderHistorySection = () => {
                                 </div>
                               </div>
 
-                              {/* Shipping Address */}
+                              {}
                               <div>
                                 <h4 className="font-medium mb-2">
                                   Shipping Address
                                 </h4>
                                 <div className="p-3 bg-gray-50 rounded-lg">
                                   <p className="font-medium">
-                                    {selectedOrder.shippingAddress.name}
+                                    {selectedOrder.shippingAddress.firstName}{" "}
+                                    {selectedOrder.shippingAddress.lastName}
                                   </p>
                                   <p>{selectedOrder.shippingAddress.address}</p>
                                   <p>
@@ -436,6 +565,7 @@ const OrderHistorySection = () => {
                                     {selectedOrder.shippingAddress.state}{" "}
                                     {selectedOrder.shippingAddress.postalCode}
                                   </p>
+                                  <p>{selectedOrder.shippingAddress.country}</p>
                                 </div>
                               </div>
                             </div>
@@ -443,27 +573,50 @@ const OrderHistorySection = () => {
                         </DialogContent>
                       </Dialog>
 
-                      {order.trackingNumber && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleTrackOrder(order.trackingNumber!)
-                          }
-                        >
-                          <Truck className="w-4 h-4 mr-2" />
-                          Track
-                        </Button>
-                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleTrackOrder(order.orderNumber)}
+                      >
+                        <Truck className="w-4 h-4 mr-2" />
+                        Track
+                      </Button>
 
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDownloadInvoice(order.orderNumber)}
+                        onClick={() =>
+                          handleDownloadInvoice(order._id, order.orderNumber)
+                        }
+                        disabled={downloadingInvoices.has(order._id)}
                       >
-                        <Download className="w-4 h-4 mr-2" />
-                        Invoice
+                        {downloadingInvoices.has(order._id) ? (
+                          <>
+                            <RefreshLoader
+                              size="sm"
+                              variant="muted"
+                              className="mr-2"
+                            />
+                            Downloading...
+                          </>
+                        ) : (
+                          <>
+                            <Download className="w-4 h-4 mr-2" />
+                            Invoice
+                          </>
+                        )}
                       </Button>
+
+                      {order.status === "pending" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCancelOrder(order._id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          Cancel Order
+                        </Button>
+                      )}
 
                       {order.status === "delivered" && (
                         <Button

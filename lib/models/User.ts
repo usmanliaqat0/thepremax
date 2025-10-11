@@ -1,7 +1,7 @@
-import mongoose, { Document, Schema } from "mongoose";
+﻿import mongoose, { Document, Schema, Types } from "mongoose";
 
-// User document interface for Mongoose
 export interface IUser extends Document {
+  _id: Types.ObjectId;
   email: string;
   password: string;
   firstName: string;
@@ -12,6 +12,10 @@ export interface IUser extends Document {
   gender?: "male" | "female" | "other";
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
   role: "customer" | "admin" | "staff";
   status: "active" | "inactive" | "pending" | "archived";
   preferences: {
@@ -37,7 +41,6 @@ export interface IUser extends Document {
   updatedAt: Date;
 }
 
-// User schema
 const UserSchema = new Schema<IUser>(
   {
     email: {
@@ -92,6 +95,22 @@ const UserSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    emailVerificationToken: {
+      type: String,
+      default: null,
+    },
+    emailVerificationExpires: {
+      type: Date,
+      default: null,
+    },
+    passwordResetToken: {
+      type: String,
+      default: null,
+    },
+    passwordResetExpires: {
+      type: Date,
+      default: null,
+    },
     role: {
       type: String,
       enum: ["customer", "admin", "staff"],
@@ -133,10 +152,17 @@ const UserSchema = new Schema<IUser>(
   }
 );
 
-// Create indexes (email index is already created by unique: true)
 UserSchema.index({ createdAt: -1 });
 UserSchema.index({ status: 1 });
 
-// Export the model
-const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+let User: mongoose.Model<IUser> | Record<string, never>;
+
+if (typeof window === "undefined") {
+
+  User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+} else {
+
+  User = {};
+}
+
 export default User;

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { AuthResponse } from "@/lib/types";
 
 export async function POST() {

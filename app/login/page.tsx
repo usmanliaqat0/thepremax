@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   Card,
   CardContent,
@@ -14,7 +15,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ButtonLoader } from "@/components/ui/loader";
-import { Eye, EyeOff } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
@@ -23,7 +23,6 @@ import { SigninData } from "@/lib/types";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { state, signin } = useAuth();
   const router = useRouter();
@@ -120,33 +119,19 @@ const Login = () => {
                   >
                     Password
                   </Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) =>
-                        handleInputChange("password", e.target.value)
-                      }
-                      className={`h-11 pr-10 ${
-                        errors.password
-                          ? "border-red-500 focus:border-red-500"
-                          : "border-gray-200 focus:border-gray-400"
-                      } transition-colors`}
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
+                  <PasswordInput
+                    id="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
+                    className={`h-11 ${
+                      errors.password
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-gray-200 focus:border-gray-400"
+                    } transition-colors`}
+                  />
                   {errors.password && (
                     <p className="text-sm text-red-500 mt-1">
                       {errors.password}

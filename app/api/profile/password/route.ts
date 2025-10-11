@@ -1,10 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
 import { TokenUtils } from "@/lib/auth-service";
 import bcrypt from "bcryptjs";
 
-// Change password
 export async function PUT(req: NextRequest) {
   try {
     const authHeader = req.headers.get("authorization");
@@ -19,8 +18,7 @@ export async function PUT(req: NextRequest) {
     const decoded = TokenUtils.verifyAccessToken(token);
     const { currentPassword, newPassword } = await req.json();
 
-    // Validate input
-    if (!currentPassword || !newPassword) {
+if (!currentPassword || !newPassword) {
       return NextResponse.json(
         {
           success: false,
@@ -50,8 +48,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(
+const isCurrentPasswordValid = await bcrypt.compare(
       currentPassword,
       user.password
     );
@@ -62,12 +59,10 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // Hash new password
-    const saltRounds = 12;
+const saltRounds = 12;
     const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
 
-    // Update password
-    await User.findByIdAndUpdate(decoded.id, {
+await User.findByIdAndUpdate(decoded.id, {
       password: hashedNewPassword,
     });
 

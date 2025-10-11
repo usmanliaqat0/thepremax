@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -54,7 +54,6 @@ export interface SpinnerProps extends VariantProps<typeof spinnerVariants> {
   variant?: "default" | "light" | "dark" | "muted";
 }
 
-// Simple circular loader
 export const Loader = ({ variant, size, className, ...props }: LoaderProps) => {
   return (
     <div
@@ -64,7 +63,6 @@ export const Loader = ({ variant, size, className, ...props }: LoaderProps) => {
   );
 };
 
-// SVG-based spinner with better animation
 export const Spinner = ({
   size,
   variant = "default",
@@ -107,7 +105,6 @@ export const Spinner = ({
   );
 };
 
-// Dots loader animation
 export const DotsLoader = ({
   size = "default",
   variant = "default",
@@ -151,7 +148,6 @@ export const DotsLoader = ({
   );
 };
 
-// Loading overlay for pages/sections
 export const LoadingOverlay = ({
   isLoading,
   children,
@@ -170,7 +166,7 @@ export const LoadingOverlay = ({
       {children}
       {isLoading && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
-          <Spinner size={loaderSize} />
+          <RefreshLoader size={loaderSize} />
           {message && (
             <p className="mt-4 text-sm text-muted-foreground font-medium">
               {message}
@@ -182,7 +178,6 @@ export const LoadingOverlay = ({
   );
 };
 
-// Button loading state component
 export const ButtonLoader = ({
   size = "sm",
   variant = "light",
@@ -193,11 +188,14 @@ export const ButtonLoader = ({
   className?: string;
 }) => {
   return (
-    <Spinner size={size} variant={variant} className={cn("mr-2", className)} />
+    <RefreshLoader
+      size={size}
+      variant={variant}
+      className={cn("mr-2", className)}
+    />
   );
 };
 
-// Beautiful comprehensive loader with text and animations
 export const BeautifulLoader = ({
   size = "default",
   variant = "default",
@@ -214,10 +212,10 @@ export const BeautifulLoader = ({
   className?: string;
 }) => {
   const sizeClasses = {
-    sm: { spinner: "w-6 h-6", text: "text-sm", container: "gap-3" },
-    default: { spinner: "w-8 h-8", text: "text-base", container: "gap-4" },
-    lg: { spinner: "w-12 h-12", text: "text-lg", container: "gap-5" },
-    xl: { spinner: "w-16 h-16", text: "text-xl", container: "gap-6" },
+    sm: { text: "text-sm", container: "gap-3" },
+    default: { text: "text-base", container: "gap-4" },
+    lg: { text: "text-lg", container: "gap-5" },
+    xl: { text: "text-xl", container: "gap-6" },
   };
 
   const colorClasses = {
@@ -236,12 +234,17 @@ export const BeautifulLoader = ({
       )}
     >
       <div className="relative">
-        <Spinner size={size} variant={variant} />
-        {/* Pulse ring animation */}
+        <RefreshLoader size={size} variant={variant} />
         <div
           className={cn(
             "absolute inset-0 rounded-full border-2 border-gray-200 animate-ping opacity-20",
-            sizeClasses[size].spinner
+            size === "sm"
+              ? "w-6 h-6"
+              : size === "default"
+              ? "w-8 h-8"
+              : size === "lg"
+              ? "w-12 h-12"
+              : "w-16 h-16"
           )}
         />
       </div>
@@ -267,7 +270,57 @@ export const BeautifulLoader = ({
   );
 };
 
-// Full page beautiful loader
+export const RefreshLoader = ({
+  size = "default",
+  variant = "default",
+  className,
+  ...props
+}: {
+  size?: "xs" | "sm" | "default" | "lg" | "xl" | "2xl";
+  variant?: "default" | "light" | "dark" | "muted";
+  className?: string;
+} & React.SVGProps<SVGSVGElement>) => {
+  const sizeClasses = {
+    xs: "w-3 h-3",
+    sm: "w-4 h-4",
+    default: "w-6 h-6",
+    lg: "w-8 h-8",
+    xl: "w-12 h-12",
+    "2xl": "w-16 h-16",
+  };
+
+  const colorClasses = {
+    default: "text-primary",
+    light: "text-white",
+    dark: "text-gray-800",
+    muted: "text-gray-400",
+  };
+
+  return (
+    <svg
+      className={cn(
+        "animate-spin",
+        sizeClasses[size],
+        colorClasses[variant],
+        className
+      )}
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      {...props}
+    >
+      <path
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+        className="opacity-75"
+      />
+    </svg>
+  );
+};
+
 export const FullPageLoader = ({
   message = "Loading",
   subtitle,
@@ -287,11 +340,10 @@ export const FullPageLoader = ({
             </div>
           </div>
         )}
-        <BeautifulLoader
-          size="lg"
-          message={message}
-          className="animate-fade-in"
-        />
+        <div className="flex flex-col items-center justify-center gap-4">
+          <RefreshLoader size="lg" />
+          <p className="text-lg font-medium text-foreground">{message}</p>
+        </div>
         {subtitle && (
           <p className="text-sm text-muted-foreground max-w-sm animate-fade-in delay-300">
             {subtitle}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -18,16 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Upload,
-  Camera,
-  Trash2,
-  RefreshCw,
-  User,
-  Edit3,
-  Check,
-  X,
-} from "lucide-react";
+import { Camera, Trash2, User, Edit3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface AvatarOption {
@@ -44,10 +35,7 @@ const AvatarSection = () => {
   const [currentAvatar, setCurrentAvatar] = useState<string>(
     "/profile-images/defaults/male-avatar.svg"
   );
-  const [isUploading, setIsUploading] = useState(false);
   const [showAvatarDialog, setShowAvatarDialog] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string>("");
 
   const defaultAvatars: AvatarOption[] = [
     {
@@ -70,74 +58,6 @@ const AvatarSection = () => {
     },
   ];
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      toast({
-        title: "Invalid file type",
-        description: "Please select an image file.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Please select an image smaller than 5MB.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSelectedFile(file);
-
-    // Create preview URL
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreviewUrl(e.target?.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFile) return;
-
-    setIsUploading(true);
-
-    try {
-      // Simulate file upload
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // In a real app, you would upload to your server here
-      const formData = new FormData();
-      formData.append("avatar", selectedFile);
-
-      // For now, we'll use the preview URL
-      setCurrentAvatar(previewUrl);
-      setShowAvatarDialog(false);
-      setSelectedFile(null);
-      setPreviewUrl("");
-
-      toast({
-        title: "Avatar updated",
-        description: "Your profile picture has been updated successfully.",
-      });
-    } catch {
-      toast({
-        title: "Upload failed",
-        description: "Failed to update your avatar. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   const handleDefaultAvatarSelect = (avatar: AvatarOption) => {
     setCurrentAvatar(avatar.src);
     setShowAvatarDialog(false);
@@ -157,18 +77,6 @@ const AvatarSection = () => {
     });
   };
 
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
-
-  const cancelUpload = () => {
-    setSelectedFile(null);
-    setPreviewUrl("");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
   return (
     <div className="space-y-6">
       <Card>
@@ -183,7 +91,7 @@ const AvatarSection = () => {
         </CardHeader>
 
         <CardContent className="space-y-4 sm:space-y-6">
-          {/* Current Avatar Display */}
+          {}
           <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
             <div className="relative mx-auto sm:mx-0">
               <Avatar className="w-24 h-24 sm:w-32 sm:h-32 ring-4 ring-gray-100">
@@ -215,7 +123,7 @@ const AvatarSection = () => {
                   </DialogHeader>
 
                   <div className="space-y-6">
-                    {/* Upload Section */}
+                    {}
                     <div className="space-y-4">
                       <h4 className="font-medium">Upload Custom Picture</h4>
 
@@ -223,99 +131,37 @@ const AvatarSection = () => {
                         ref={fileInputRef}
                         type="file"
                         accept="image/*"
-                        onChange={handleFileSelect}
-                        className="hidden"
+                        style={{ display: "none" }}
                       />
-
-                      {selectedFile ? (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-center">
-                            <Avatar className="w-24 h-24">
-                              <AvatarImage src={previewUrl} alt="Preview" />
-                              <AvatarFallback>
-                                <User className="w-8 h-8" />
-                              </AvatarFallback>
-                            </Avatar>
-                          </div>
-
-                          <div className="text-sm text-gray-600 text-center">
-                            {selectedFile.name} (
-                            {(selectedFile.size / 1024 / 1024).toFixed(1)} MB)
-                          </div>
-
-                          <div className="flex space-x-2">
-                            <Button
-                              onClick={handleUpload}
-                              disabled={isUploading}
-                              className="flex-1"
-                            >
-                              {isUploading ? (
-                                <>
-                                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                                  Uploading...
-                                </>
-                              ) : (
-                                <>
-                                  <Check className="w-4 h-4 mr-2" />
-                                  Upload
-                                </>
-                              )}
-                            </Button>
-                            <Button variant="outline" onClick={cancelUpload}>
-                              <X className="w-4 h-4 mr-2" />
-                              Cancel
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div
-                          onClick={triggerFileInput}
-                          className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 transition-colors"
-                        >
-                          <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                          <p className="text-sm font-medium text-gray-700 mb-1">
-                            Click to upload a photo
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            PNG, JPG, GIF up to 5MB
-                          </p>
-                        </div>
-                      )}
                     </div>
 
-                    {/* Default Avatars */}
-                    {!selectedFile && (
-                      <div className="space-y-4">
-                        <h4 className="font-medium">Choose Default Avatar</h4>
+                    <div className="space-y-4">
+                      <h4 className="font-medium">Choose Default Avatar</h4>
 
-                        <div className="grid grid-cols-3 gap-4">
-                          {defaultAvatars.map((avatar) => (
-                            <div
-                              key={avatar.id}
-                              className={`cursor-pointer rounded-lg p-3 border-2 transition-all ${
-                                currentAvatar === avatar.src
-                                  ? "border-blue-500 bg-blue-50"
-                                  : "border-gray-200 hover:border-gray-300"
-                              }`}
-                              onClick={() => handleDefaultAvatarSelect(avatar)}
-                            >
-                              <Avatar className="w-16 h-16 mx-auto mb-2">
-                                <AvatarImage
-                                  src={avatar.src}
-                                  alt={avatar.name}
-                                />
-                                <AvatarFallback>
-                                  <User className="w-6 h-6" />
-                                </AvatarFallback>
-                              </Avatar>
-                              <p className="text-xs text-center text-gray-600">
-                                {avatar.name}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        {defaultAvatars.map((avatar) => (
+                          <div
+                            key={avatar.id}
+                            className={`cursor-pointer rounded-lg p-3 border-2 transition-all ${
+                              currentAvatar === avatar.src
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                            onClick={() => handleDefaultAvatarSelect(avatar)}
+                          >
+                            <Avatar className="w-16 h-16 mx-auto mb-2">
+                              <AvatarImage src={avatar.src} alt={avatar.name} />
+                              <AvatarFallback>
+                                <User className="w-6 h-6" />
+                              </AvatarFallback>
+                            </Avatar>
+                            <p className="text-xs text-center text-gray-600">
+                              {avatar.name}
+                            </p>
+                          </div>
+                        ))}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </DialogContent>
               </Dialog>
@@ -350,7 +196,7 @@ const AvatarSection = () => {
             </div>
           </div>
 
-          {/* Privacy Notice */}
+          {}
           <div className="border-l-4 border-blue-500 bg-blue-50 p-4">
             <div className="flex items-start space-x-3">
               <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">

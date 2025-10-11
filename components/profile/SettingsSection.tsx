@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -10,8 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   Dialog,
   DialogContent,
@@ -107,7 +107,7 @@ const SettingsSection = () => {
 
   return (
     <div className="space-y-6">
-      {/* Change Password */}
+      {}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -123,9 +123,8 @@ const SettingsSection = () => {
             <Label htmlFor="currentPassword" className="mb-2 block">
               Current Password
             </Label>
-            <Input
+            <PasswordInput
               id="currentPassword"
-              type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="Enter your current password"
@@ -136,9 +135,8 @@ const SettingsSection = () => {
             <Label htmlFor="newPassword" className="mb-2 block">
               New Password
             </Label>
-            <Input
+            <PasswordInput
               id="newPassword"
-              type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Enter your new password"
@@ -149,9 +147,8 @@ const SettingsSection = () => {
             <Label htmlFor="confirmPassword" className="mb-2 block">
               Confirm New Password
             </Label>
-            <Input
+            <PasswordInput
               id="confirmPassword"
-              type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm your new password"
@@ -169,7 +166,7 @@ const SettingsSection = () => {
         </CardContent>
       </Card>
 
-      {/* Account Management */}
+      {}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">

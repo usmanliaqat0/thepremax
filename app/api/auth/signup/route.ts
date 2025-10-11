@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { AuthService } from "@/lib/auth-service";
 import { SignupData, AuthResponse } from "@/lib/types";
 
@@ -8,17 +8,19 @@ export async function POST(req: NextRequest) {
     const result = await AuthService.signup(body);
 
     if (result.success) {
+
       const response = NextResponse.json<AuthResponse>(
         {
           success: true,
           message: result.message!,
           user: result.user!,
           token: result.accessToken!,
+          requiresVerification: true,
         },
         { status: 201 }
       );
 
-      response.cookies.set("accessToken", result.accessToken!, {
+response.cookies.set("accessToken", result.accessToken!, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",

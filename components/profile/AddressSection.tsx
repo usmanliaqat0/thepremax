@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -37,8 +37,7 @@ const AddressSection = () => {
   const { state, updateProfile } = useAuth();
   const [addresses, setAddresses] = useState<Address[]>([]);
 
-  // Sync addresses from user data
-  useEffect(() => {
+useEffect(() => {
     if (state.user?.addresses) {
       setAddresses(state.user.addresses);
     }
@@ -73,21 +72,21 @@ const AddressSection = () => {
     try {
       const addressData = {
         ...formData,
-        country: "United States", // Force country to always be United States
+        country: "United States",
         id: editingAddress?.id || Date.now().toString(),
       } as Address;
 
       let updatedAddresses: Address[];
 
       if (editingAddress) {
-        // Update existing address
+
         updatedAddresses = addresses.map((addr) =>
           addr.id === editingAddress.id ? addressData : addr
         );
       } else {
-        // Add new address
+
         if (addressData.isDefault) {
-          // Remove default from other addresses
+
           updatedAddresses = addresses.map((addr) => ({
             ...addr,
             isDefault: false,
@@ -98,8 +97,7 @@ const AddressSection = () => {
         updatedAddresses.push(addressData);
       }
 
-      // Update via API
-      const success = await updateProfile({ addresses: updatedAddresses });
+const success = await updateProfile({ addresses: updatedAddresses });
 
       if (success) {
         toast.success(
@@ -206,7 +204,7 @@ const AddressSection = () => {
               </DialogHeader>
 
               <div className="grid gap-4 py-4">
-                {/* Address Type */}
+                {}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Address Type</Label>
@@ -242,7 +240,7 @@ const AddressSection = () => {
                   </div>
                 </div>
 
-                {/* Name */}
+                {}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>First Name</Label>
@@ -266,7 +264,7 @@ const AddressSection = () => {
                   </div>
                 </div>
 
-                {/* Phone */}
+                {}
                 <div className="space-y-2">
                   <Label>Phone Number</Label>
                   <Input
@@ -277,7 +275,7 @@ const AddressSection = () => {
                   />
                 </div>
 
-                {/* Address */}
+                {}
                 <div className="space-y-2">
                   <Label>Address</Label>
                   <Input
@@ -289,7 +287,7 @@ const AddressSection = () => {
                   />
                 </div>
 
-                {/* City, State, Postal Code */}
+                {}
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>City</Label>
@@ -323,7 +321,7 @@ const AddressSection = () => {
                   </div>
                 </div>
 
-                {/* Country */}
+                {}
                 <div className="space-y-2">
                   <Label>Country</Label>
                   <div className="flex items-center px-3 py-2 border border-gray-300 bg-gray-50 rounded-md">

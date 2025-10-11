@@ -1,11 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
 import { TokenUtils, AvatarUtils } from "@/lib/auth-service";
 import fs from "fs/promises";
 import path from "path";
 
-// File upload service
 class FileUploadService {
   private static readonly UPLOAD_DIR = path.join(
     process.cwd(),
@@ -19,12 +18,12 @@ class FileUploadService {
     "image/png",
     "image/webp",
   ];
-  private static readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  private static readonly MAX_FILE_SIZE = 5 * 1024 * 1024;
 
   static async validateFile(
     file: File
   ): Promise<{ valid: boolean; message?: string }> {
-    // Check file type
+
     if (!this.ALLOWED_TYPES.includes(file.type)) {
       return {
         valid: false,
@@ -32,8 +31,7 @@ class FileUploadService {
       };
     }
 
-    // Check file size
-    if (file.size > this.MAX_FILE_SIZE) {
+if (file.size > this.MAX_FILE_SIZE) {
       return {
         valid: false,
         message: "File size too large. Maximum size is 5MB.",
@@ -52,7 +50,7 @@ class FileUploadService {
     message?: string;
   }> {
     try {
-      // Validate file
+
       const validation = await this.validateFile(file);
       if (!validation.valid) {
         return {
@@ -61,21 +59,17 @@ class FileUploadService {
         };
       }
 
-      // Ensure upload directory exists
-      await fs.mkdir(this.UPLOAD_DIR, { recursive: true });
+await fs.mkdir(this.UPLOAD_DIR, { recursive: true });
 
-      // Generate unique filename
-      const fileExtension = path.extname(file.name);
+const fileExtension = path.extname(file.name);
       const fileName = `user-${userId}-${Date.now()}${fileExtension}`;
       const filePath = path.join(this.UPLOAD_DIR, fileName);
 
-      // Write file to disk
-      const bytes = await file.arrayBuffer();
+const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       await fs.writeFile(filePath, buffer);
 
-      // Return relative path for database storage
-      const relativePath = `/uploads/avatars/${fileName}`;
+const relativePath = `/uploads/avatars/${fileName}`;
 
       return {
         success: true,
@@ -93,33 +87,31 @@ class FileUploadService {
 
   static async deleteOldAvatar(avatarPath: string): Promise<void> {
     try {
-      // Only delete custom uploaded avatars, not default ones
+
       if (
         avatarPath.startsWith("/uploads/avatars/") ||
         avatarPath.startsWith("/profile-images/custom/")
       ) {
         const fullPath = path.join(process.cwd(), "public", avatarPath);
         await fs.unlink(fullPath).catch(() => {
-          // Ignore errors if file doesn't exist
+
         });
       }
     } catch (error) {
       console.error("Error deleting old avatar:", error);
-      // Don't throw error, just log it
+
     }
   }
 }
 
-// Helper function to get auth token from request
 function getAuthToken(req: NextRequest): string | null {
-  // Try Authorization header first
+
   const authHeader = req.headers.get("authorization");
   if (authHeader && authHeader.startsWith("Bearer ")) {
     return authHeader.substring(7);
   }
 
-  // Try cookie as fallback
-  const cookieToken = req.cookies.get("accessToken")?.value;
+const cookieToken = req.cookies.get("accessToken")?.value;
   if (cookieToken) {
     return cookieToken;
   }
@@ -129,7 +121,7 @@ function getAuthToken(req: NextRequest): string | null {
 
 export async function POST(req: NextRequest) {
   try {
-    // Get and verify auth token
+
     const token = getAuthToken(req);
     if (!token) {
       return NextResponse.json(
@@ -140,8 +132,7 @@ export async function POST(req: NextRequest) {
 
     const decoded = TokenUtils.verifyAccessToken(token);
 
-    // Parse form data
-    const formData = await req.formData();
+const formData = await req.formData();
     const file = formData.get("avatar") as File;
 
     if (!file) {
@@ -151,8 +142,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Upload file
-    const uploadResult = await FileUploadService.uploadAvatar(file, decoded.id);
+const uploadResult = await FileUploadService.uploadAvatar(file, decoded.id);
 
     if (!uploadResult.success) {
       return NextResponse.json(
@@ -161,8 +151,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Update user in database
-    await connectDB();
+await connectDB();
 
     const user = await User.findById(decoded.id);
     if (!user) {
@@ -172,8 +161,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Delete old avatar if it exists and is not a default
-    if (
+if (
       user.avatar &&
       (user.avatar.startsWith("/uploads/avatars/") ||
         user.avatar.startsWith("/profile-images/custom/"))
@@ -181,8 +169,7 @@ export async function POST(req: NextRequest) {
       await FileUploadService.deleteOldAvatar(user.avatar);
     }
 
-    // Update user avatar
-    const updatedUser = await User.findByIdAndUpdate(
+const updatedUser = await User.findByIdAndUpdate(
       decoded.id,
       { avatar: uploadResult.path },
       { new: true }
@@ -213,10 +200,9 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// DELETE - Reset avatar to default
 export async function DELETE(req: NextRequest) {
   try {
-    // Get and verify auth token
+
     const token = getAuthToken(req);
     if (!token) {
       return NextResponse.json(
@@ -237,8 +223,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    // Delete current custom avatar if exists
-    if (
+if (
       user.avatar &&
       (user.avatar.startsWith("/uploads/avatars/") ||
         user.avatar.startsWith("/profile-images/custom/"))
@@ -246,8 +231,7 @@ export async function DELETE(req: NextRequest) {
       await FileUploadService.deleteOldAvatar(user.avatar);
     }
 
-    // Set default avatar
-    const defaultAvatar = AvatarUtils.getDefaultAvatar(user.gender);
+const defaultAvatar = AvatarUtils.getDefaultAvatar(user.gender);
 
     const updatedUser = await User.findByIdAndUpdate(
       decoded.id,

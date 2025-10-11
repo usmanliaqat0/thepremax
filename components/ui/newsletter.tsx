@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Section, Container, SectionHeader } from "@/components/ui/layout";
 import { cn } from "@/lib/utils";
-import { Mail, CheckCircle } from "lucide-react";
+import { Mail } from "lucide-react";
 import { toast } from "sonner";
 
 interface NewsletterProps {
@@ -26,7 +26,6 @@ export function Newsletter({
   buttonText = "Subscribe",
 }: NewsletterProps) {
   const [email, setEmail] = useState("");
-  const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,13 +38,39 @@ export function Newsletter({
 
     setIsLoading(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          source: "newsletter",
+        }),
+      });
 
-    setIsSubscribed(true);
-    setIsLoading(false);
-    toast.success("Successfully subscribed to newsletter!");
-    setEmail("");
+      const data = await response.json();
+
+      if (response.ok) {
+        setEmail("");
+
+        if (data.alreadySubscribed) {
+          toast.info(data.message);
+        } else if (data.resubscribed) {
+          toast.success(data.message);
+        } else {
+          toast.success(data.message);
+        }
+      } else {
+        toast.error(data.error || "Failed to subscribe. Please try again.");
+      }
+    } catch (error) {
+      console.error("Subscription error:", error);
+      toast.error("Network error. Please check your connection and try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const variants = {
@@ -86,29 +111,6 @@ export function Newsletter({
   };
 
   const variantStyles = variants[variant];
-
-  if (isSubscribed) {
-    return (
-      <Section
-        variant={variant === "accent" ? "default" : undefined}
-        className={className}
-      >
-        <Container>
-          <div
-            className={cn(variantStyles.content, "flex flex-col items-center")}
-          >
-            <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
-            <h3 className="text-2xl font-heading font-bold text-primary mb-2">
-              Thank You!
-            </h3>
-            <p className="text-muted-foreground">
-              You&apos;ve successfully subscribed to our newsletter.
-            </p>
-          </div>
-        </Container>
-      </Section>
-    );
-  }
 
   const content = (
     <div className={variantStyles.content}>

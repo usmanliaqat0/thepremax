@@ -1,30 +1,35 @@
-import bcrypt from "bcryptjs";
+﻿import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+import crypto from "crypto";
 import { AuthUser, SigninData, SignupData } from "./types";
-import User from "./models/User";
+import User, { IUser } from "./models/User";
 import connectDB from "./db";
+import { EmailService } from "./email-service";
 
 interface JWTPayload {
   id: string;
   email: string;
+  role: string;
   type: string;
   iat?: number;
   exp?: number;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET!;
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key-here";
+const JWT_REFRESH_SECRET =
+  process.env.JWT_REFRESH_SECRET || "your-super-secret-refresh-key-here";
 const TOKEN_EXPIRY = process.env.JWT_EXPIRES_IN || "7d";
 const REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_EXPIRES_IN || "30d";
 
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is required");
+if (!process.env.JWT_SECRET) {
+  console.warn(
+    "⚠️  JWT_SECRET environment variable not found. Using default secret (not recommended for production)."
+  );
 }
 
-// Refresh token is optional - if not provided, only access tokens will be used
 const REFRESH_TOKENS_ENABLED = !!JWT_REFRESH_SECRET;
 
-// Password utilities
 export class PasswordUtils {
   private static readonly SALT_ROUNDS = 12;
   private static readonly MIN_LENGTH = 8;
@@ -85,7 +90,6 @@ export class PasswordUtils {
   }
 }
 
-// Email utilities
 export class EmailUtils {
   private static readonly EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -98,7 +102,6 @@ export class EmailUtils {
   }
 }
 
-// Token utilities
 export class TokenUtils {
   static generateAccessToken(user: AuthUser): string {
     const payload = {
@@ -158,7 +161,6 @@ export class TokenUtils {
   }
 }
 
-// Avatar utilities
 export class AvatarUtils {
   static getDefaultAvatar(gender?: "male" | "female" | "other"): string {
     const basePath = "/profile-images/defaults";
@@ -179,7 +181,16 @@ export class AvatarUtils {
   }
 }
 
-// Main authentication service
+export class VerificationUtils {
+  static generateVerificationToken(): string {
+    return crypto.randomBytes(32).toString("hex");
+  }
+
+  static getVerificationExpiry(): Date {
+    return new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+  }
+}
+
 export class AuthService {
   static async signin(data: SigninData): Promise<{
     success: boolean;
@@ -191,7 +202,6 @@ export class AuthService {
     try {
       const { email, password } = data;
 
-      // Validate input
       if (!email || !password) {
         return {
           success: false,
@@ -206,11 +216,58 @@ export class AuthService {
         };
       }
 
-      // Connect to database
+      const normalizedEmail = EmailUtils.normalize(email);
+
+      const adminEmail = process.env.ADMIN_EMAIL;
+      const adminPassword = process.env.ADMIN_PASSWORD;
+
+      if (
+        adminEmail &&
+        adminPassword &&
+        normalizedEmail === EmailUtils.normalize(adminEmail)
+      ) {
+        if (password === adminPassword) {
+          const adminUserData: AuthUser = {
+            id: "admin-super-user",
+            email: normalizedEmail,
+            firstName: "Super",
+            lastName: "Admin",
+            role: "admin",
+            avatar: AvatarUtils.getDefaultAvatar(),
+            isEmailVerified: true,
+            isPhoneVerified: false,
+            status: "active",
+            preferences: {
+              currency: "USD",
+              language: "en",
+              theme: "light",
+              favoriteCategories: [],
+            },
+            addresses: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          const accessToken = TokenUtils.generateAccessToken(adminUserData);
+          const refreshToken = TokenUtils.generateRefreshToken(adminUserData);
+
+          return {
+            success: true,
+            user: adminUserData,
+            accessToken,
+            refreshToken,
+            message: "Admin login successful",
+          };
+        } else {
+          return {
+            success: false,
+            message: "Invalid admin credentials",
+          };
+        }
+      }
+
       await connectDB();
 
-      // Find user by email
-      const normalizedEmail = EmailUtils.normalize(email);
       const user = await User.findOne({ email: normalizedEmail }).select(
         "+password"
       );
@@ -222,7 +279,6 @@ export class AuthService {
         };
       }
 
-      // Check account status
       if (user.status !== "active") {
         return {
           success: false,
@@ -230,7 +286,6 @@ export class AuthService {
         };
       }
 
-      // Verify password
       const isPasswordValid = await PasswordUtils.compare(
         password,
         user.password
@@ -242,7 +297,6 @@ export class AuthService {
         };
       }
 
-      // Prepare user data
       const userData: AuthUser = {
         id: user._id.toString(),
         email: user.email,
@@ -251,9 +305,15 @@ export class AuthService {
         gender: user.gender,
         avatar: user.avatar,
         role: user.role,
+        isEmailVerified: user.isEmailVerified,
+        isPhoneVerified: user.isPhoneVerified,
+        status: user.status,
+        preferences: user.preferences,
+        addresses: user.addresses,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
       };
 
-      // Generate tokens
       const accessToken = TokenUtils.generateAccessToken(userData);
       const refreshToken = TokenUtils.generateRefreshToken(userData);
 
@@ -283,7 +343,6 @@ export class AuthService {
     try {
       const { email, password, firstName, lastName, gender, phone } = data;
 
-      // Validate required fields
       if (!email || !password || !firstName || !lastName) {
         return {
           success: false,
@@ -291,7 +350,6 @@ export class AuthService {
         };
       }
 
-      // Validate email
       if (!EmailUtils.isValid(email)) {
         return {
           success: false,
@@ -299,7 +357,6 @@ export class AuthService {
         };
       }
 
-      // Validate password
       const passwordValidation = PasswordUtils.validate(password);
       if (!passwordValidation.valid) {
         return {
@@ -308,10 +365,8 @@ export class AuthService {
         };
       }
 
-      // Connect to database
       await connectDB();
 
-      // Check if user exists
       const normalizedEmail = EmailUtils.normalize(email);
       const existingUser = await User.findOne({ email: normalizedEmail });
 
@@ -322,11 +377,14 @@ export class AuthService {
         };
       }
 
-      // Hash password
       const hashedPassword = await PasswordUtils.hash(password);
 
-      // Create user
-      const newUser = new User({
+      const emailVerificationToken =
+        VerificationUtils.generateVerificationToken();
+      const emailVerificationExpires =
+        VerificationUtils.getVerificationExpiry();
+
+      const newUser = new (User as mongoose.Model<IUser>)({
         email: normalizedEmail,
         password: hashedPassword,
         firstName: firstName.trim(),
@@ -334,6 +392,9 @@ export class AuthService {
         phone: phone?.trim(),
         gender,
         avatar: AvatarUtils.getDefaultAvatar(gender),
+        isEmailVerified: false,
+        emailVerificationToken,
+        emailVerificationExpires,
         preferences: {
           currency: "USD",
           language: "en",
@@ -344,7 +405,6 @@ export class AuthService {
 
       const savedUser = await newUser.save();
 
-      // Prepare user data
       const userData: AuthUser = {
         id: savedUser._id.toString(),
         email: savedUser.email,
@@ -353,18 +413,33 @@ export class AuthService {
         gender: savedUser.gender,
         avatar: savedUser.avatar,
         role: savedUser.role,
+        isEmailVerified: savedUser.isEmailVerified,
+        isPhoneVerified: savedUser.isPhoneVerified,
+        status: savedUser.status,
+        preferences: savedUser.preferences,
+        addresses: savedUser.addresses,
+        createdAt: savedUser.createdAt.toISOString(),
+        updatedAt: savedUser.updatedAt.toISOString(),
       };
 
-      // Generate tokens
       const accessToken = TokenUtils.generateAccessToken(userData);
       const refreshToken = TokenUtils.generateRefreshToken(userData);
+
+      EmailService.sendEmailVerificationEmail(
+        email,
+        firstName,
+        emailVerificationToken
+      ).catch((error) => {
+        console.error("Failed to send email verification email:", error);
+      });
 
       return {
         success: true,
         user: userData,
         accessToken,
         refreshToken,
-        message: "Account created successfully",
+        message:
+          "Account created successfully. Please check your email to verify your account.",
       };
     } catch (error) {
       console.error("Signup error:", error);
@@ -382,13 +457,10 @@ export class AuthService {
     message?: string;
   }> {
     try {
-      // Verify refresh token
       const decoded = TokenUtils.verifyRefreshToken(refreshToken);
 
-      // Connect to database
       await connectDB();
 
-      // Get current user data
       const user = await User.findById(decoded.id);
       if (!user || user.status !== "active") {
         return {
@@ -397,7 +469,6 @@ export class AuthService {
         };
       }
 
-      // Prepare user data
       const userData: AuthUser = {
         id: user._id.toString(),
         email: user.email,
@@ -406,9 +477,15 @@ export class AuthService {
         gender: user.gender,
         avatar: user.avatar,
         role: user.role,
+        isEmailVerified: user.isEmailVerified,
+        isPhoneVerified: user.isPhoneVerified,
+        status: user.status,
+        preferences: user.preferences,
+        addresses: user.addresses,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
       };
 
-      // Generate new tokens
       const newAccessToken = TokenUtils.generateAccessToken(userData);
       const newRefreshToken = TokenUtils.generateRefreshToken(userData);
 
@@ -451,6 +528,13 @@ export class AuthService {
         gender: user.gender,
         avatar: user.avatar,
         role: user.role,
+        isEmailVerified: user.isEmailVerified,
+        isPhoneVerified: user.isPhoneVerified,
+        status: user.status,
+        preferences: user.preferences,
+        addresses: user.addresses,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
       };
 
       return {
@@ -462,6 +546,119 @@ export class AuthService {
       return {
         success: false,
         message: "Failed to get user data",
+      };
+    }
+  }
+
+  static async verifyEmail(token: string): Promise<{
+    success: boolean;
+    message?: string;
+  }> {
+    try {
+      await connectDB();
+
+      let user;
+      if (token.length === 6) {
+        const upperCode = token.toUpperCase();
+        console.log("Looking for user with code:", upperCode);
+
+        const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+        user = await User.findOne({
+          emailVerificationToken: { $regex: `^${escapedCode}`, $options: "i" },
+        });
+
+        console.log("Found user:", user ? "Yes" : "No");
+        if (user) {
+          console.log(
+            "User token starts with:",
+            user.emailVerificationToken?.substring(0, 6)
+          );
+        }
+      } else {
+        user = await User.findOne({
+          emailVerificationToken: token,
+        });
+      }
+
+      if (!user) {
+        return {
+          success: false,
+          message: "Invalid verification code",
+        };
+      }
+
+      user.isEmailVerified = true;
+      user.emailVerificationToken = undefined;
+      user.emailVerificationExpires = undefined;
+      await user.save();
+
+      return {
+        success: true,
+        message: "Email verified successfully",
+      };
+    } catch (error) {
+      console.error("Email verification error:", error);
+      return {
+        success: false,
+        message: "Failed to verify email",
+      };
+    }
+  }
+
+  static async resendVerificationEmail(email: string): Promise<{
+    success: boolean;
+    message?: string;
+  }> {
+    try {
+      await connectDB();
+
+      const user = await User.findOne({ email: email.toLowerCase() });
+      if (!user) {
+        return {
+          success: false,
+          message: "User not found",
+        };
+      }
+
+      if (user.isEmailVerified) {
+        return {
+          success: false,
+          message: "Email is already verified",
+        };
+      }
+
+      const emailVerificationToken =
+        VerificationUtils.generateVerificationToken();
+      const emailVerificationExpires =
+        VerificationUtils.getVerificationExpiry();
+
+      user.emailVerificationToken = emailVerificationToken;
+      user.emailVerificationExpires = emailVerificationExpires;
+      await user.save();
+
+      const emailResult = await EmailService.sendEmailVerificationEmail(
+        user.email,
+        user.firstName,
+        emailVerificationToken
+      );
+
+      if (emailResult.success) {
+        return {
+          success: true,
+          message: "Verification email sent successfully",
+        };
+      } else {
+        return {
+          success: false,
+          message: "Failed to send verification email",
+        };
+      }
+    } catch (error) {
+      console.error("Resend verification email error:", error);
+      return {
+        success: false,
+        message: "Failed to resend verification email",
       };
     }
   }

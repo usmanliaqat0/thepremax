@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+﻿import { NextRequest } from "next/server";
 import { TokenUtils } from "@/lib/auth-service";
 
 export interface AuthenticatedRequest extends NextRequest {
@@ -6,20 +6,68 @@ export interface AuthenticatedRequest extends NextRequest {
     id: string;
     email: string;
     role: string;
+    isEmailVerified?: boolean;
   };
 }
 
+// Helper functions for token extraction
+function extractTokenFromHeader(req: NextRequest): string | null {
+  const authHeader = req.headers.get("authorization");
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    return authHeader.substring(7);
+  }
+
+  return null;
+}
+
+function extractTokenFromCookies(req: NextRequest): string | null {
+  return req.cookies.get("accessToken")?.value || null;
+}
+
+// Simple auth middleware function for API routes
+export async function authMiddleware(req: NextRequest): Promise<{
+  id: string;
+  email: string;
+  role: string;
+  isEmailVerified?: boolean;
+} | null> {
+  try {
+    let token = extractTokenFromHeader(req);
+
+    if (!token) {
+      token = extractTokenFromCookies(req);
+    }
+
+    if (!token) {
+      return null;
+    }
+
+    const decoded = TokenUtils.verifyAccessToken(token);
+
+    return {
+      id: decoded.id,
+      email: decoded.email,
+      role: decoded.role,
+    };
+  } catch (error) {
+    console.error("Auth middleware error:", error);
+    return null;
+  }
+}
+
 export class AuthMiddleware {
-  /**
-   * Extract and verify JWT token from request
-   */
   static async verifyRequest(req: NextRequest): Promise<{
     success: boolean;
-    user?: { id: string; email: string; role: string };
+    user?: {
+      id: string;
+      email: string;
+      role: string;
+      isEmailVerified?: boolean;
+    };
     error?: string;
   }> {
     try {
-      // Get token from Authorization header or cookies
       let token = this.extractTokenFromHeader(req);
 
       if (!token) {
@@ -33,7 +81,6 @@ export class AuthMiddleware {
         };
       }
 
-      // Verify token
       const decoded = TokenUtils.verifyAccessToken(token);
 
       return {
@@ -64,29 +111,14 @@ export class AuthMiddleware {
     }
   }
 
-  /**
-   * Extract token from Authorization header
-   */
   private static extractTokenFromHeader(req: NextRequest): string | null {
-    const authHeader = req.headers.get("authorization");
-
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      return authHeader.substring(7);
-    }
-
-    return null;
+    return extractTokenFromHeader(req);
   }
 
-  /**
-   * Extract token from cookies
-   */
   private static extractTokenFromCookies(req: NextRequest): string | null {
-    return req.cookies.get("accessToken")?.value || null;
+    return extractTokenFromCookies(req);
   }
 
-  /**
-   * Check if user has required role
-   */
   static hasRole(
     user: { role: string },
     requiredRole: string | string[]
@@ -95,16 +127,10 @@ export class AuthMiddleware {
     return roles.includes(user.role);
   }
 
-  /**
-   * Check if user is admin
-   */
   static isAdmin(user: { role: string }): boolean {
     return user.role === "admin";
   }
 
-  /**
-   * Check if user owns the resource or is admin
-   */
   static canAccessResource(
     user: { id: string; role: string },
     resourceUserId: string
