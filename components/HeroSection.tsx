@@ -7,9 +7,9 @@ import Image from "next/image";
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-[500px] sm:min-h-[600px] lg:min-h-[700px] bg-gradient-hero overflow-hidden">
-      <div className="container mx-auto px-4 py-8 sm:py-12 lg:py-0 h-full">
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-10 items-center min-h-[500px] sm:min-h-[600px] lg:min-h-[700px]">
+    <section className="relative bg-gradient-hero overflow-hidden">
+      <div className="container mx-auto px-4 py-12 h-full">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-10 items-center">
           <div className="space-y-6 sm:space-y-8 lg:space-y-10">
             <div className="space-y-3 sm:space-y-4">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-primary leading-tight">
@@ -44,7 +44,7 @@ const HeroSection = () => {
               </Button>
             </div>
 
-            <div className="pt-6 sm:pt-8 border-t border-border">
+            {/* <div className="pt-6 sm:pt-8 border-t border-border">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8">
                 <div className="text-center">
                   <div className="text-xl sm:text-2xl md:text-3xl font-bold text-primary">
@@ -79,7 +79,7 @@ const HeroSection = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
           <div className="relative">
