@@ -1,4 +1,4 @@
-﻿import bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import crypto from "crypto";
@@ -16,15 +16,14 @@ interface JWTPayload {
   exp?: number;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key-here";
-const JWT_REFRESH_SECRET =
-  process.env.JWT_REFRESH_SECRET || "your-super-secret-refresh-key-here";
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const TOKEN_EXPIRY = process.env.JWT_EXPIRES_IN || "7d";
 const REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_EXPIRES_IN || "30d";
 
 if (!process.env.JWT_SECRET) {
   console.warn(
-    "⚠️  JWT_SECRET environment variable not found. Using default secret (not recommended for production)."
+    "⚠️  JWT_SECRET is not set. Token generation/verification will fail until configured."
   );
 }
 
@@ -111,7 +110,11 @@ export class TokenUtils {
       type: "access",
     };
 
-    return jwt.sign(payload, JWT_SECRET, {
+    if (!JWT_SECRET) {
+      throw new Error("JWT_SECRET is not configured");
+    }
+
+    return jwt.sign(payload, JWT_SECRET as jwt.Secret, {
       expiresIn: TOKEN_EXPIRY,
     } as jwt.SignOptions);
   }
@@ -127,14 +130,17 @@ export class TokenUtils {
       type: "refresh",
     };
 
-    return jwt.sign(payload, JWT_REFRESH_SECRET, {
+    return jwt.sign(payload, JWT_REFRESH_SECRET as jwt.Secret, {
       expiresIn: REFRESH_TOKEN_EXPIRY,
     } as jwt.SignOptions);
   }
 
   static verifyAccessToken(token: string): JWTPayload {
     try {
-      const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+      if (!JWT_SECRET) {
+        throw new Error("JWT_SECRET is not configured");
+      }
+      const decoded = jwt.verify(token, JWT_SECRET as jwt.Secret) as JWTPayload;
       if (decoded.type !== "access") {
         throw new Error("Invalid token type");
       }
@@ -150,7 +156,10 @@ export class TokenUtils {
     }
 
     try {
-      const decoded = jwt.verify(token, JWT_REFRESH_SECRET) as JWTPayload;
+      const decoded = jwt.verify(
+        token,
+        JWT_REFRESH_SECRET as jwt.Secret
+      ) as JWTPayload;
       if (decoded.type !== "refresh") {
         throw new Error("Invalid token type");
       }
@@ -566,6 +575,8 @@ export class AuthService {
 
         user = await User.findOne({
           emailVerificationToken: { $regex: `^${escapedCode}`, $options: "i" },
+          emailVerificationExpires: { $gt: new Date() },
+          isEmailVerified: false,
         });
 
         console.log("Found user:", user ? "Yes" : "No");
@@ -578,6 +589,8 @@ export class AuthService {
       } else {
         user = await User.findOne({
           emailVerificationToken: token,
+          emailVerificationExpires: { $gt: new Date() },
+          isEmailVerified: false,
         });
       }
 
@@ -585,6 +598,13 @@ export class AuthService {
         return {
           success: false,
           message: "Invalid verification code",
+        };
+      }
+
+      if (!user.emailVerificationExpires || user.emailVerificationExpires < new Date()) {
+        return {
+          success: false,
+          message: "Verification code has expired",
         };
       }
 
