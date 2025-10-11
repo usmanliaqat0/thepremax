@@ -239,19 +239,19 @@ const Checkout = () => {
       <Navigation />
 
       {}
-      <section className="py-12 bg-muted/30">
+      <section className="py-8 sm:py-12 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
             <div>
-              <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-2">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-primary mb-2">
                 Checkout
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Complete your purchase securely
               </p>
             </div>
             <Link href="/cart">
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-auto">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Cart
               </Button>
@@ -260,23 +260,23 @@ const Checkout = () => {
         </div>
       </section>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           {}
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                  <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
                   Shipping Information
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <form className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="fullName" className="mb-2 block">
+                      <Label htmlFor="fullName" className="mb-2 block text-sm">
                         Full Name
                       </Label>
                       <Input
@@ -285,10 +285,11 @@ const Checkout = () => {
                         value={shippingInfo.fullName}
                         onChange={handleShippingChange}
                         required
+                        className="h-10"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email" className="mb-2 block">
+                      <Label htmlFor="email" className="mb-2 block text-sm">
                         Email
                       </Label>
                       <Input
@@ -298,11 +299,12 @@ const Checkout = () => {
                         value={shippingInfo.email}
                         onChange={handleShippingChange}
                         required
+                        className="h-10"
                       />
                     </div>
                   </div>
                   <div>
-                    <Label htmlFor="phone" className="mb-2 block">
+                    <Label htmlFor="phone" className="mb-2 block text-sm">
                       Phone Number
                     </Label>
                     <Input
@@ -311,10 +313,11 @@ const Checkout = () => {
                       value={shippingInfo.phone}
                       onChange={handleShippingChange}
                       required
+                      className="h-10"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="address" className="mb-2 block">
+                    <Label htmlFor="address" className="mb-2 block text-sm">
                       Address
                     </Label>
                     <Input
@@ -323,38 +326,47 @@ const Checkout = () => {
                       value={shippingInfo.address}
                       onChange={handleShippingChange}
                       required
+                      className="h-10"
                     />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
-                      <Label htmlFor="city">City</Label>
+                      <Label htmlFor="city" className="text-sm">
+                        City
+                      </Label>
                       <Input
                         id="city"
                         name="city"
                         value={shippingInfo.city}
                         onChange={handleShippingChange}
                         required
+                        className="h-10"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="postalCode">Postal Code</Label>
+                      <Label htmlFor="postalCode" className="text-sm">
+                        Postal Code
+                      </Label>
                       <Input
                         id="postalCode"
                         name="postalCode"
                         value={shippingInfo.postalCode}
                         onChange={handleShippingChange}
                         required
+                        className="h-10"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="province">Province</Label>
+                    <div className="sm:col-span-2 lg:col-span-1">
+                      <Label htmlFor="province" className="text-sm">
+                        Province
+                      </Label>
                       <Select
                         value={shippingInfo.province}
                         onValueChange={(value) =>
                           setShippingInfo({ ...shippingInfo, province: value })
                         }
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="h-10">
                           <SelectValue placeholder="Select province" />
                         </SelectTrigger>
                         <SelectContent>
@@ -376,8 +388,8 @@ const Checkout = () => {
             {}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                  <CreditCard className="h-4 w-4 sm:h-5 sm:w-5" />
                   Payment Information
                 </CardTitle>
               </CardHeader>
@@ -385,18 +397,18 @@ const Checkout = () => {
                 <div className="space-y-4">
                   {}
                   <div>
-                    <Label>Payment Method</Label>
-                    <div className="grid grid-cols-2 gap-4 mt-2">
+                    <Label className="text-sm">Payment Method</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
                       <Button
                         type="button"
                         variant={
                           paymentMethod === "card" ? "default" : "outline"
                         }
                         onClick={() => setPaymentMethod("card")}
-                        className="justify-start"
+                        className="justify-start h-10"
                       >
                         <CreditCard className="mr-2 h-4 w-4" />
-                        Credit Card
+                        <span className="text-sm">Credit Card</span>
                       </Button>
                       <Button
                         type="button"
@@ -404,9 +416,10 @@ const Checkout = () => {
                           paymentMethod === "cod" ? "default" : "outline"
                         }
                         onClick={() => setPaymentMethod("cod")}
-                        className="justify-start"
+                        className="justify-start h-10"
                       >
-                        💰 Cash on Delivery
+                        <span className="mr-2">💰</span>
+                        <span className="text-sm">Cash on Delivery</span>
                       </Button>
                     </div>
                   </div>
@@ -414,17 +427,22 @@ const Checkout = () => {
                   {paymentMethod === "card" && (
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="cardName">Name on Card</Label>
+                        <Label htmlFor="cardName" className="text-sm">
+                          Name on Card
+                        </Label>
                         <Input
                           id="cardName"
                           name="cardName"
                           value={paymentInfo.cardName}
                           onChange={handlePaymentChange}
                           required
+                          className="h-10"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="cardNumber">Card Number</Label>
+                        <Label htmlFor="cardNumber" className="text-sm">
+                          Card Number
+                        </Label>
                         <Input
                           id="cardNumber"
                           name="cardNumber"
@@ -432,11 +450,14 @@ const Checkout = () => {
                           value={paymentInfo.cardNumber}
                           onChange={handlePaymentChange}
                           required
+                          className="h-10"
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="expiryDate">Expiry Date</Label>
+                          <Label htmlFor="expiryDate" className="text-sm">
+                            Expiry Date
+                          </Label>
                           <Input
                             id="expiryDate"
                             name="expiryDate"
@@ -444,10 +465,13 @@ const Checkout = () => {
                             value={paymentInfo.expiryDate}
                             onChange={handlePaymentChange}
                             required
+                            className="h-10"
                           />
                         </div>
                         <div>
-                          <Label htmlFor="cvv">CVV</Label>
+                          <Label htmlFor="cvv" className="text-sm">
+                            CVV
+                          </Label>
                           <Input
                             id="cvv"
                             name="cvv"
@@ -455,6 +479,7 @@ const Checkout = () => {
                             value={paymentInfo.cvv}
                             onChange={handlePaymentChange}
                             required
+                            className="h-10"
                           />
                         </div>
                       </div>
@@ -476,9 +501,11 @@ const Checkout = () => {
 
           {}
           <div>
-            <Card className="sticky top-8">
+            <Card className="sticky top-4 sm:top-8">
               <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">
+                  Order Summary
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -489,7 +516,7 @@ const Checkout = () => {
                         key={`${item.id}-${item.size}-${item.color}`}
                         className="flex gap-3"
                       >
-                        <div className="relative w-16 h-16 flex-shrink-0">
+                        <div className="relative w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0">
                           <Image
                             src={
                               item.product.images[0]?.url ||
@@ -500,11 +527,11 @@ const Checkout = () => {
                             className="object-cover rounded-md"
                           />
                         </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-sm">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-xs sm:text-sm line-clamp-2">
                             {item.product.name}
                           </h4>
-                          <div className="flex gap-2 mt-1">
+                          <div className="flex flex-wrap gap-1 mt-1">
                             {item.size && (
                               <Badge variant="outline" className="text-xs">
                                 {item.size}
@@ -517,10 +544,10 @@ const Checkout = () => {
                             )}
                           </div>
                           <div className="flex justify-between items-center mt-2">
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-xs sm:text-sm text-muted-foreground">
                               Qty: {item.quantity}
                             </span>
-                            <span className="font-medium text-sm">
+                            <span className="font-medium text-xs sm:text-sm">
                               {formatPrice(
                                 item.product.basePrice * item.quantity
                               )}
@@ -563,11 +590,15 @@ const Checkout = () => {
                     disabled={isProcessing}
                   >
                     {isProcessing ? (
-                      "Processing..."
+                      <span className="text-sm sm:text-base">
+                        Processing...
+                      </span>
                     ) : (
                       <>
-                        <Check className="mr-2 h-5 w-5" />
-                        Place Order
+                        <Check className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="text-sm sm:text-base">
+                          Place Order
+                        </span>
                       </>
                     )}
                   </Button>

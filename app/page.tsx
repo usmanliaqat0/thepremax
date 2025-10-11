@@ -204,24 +204,30 @@ export default function Home() {
             subtitle="Explore our diverse range of products across multiple categories"
           />
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="animate-pulse">
-                  <div className="bg-muted rounded-lg h-48 mb-4"></div>
-                  <div className="h-6 bg-muted rounded mb-2"></div>
-                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="bg-muted rounded-lg h-40 sm:h-48 mb-4"></div>
+                  <div className="h-5 sm:h-6 bg-muted rounded mb-2"></div>
+                  <div className="h-3 sm:h-4 bg-muted rounded w-3/4"></div>
                 </div>
               ))}
             </div>
           ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">{error}</p>
-              <Button onClick={() => window.location.reload()}>
+            <div className="text-center py-8 sm:py-12">
+              <p className="text-muted-foreground mb-4 text-sm sm:text-base">
+                {error}
+              </p>
+              <Button
+                onClick={() => window.location.reload()}
+                size="sm"
+                className="sm:size-default"
+              >
                 Try Again
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {categories.slice(0, 4).map((category) => (
                 <Card
                   key={category._id}
@@ -232,7 +238,7 @@ export default function Home() {
                     className="h-full flex flex-col"
                   >
                     {/* Image Section */}
-                    <div className="relative h-48 overflow-hidden">
+                    <div className="relative h-40 sm:h-48 overflow-hidden">
                       {category.image ? (
                         <Image
                           src={category.image}
@@ -242,32 +248,34 @@ export default function Home() {
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-accent/20 to-accent/40 flex items-center justify-center">
-                          <div className="text-6xl opacity-60">📦</div>
+                          <div className="text-4xl sm:text-6xl opacity-60">
+                            📦
+                          </div>
                         </div>
                       )}
                       {/* Overlay */}
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
                       {/* Hover Effect */}
-                      <div className="absolute top-4 right-4 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                        <ArrowRight className="w-4 h-4 text-accent" />
+                      <div className="absolute top-2 right-2 sm:top-4 sm:right-4 w-6 h-6 sm:w-8 sm:h-8 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                        <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 text-accent" />
                       </div>
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-6 flex-1 flex flex-col justify-center">
-                      <h3 className="font-bold text-xl mb-3 group-hover:text-accent transition-colors duration-300 text-center">
+                    <div className="p-4 sm:p-6 flex-1 flex flex-col justify-center">
+                      <h3 className="font-bold text-lg sm:text-xl mb-2 sm:mb-3 group-hover:text-accent transition-colors duration-300 text-center">
                         {category.name}
                       </h3>
-                      <p className="text-muted-foreground text-sm text-center leading-relaxed">
+                      <p className="text-muted-foreground text-xs sm:text-sm text-center leading-relaxed">
                         {category.description ||
                           "Explore our amazing collection"}
                       </p>
 
                       {/* Bottom Action */}
-                      <div className="mt-4 flex justify-center">
-                        <div className="inline-flex items-center text-accent text-sm font-medium opacity-100 transition-all duration-300">
+                      <div className="mt-3 sm:mt-4 flex justify-center">
+                        <div className="inline-flex items-center text-accent text-xs sm:text-sm font-medium opacity-100 transition-all duration-300">
                           Shop Now
-                          <ArrowRight className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                          <ArrowRight className="ml-1 w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform duration-300" />
                         </div>
                       </div>
                     </div>
@@ -329,10 +337,15 @@ export default function Home() {
               </ProductGridWrapper>
 
               <div className="text-center">
-                <Button asChild size="lg" variant="luxury">
+                <Button
+                  asChild
+                  size="lg"
+                  variant="luxury"
+                  className="w-full sm:w-auto"
+                >
                   <Link href="/shop">
                     Shop All Categories
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                   </Link>
                 </Button>
               </div>

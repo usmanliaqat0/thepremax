@@ -193,72 +193,81 @@ const ShopContent = () => {
       </Section>
 
       {}
-      <section className="py-8 border-b border-border">
+      <section className="py-6 sm:py-8 border-b border-border">
         <div className="container mx-auto px-4">
           {}
-          <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center mb-6">
+          <div className="flex flex-col gap-4 sm:gap-6 items-start mb-6">
             {}
-            <div className="relative flex-1 lg:max-w-md w-full">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 type="search"
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 w-full"
               />
             </div>
 
             {}
-            <div className="flex flex-wrap gap-4 items-center">
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Products</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category._id} value={category.slug}>
-                      {category.name}
+            <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 w-full">
+              <div className="flex flex-col lg:flex-row gap-3 lg:gap-4 flex-1">
+                <Select
+                  value={categoryFilter}
+                  onValueChange={setCategoryFilter}
+                >
+                  <SelectTrigger className="w-full lg:w-auto lg:min-w-[180px]">
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Products</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category._id} value={category.slug}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select value={priceRange} onValueChange={setPriceRange}>
+                  <SelectTrigger className="w-full lg:w-auto lg:min-w-[160px]">
+                    <SelectValue placeholder="Price Range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Prices</SelectItem>
+                    <SelectItem value="under-50">Under $50</SelectItem>
+                    <SelectItem value="50-200">$50 - $200</SelectItem>
+                    <SelectItem value="200-500">$200 - $500</SelectItem>
+                    <SelectItem value="over-500">Over $500</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={sortBy}
+                  onValueChange={(value) => setSortBy(value as SortOption)}
+                >
+                  <SelectTrigger className="w-full lg:w-auto lg:min-w-[160px]">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">Name A-Z</SelectItem>
+                    <SelectItem value="price-low">
+                      Price: Low to High
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={priceRange} onValueChange={setPriceRange}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Price Range" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Prices</SelectItem>
-                  <SelectItem value="under-50">Under $50</SelectItem>
-                  <SelectItem value="50-200">$50 - $200</SelectItem>
-                  <SelectItem value="200-500">$200 - $500</SelectItem>
-                  <SelectItem value="over-500">Over $500</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={sortBy}
-                onValueChange={(value) => setSortBy(value as SortOption)}
-              >
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name">Name A-Z</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="featured">Featured First</SelectItem>
-                </SelectContent>
-              </Select>
+                    <SelectItem value="price-high">
+                      Price: High to Low
+                    </SelectItem>
+                    <SelectItem value="featured">Featured First</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
               {activeFiltersCount > 0 && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={clearFilters}
-                  className="flex items-center gap-2 text-destructive hover:text-destructive"
+                  className="flex items-center gap-2 text-destructive hover:text-destructive w-full lg:w-auto"
                 >
                   <X className="h-4 w-4" />
                   Clear Filters ({activeFiltersCount})
@@ -298,14 +307,18 @@ const ShopContent = () => {
       </section>
 
       {}
-      <section className="py-6">
+      <section className="py-4 sm:py-6">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between">
-            <p className="text-muted-foreground">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+            <p className="text-sm sm:text-base text-muted-foreground">
               Showing {filteredProducts.length} of {products.length} products
             </p>
             {filteredProducts.length === 0 && (
-              <Button variant="outline" onClick={clearFilters}>
+              <Button
+                variant="outline"
+                onClick={clearFilters}
+                className="w-full sm:w-auto"
+              >
                 Clear All Filters
               </Button>
             )}

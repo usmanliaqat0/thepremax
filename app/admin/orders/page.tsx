@@ -483,43 +483,43 @@ export default function OrdersManagement() {
       </div>
 
       {/* Order Statistics */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-        <Card className="p-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+        <Card className="p-3 sm:p-6">
           <div className="flex flex-col items-center gap-2">
-            <ShoppingCart className="h-5 w-5 text-blue-600" />
+            <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
             <p className="text-xs text-muted-foreground text-center">
               Total Orders
             </p>
-            <p className="text-lg font-bold">{stats.total}</p>
+            <p className="text-base sm:text-lg font-bold">{stats.total}</p>
           </div>
         </Card>
-        <Card className="p-6">
+        <Card className="p-3 sm:p-6">
           <div className="flex flex-col items-center gap-2">
-            <DollarSign className="h-5 w-5 text-green-600" />
+            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
             <p className="text-xs text-muted-foreground text-center">
               Total Revenue
             </p>
-            <p className="text-lg font-bold">
+            <p className="text-base sm:text-lg font-bold">
               {formatPrice(stats.totalRevenue)}
             </p>
           </div>
         </Card>
-        <Card className="p-6">
+        <Card className="p-3 sm:p-6">
           <div className="flex flex-col items-center gap-2">
-            <Clock className="h-5 w-5 text-yellow-600" />
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
             <p className="text-xs text-muted-foreground text-center">
               Pending Orders
             </p>
-            <p className="text-lg font-bold">{stats.pending}</p>
+            <p className="text-base sm:text-lg font-bold">{stats.pending}</p>
           </div>
         </Card>
-        <Card className="p-6">
+        <Card className="p-3 sm:p-6">
           <div className="flex flex-col items-center gap-2">
             <Truck className="h-5 w-5 text-purple-600" />
             <p className="text-xs text-muted-foreground text-center">
               Shipped Orders
             </p>
-            <p className="text-lg font-bold">{stats.shipped}</p>
+            <p className="text-base sm:text-lg font-bold">{stats.shipped}</p>
           </div>
         </Card>
       </div>

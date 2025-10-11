@@ -33,31 +33,33 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3">
         {loading || !stats ? (
           Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="p-3">
+            <Card key={i} className="p-2 sm:p-3">
               <div className="flex items-center justify-between">
-                <div className="bg-muted h-3 w-16 animate-pulse rounded" />
-                <div className="bg-muted h-4 w-4 animate-pulse rounded" />
+                <div className="bg-muted h-3 w-12 sm:w-16 animate-pulse rounded" />
+                <div className="bg-muted h-3 w-3 sm:h-4 sm:w-4 animate-pulse rounded" />
               </div>
               <div className="space-y-1">
-                <div className="bg-muted h-6 w-12 animate-pulse rounded" />
-                <div className="bg-muted h-3 w-20 animate-pulse rounded" />
+                <div className="bg-muted h-5 w-10 sm:h-6 sm:w-12 animate-pulse rounded" />
+                <div className="bg-muted h-2 w-16 sm:h-3 sm:w-20 animate-pulse rounded" />
               </div>
             </Card>
           ))
         ) : (
           <>
-            <Card className="hover:shadow-md transition-shadow p-6">
+            <Card className="hover:shadow-md transition-shadow p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xs font-medium text-muted-foreground">
                   Total Users
                 </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
               </div>
               <div className="space-y-1">
-                <div className="text-xl font-bold">{stats.users.total}</div>
+                <div className="text-lg sm:text-xl font-bold">
+                  {stats.users.total}
+                </div>
                 <div className="flex items-center text-xs">
                   <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
                   <span className="text-green-600 font-medium">
@@ -66,15 +68,17 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </Card>
-            <Card className="hover:shadow-md transition-shadow p-6">
+            <Card className="hover:shadow-md transition-shadow p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xs font-medium text-muted-foreground">
                   Active Users
                 </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
               </div>
               <div className="space-y-1">
-                <div className="text-xl font-bold">{stats.users.active}</div>
+                <div className="text-lg sm:text-xl font-bold">
+                  {stats.users.active}
+                </div>
                 <div className="flex items-center text-xs">
                   <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
                   <span className="text-green-600 font-medium">
@@ -83,15 +87,15 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </Card>
-            <Card className="hover:shadow-md transition-shadow p-6">
+            <Card className="hover:shadow-md transition-shadow p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xs font-medium text-muted-foreground">
                   Email Verified
                 </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
               </div>
               <div className="space-y-1">
-                <div className="text-xl font-bold">
+                <div className="text-lg sm:text-xl font-bold">
                   {stats.verification.emailVerified}
                 </div>
                 <div className="flex items-center text-xs">
@@ -102,15 +106,15 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </Card>
-            <Card className="hover:shadow-md transition-shadow p-6">
+            <Card className="hover:shadow-md transition-shadow p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xs font-medium text-muted-foreground">
                   Phone Verified
                 </CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
               </div>
               <div className="space-y-1">
-                <div className="text-xl font-bold">
+                <div className="text-lg sm:text-xl font-bold">
                   {stats.verification.phoneVerified}
                 </div>
                 <div className="flex items-center text-xs">
@@ -121,7 +125,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </Card>
-            <Card className="hover:shadow-md transition-shadow p-6">
+            <Card className="hover:shadow-md transition-shadow p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xs font-medium text-muted-foreground">
                   Total Orders
@@ -129,7 +133,9 @@ export default function AdminDashboard() {
                 <ShoppingCart className="h-4 w-4 text-muted-foreground" />
               </div>
               <div className="space-y-1">
-                <div className="text-xl font-bold">{stats.orders.total}</div>
+                <div className="text-lg sm:text-xl font-bold">
+                  {stats.orders.total}
+                </div>
                 <div className="flex items-center text-xs">
                   <TrendingUp className="h-3 w-3 mr-1 text-green-600" />
                   <span className="text-green-600 font-medium">
@@ -138,7 +144,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </Card>
-            <Card className="hover:shadow-md transition-shadow p-6">
+            <Card className="hover:shadow-md transition-shadow p-3 sm:p-6">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xs font-medium text-muted-foreground">
                   Total Revenue
@@ -146,7 +152,7 @@ export default function AdminDashboard() {
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </div>
               <div className="space-y-1">
-                <div className="text-xl font-bold">
+                <div className="text-lg sm:text-xl font-bold">
                   ${stats.orders.totalRevenue.toLocaleString()}
                 </div>
                 <div className="flex items-center text-xs">

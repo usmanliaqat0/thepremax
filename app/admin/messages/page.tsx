@@ -254,8 +254,8 @@ export default function MessagesPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-        <Card className="p-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+        <Card className="p-2 sm:p-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               New Messages
@@ -263,14 +263,14 @@ export default function MessagesPage() {
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            <div className="text-lg font-bold text-blue-600">
+            <div className="text-base sm:text-lg font-bold text-blue-600">
               {statusCounts.new}
             </div>
             <p className="text-xs text-muted-foreground">Unread messages</p>
           </div>
         </Card>
 
-        <Card className="p-3">
+        <Card className="p-2 sm:p-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Read
@@ -278,14 +278,14 @@ export default function MessagesPage() {
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            <div className="text-lg font-bold text-gray-600">
+            <div className="text-base sm:text-lg font-bold text-gray-600">
               {statusCounts.read}
             </div>
             <p className="text-xs text-muted-foreground">Read messages</p>
           </div>
         </Card>
 
-        <Card className="p-3">
+        <Card className="p-2 sm:p-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Replied
@@ -293,14 +293,14 @@ export default function MessagesPage() {
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            <div className="text-lg font-bold text-green-600">
+            <div className="text-base sm:text-lg font-bold text-green-600">
               {statusCounts.replied}
             </div>
             <p className="text-xs text-muted-foreground">Replied messages</p>
           </div>
         </Card>
 
-        <Card className="p-3">
+        <Card className="p-2 sm:p-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Closed
@@ -308,7 +308,7 @@ export default function MessagesPage() {
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            <div className="text-lg font-bold text-red-600">
+            <div className="text-base sm:text-lg font-bold text-red-600">
               {statusCounts.closed}
             </div>
             <p className="text-xs text-muted-foreground">Closed messages</p>

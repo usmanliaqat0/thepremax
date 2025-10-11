@@ -246,7 +246,7 @@ const ProductDetail = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Product Images */}
           <div>
             <div className="relative aspect-square mb-4">
@@ -258,7 +258,7 @@ const ProductDetail = () => {
                 priority
               />
               {product.featured && (
-                <Badge className="absolute top-4 left-4 bg-accent text-accent-foreground">
+                <Badge className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-accent text-accent-foreground text-xs sm:text-sm">
                   Featured
                 </Badge>
               )}
@@ -271,7 +271,7 @@ const ProductDetail = () => {
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`relative aspect-square w-20 md:w-32 rounded-md overflow-hidden border-2 transition-colors ${
+                    className={`relative aspect-square w-16 sm:w-20 md:w-32 rounded-md overflow-hidden border-2 transition-colors ${
                       selectedImage === index
                         ? "border-primary"
                         : "border-transparent hover:border-muted-foreground"
@@ -291,11 +291,11 @@ const ProductDetail = () => {
 
           {/* Product Details */}
           <div>
-            <div className="mb-6">
-              <h1 className="text-3xl md:text-4xl font-heading font-bold text-primary mb-2">
+            <div className="mb-4 sm:mb-6">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-primary mb-2">
                 {product.name}
               </h1>
-              <p className="text-muted-foreground mb-4">
+              <p className="text-sm sm:text-base text-muted-foreground mb-4">
                 {product.description}
               </p>
 
@@ -305,7 +305,7 @@ const ProductDetail = () => {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-4 w-4 ${
+                      className={`h-3 w-3 sm:h-4 sm:w-4 ${
                         i < 4
                           ? "fill-yellow-400 text-yellow-400"
                           : "text-gray-300"
@@ -313,16 +313,16 @@ const ProductDetail = () => {
                     />
                   ))}
                 </div>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-xs sm:text-sm text-muted-foreground">
                   (4.0) 124 reviews
                 </span>
               </div>
 
-              <div className="text-3xl font-bold text-primary mb-6">
+              <div className="text-2xl sm:text-3xl font-bold text-primary mb-4 sm:mb-6">
                 {formatPrice(product.basePrice)}
                 {product.compareAtPrice &&
                   product.compareAtPrice > product.basePrice && (
-                    <span className="text-lg text-muted-foreground line-through ml-2">
+                    <span className="text-base sm:text-lg text-muted-foreground line-through ml-2">
                       {formatPrice(product.compareAtPrice)}
                     </span>
                   )}
@@ -331,7 +331,7 @@ const ProductDetail = () => {
 
             {/* Product Options */}
             {product.category?.name?.toLowerCase() === "shirts" && (
-              <div className="space-y-6 mb-8">
+              <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8">
                 {/* Size Selection */}
                 <div>
                   <label className="block text-sm font-medium mb-2">Size</label>
@@ -374,21 +374,25 @@ const ProductDetail = () => {
             )}
 
             {/* Quantity */}
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8">
               <label className="block text-sm font-medium mb-2">Quantity</label>
               <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="h-10 w-10"
                 >
                   -
                 </Button>
-                <span className="w-12 text-center">{quantity}</span>
+                <span className="w-12 text-center text-sm sm:text-base">
+                  {quantity}
+                </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setQuantity(quantity + 1)}
+                  className="h-10 w-10"
                 >
                   +
                 </Button>
@@ -396,9 +400,9 @@ const ProductDetail = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="space-y-4 mb-8">
+            <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
               {/* Primary Action Buttons */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Button
                   onClick={handleAddToCart}
                   variant="outline"
@@ -409,8 +413,10 @@ const ProductDetail = () => {
                     (!selectedSize || !selectedColor)
                   }
                 >
-                  <ShoppingCart className="mr-2 h-5 w-5" />
-                  {isInCart(product._id) ? "Added to Cart" : "Add to Cart"}
+                  <ShoppingCart className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="text-sm sm:text-base">
+                    {isInCart(product._id) ? "Added to Cart" : "Add to Cart"}
+                  </span>
                 </Button>
 
                 <Button
@@ -430,19 +436,21 @@ const ProductDetail = () => {
                         variant="light"
                         className="mr-2"
                       />
-                      Processing...
+                      <span className="text-sm sm:text-base">
+                        Processing...
+                      </span>
                     </div>
                   ) : (
                     <>
-                      <Zap className="mr-2 h-5 w-5" />
-                      Buy Now
+                      <Zap className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="text-sm sm:text-base">Buy Now</span>
                     </>
                   )}
                 </Button>
               </div>
 
               {/* Secondary Action Buttons */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <Button
                   variant="outline"
                   size="lg"
@@ -456,37 +464,48 @@ const ProductDetail = () => {
                         : ""
                     }`}
                   />
-                  {isInWishlist(product._id)
-                    ? "In Wishlist"
-                    : "Add to Wishlist"}
+                  <span className="text-xs sm:text-sm">
+                    {isInWishlist(product._id)
+                      ? "In Wishlist"
+                      : "Add to Wishlist"}
+                  </span>
                 </Button>
 
-                <Button variant="outline" size="lg" onClick={handleShare}>
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Share
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={handleShare}
+                  className="flex items-center justify-center gap-2"
+                >
+                  <Share2 className="h-4 w-4" />
+                  <span className="text-xs sm:text-sm">Share</span>
                 </Button>
               </div>
             </div>
 
             {/* Product Features */}
-            <div className="space-y-4 mb-8 pt-8 border-t">
+            <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 pt-6 sm:pt-8 border-t">
               <div className="flex items-center gap-3">
-                <Truck className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm">
+                <Truck className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                <span className="text-xs sm:text-sm">
                   Free shipping on orders over $50
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <RotateCcw className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm">30-day return policy</span>
+                <RotateCcw className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                <span className="text-xs sm:text-sm">30-day return policy</span>
               </div>
               <div className="flex items-center gap-3">
-                <Shield className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm">2-year warranty included</span>
+                <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                <span className="text-xs sm:text-sm">
+                  2-year warranty included
+                </span>
               </div>
               <div className="flex items-center gap-3">
-                <Zap className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm">Fast 2-3 day delivery</span>
+                <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                <span className="text-xs sm:text-sm">
+                  Fast 2-3 day delivery
+                </span>
               </div>
             </div>
           </div>

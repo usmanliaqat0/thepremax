@@ -90,7 +90,7 @@ const Wishlist = () => {
 
       <section className="py-12 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-2">
                 My Wishlist
@@ -99,15 +99,19 @@ const Wishlist = () => {
                 {wishlistState.items.length} items saved for later
               </p>
             </div>
-            <div className="flex gap-4">
-              <Link href="/shop">
-                <Button variant="outline">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
+              <Link href="/shop" className="w-full sm:w-auto">
+                <Button variant="outline" className="w-full sm:w-auto">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Continue Shopping
                 </Button>
               </Link>
               {wishlistState.items.length > 0 && (
-                <Button variant="destructive" onClick={clearWishlist}>
+                <Button
+                  variant="destructive"
+                  onClick={clearWishlist}
+                  className="w-full sm:w-auto"
+                >
                   Clear Wishlist
                 </Button>
               )}

@@ -367,8 +367,8 @@ export default function ProductsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-        <Card className="p-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+        <Card className="p-2 sm:p-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Total Products
@@ -376,34 +376,34 @@ export default function ProductsPage() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            <div className="text-xl font-bold">{stats.total}</div>
+            <div className="text-lg sm:text-xl font-bold">{stats.total}</div>
             <p className="text-xs text-muted-foreground">
               {stats.active} active
             </p>
           </div>
         </Card>
 
-        <Card className="p-3">
+        <Card className="p-2 sm:p-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Featured
             </CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
+            <Star className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            <div className="text-xl font-bold">{stats.featured}</div>
+            <div className="text-lg sm:text-xl font-bold">{stats.featured}</div>
             <p className="text-xs text-muted-foreground">
               {stats.onSale} on sale
             </p>
           </div>
         </Card>
 
-        <Card className="p-3">
+        <Card className="p-2 sm:p-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Out of Stock
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </div>
           <div className="space-y-1">
             <div className="text-xl font-bold text-red-500">
@@ -413,15 +413,15 @@ export default function ProductsPage() {
           </div>
         </Card>
 
-        <Card className="p-3">
+        <Card className="p-2 sm:p-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Avg Rating
             </CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
+            <Star className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            <div className="text-xl font-bold">
+            <div className="text-lg sm:text-xl font-bold">
               {stats.averageRating.toFixed(1)}
             </div>
             <p className="text-xs text-muted-foreground">Across all products</p>

@@ -16,13 +16,13 @@ const About = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      <section className="py-16 lg:py-24 bg-gradient-hero">
+      <section className="py-12 sm:py-16 lg:py-24 bg-gradient-hero">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-primary mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-heading font-bold text-primary mb-4 sm:mb-6">
               About <span className="text-accent">ThePreMax</span>
             </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed">
+            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed">
               We&apos;re passionate about bringing you premium fashion pieces
               that speak volumes about your unique style. Every design tells a
               story, and we&apos;re here to help you tell yours.
@@ -31,14 +31,14 @@ const About = () => {
         </div>
       </section>
 
-      <section className="py-16">
+      <section className="py-12 sm:py-16">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <h2 className="text-3xl md:text-4xl font-heading font-bold text-primary">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div className="space-y-4 sm:space-y-6">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-heading font-bold text-primary">
                 Our Story
               </h2>
-              <div className="space-y-4 text-muted-foreground leading-relaxed">
+              <div className="space-y-3 sm:space-y-4 text-sm sm:text-base text-muted-foreground leading-relaxed">
                 <p>
                   ThePreMax was born from a simple belief: everyone deserves to
                   express their personality through high-quality, stylish
@@ -59,7 +59,7 @@ const About = () => {
                 </p>
               </div>
             </div>
-            <div className="relative">
+            <div className="relative order-first lg:order-last">
               <Image
                 src="/logo.png"
                 alt="ThePreMax Logo"

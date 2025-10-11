@@ -70,7 +70,6 @@ const Contact = () => {
           message: "",
         });
       } else {
-
         if (data.details && Array.isArray(data.details)) {
           const errorMessages = data.details
             .map((detail: { message: string }) => detail.message)
@@ -95,13 +94,13 @@ const Contact = () => {
       <Navigation />
 
       {}
-      <section className="py-16 bg-gradient-hero">
+      <section className="py-12 sm:py-16 bg-gradient-hero">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-primary mb-4 sm:mb-6">
               Get in <span className="text-accent">Touch</span>
             </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed">
+            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed">
               Have questions about our products or need assistance? We&apos;re
               here to help! Reach out to us through any of the channels below.
             </p>
