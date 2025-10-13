@@ -61,9 +61,9 @@ function VerifyCodeContent() {
           setMessage(result.message);
           toast.success("Email verified successfully!");
 
-localStorage.removeItem("pending_verification_email");
+          localStorage.removeItem("pending_verification_email");
 
-setTimeout(() => {
+          setTimeout(() => {
             router.push("/login");
           }, 3000);
         } else {
@@ -107,9 +107,9 @@ setTimeout(() => {
         setMessage(result.message);
         toast.success("Email verified successfully!");
 
-localStorage.removeItem("pending_verification_email");
+        localStorage.removeItem("pending_verification_email");
 
-setTimeout(() => {
+        setTimeout(() => {
           router.push("/login");
         }, 3000);
       } else {
@@ -150,7 +150,7 @@ setTimeout(() => {
         setMessage("A new verification email has been sent to your inbox.");
         setVerificationStatus("pending");
 
-const cooldownTime = Date.now() + 2 * 60 * 1000;
+        const cooldownTime = Date.now() + 2 * 60 * 1000;
         localStorage.setItem("resend_cooldown", cooldownTime.toString());
         setResendCooldown(120);
       } else {
@@ -166,7 +166,6 @@ const cooldownTime = Date.now() + 2 * 60 * 1000;
   };
 
   useEffect(() => {
-
     const emailParam = searchParams.get("email");
     const storedEmail = localStorage.getItem("pending_verification_email");
 
@@ -177,15 +176,14 @@ const cooldownTime = Date.now() + 2 * 60 * 1000;
       setEmail(storedEmail);
     }
 
-if (token) {
+    if (token) {
       verifyEmailWithToken(token);
     } else {
-
       if (codeFromUrl) {
         setVerificationCode(codeFromUrl);
       }
 
-const storedCooldown = localStorage.getItem("resend_cooldown");
+      const storedCooldown = localStorage.getItem("resend_cooldown");
       if (storedCooldown) {
         const cooldownTime = parseInt(storedCooldown);
         const remainingTime = Math.max(0, cooldownTime - Date.now());
@@ -194,18 +192,17 @@ const storedCooldown = localStorage.getItem("resend_cooldown");
         }
       }
 
-setIsCooldownChecked(true);
+      setIsCooldownChecked(true);
     }
   }, [searchParams, token, codeFromUrl, verifyEmailWithToken]);
 
-useEffect(() => {
+  useEffect(() => {
     if (resendCooldown > 0) {
       const timer = setTimeout(() => {
         setResendCooldown(resendCooldown - 1);
       }, 1000);
       return () => clearTimeout(timer);
     } else if (resendCooldown === 0) {
-
       localStorage.removeItem("resend_cooldown");
     }
   }, [resendCooldown]);
@@ -418,7 +415,6 @@ export default function VerifyCodePage() {
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center">
             <Loader2 className="h-12 w-12 text-blue-500 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Loading verification page...</p>
           </div>
         </div>
       }

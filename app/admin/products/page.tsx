@@ -91,7 +91,6 @@ export default function ProductsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
 
-  // Use the custom dialog hook for better state management
   const productDialog = useDialog({
     onOpenChange: (open) => {
       if (!open) {
@@ -108,7 +107,6 @@ export default function ProductsPage() {
     },
   });
 
-  // Use the new hook for fetching all products
   const {
     data: products,
     isLoading,
@@ -156,7 +154,6 @@ export default function ProductsPage() {
       const data = await response.json();
 
       if (data.success) {
-        // Update local data
         setData(products.filter((p) => p._id !== product._id));
         toast.success("Product deleted successfully");
       } else {
@@ -173,7 +170,6 @@ export default function ProductsPage() {
     toast.success("Products refreshed");
   };
 
-  // Calculate stats from all products
   const stats = {
     total: products.length,
     active: products.filter((p) => p.status === "active").length,
@@ -190,7 +186,6 @@ export default function ProductsPage() {
         : 0,
   };
 
-  // Helper functions for rendering
   const getStatusBadge = (status: string) => {
     const colors = {
       active: "bg-green-100 text-green-800",
@@ -213,7 +208,6 @@ export default function ProductsPage() {
     return category ? category.name : "Unknown";
   };
 
-  // Table columns configuration
   const columns: TableColumn<Product>[] = [
     {
       key: "name",
@@ -265,7 +259,6 @@ export default function ProductsPage() {
     },
   ];
 
-  // Dynamic actions
   const getActions = (): TableAction<Product>[] => {
     const actions: TableAction<Product>[] = [];
 
@@ -302,7 +295,6 @@ export default function ProductsPage() {
     return actions;
   };
 
-  // Filter options
   const statusFilterOptions = [
     { key: "all", label: "All Status", value: "all" },
     { key: "active", label: "Active", value: "active" },

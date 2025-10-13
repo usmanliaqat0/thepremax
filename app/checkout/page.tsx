@@ -68,7 +68,6 @@ const Checkout = () => {
 
   useScrollToTop();
 
-  // Redirect to login if not authenticated
   if (!authState.token) {
     return (
       <div className="min-h-screen bg-background">
@@ -137,7 +136,6 @@ const Checkout = () => {
     e.preventDefault();
     setIsProcessing(true);
 
-    // Check if user is authenticated
     if (!authState.token) {
       toast({
         title: "Authentication required",
@@ -150,7 +148,6 @@ const Checkout = () => {
     }
 
     try {
-      // Prepare order data
       const orderItems = state.items.map((item) => ({
         productId: item.id,
         name: item.product.name,
@@ -161,7 +158,6 @@ const Checkout = () => {
         color: item.color,
       }));
 
-      // Split full name into first and last name
       const nameParts = shippingInfo.fullName.trim().split(" ");
       const firstName = nameParts[0] || "";
       const lastName = nameParts.slice(1).join(" ") || "";
@@ -195,7 +191,6 @@ const Checkout = () => {
         },
       };
 
-      // Create order
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: {
@@ -212,7 +207,6 @@ const Checkout = () => {
 
       const result = await response.json();
 
-      // Clear cart and redirect
       clearCart();
       toast({
         title: "Order placed successfully!",

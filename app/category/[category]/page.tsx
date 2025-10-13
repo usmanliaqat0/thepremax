@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import Navigation from "@/components/Navigation";
+import PageLayout from "@/components/ui/page-layout";
 import ProductCard from "@/components/ProductCard";
-import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RefreshLoader } from "@/components/ui/loader";
@@ -17,7 +16,6 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-// Removed dummy data imports - now using real API data
 import { Search, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -40,17 +38,14 @@ const CategoryPage = () => {
 
   useScrollToTop();
 
-  // Fetch data from API
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
 
-        // Fetch products
         const productsResponse = await fetch("/api/products?limit=1000");
         const productsData = await productsResponse.json();
 
-        // Fetch categories
         const categoriesResponse = await fetch("/api/categories");
         const categoriesData = await categoriesResponse.json();
 
@@ -141,22 +136,19 @@ const CategoryPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
+      <PageLayout>
         <div className="container mx-auto px-4 py-16">
           <div className="text-center">
             <RefreshLoader size="lg" className="mx-auto mb-4" />
           </div>
         </div>
-        <Footer />
-      </div>
+      </PageLayout>
     );
   }
 
   if (!category) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
+      <PageLayout>
         <div className="container mx-auto px-4 py-16">
           <Card className="max-w-md mx-auto text-center">
             <CardContent className="py-12">
@@ -175,15 +167,12 @@ const CategoryPage = () => {
             </CardContent>
           </Card>
         </div>
-        <Footer />
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-
+    <PageLayout>
       {/* Header */}
       <section className="py-12 bg-muted/30">
         <div className="container mx-auto px-4">
@@ -381,9 +370,7 @@ const CategoryPage = () => {
           </div>
         </section>
       )}
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 };
 

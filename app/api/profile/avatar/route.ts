@@ -23,7 +23,6 @@ class FileUploadService {
   static async validateFile(
     file: File
   ): Promise<{ valid: boolean; message?: string }> {
-
     if (!this.ALLOWED_TYPES.includes(file.type)) {
       return {
         valid: false,
@@ -31,7 +30,7 @@ class FileUploadService {
       };
     }
 
-if (file.size > this.MAX_FILE_SIZE) {
+    if (file.size > this.MAX_FILE_SIZE) {
       return {
         valid: false,
         message: "File size too large. Maximum size is 5MB.",
@@ -50,7 +49,6 @@ if (file.size > this.MAX_FILE_SIZE) {
     message?: string;
   }> {
     try {
-
       const validation = await this.validateFile(file);
       if (!validation.valid) {
         return {
@@ -59,17 +57,17 @@ if (file.size > this.MAX_FILE_SIZE) {
         };
       }
 
-await fs.mkdir(this.UPLOAD_DIR, { recursive: true });
+      await fs.mkdir(this.UPLOAD_DIR, { recursive: true });
 
-const fileExtension = path.extname(file.name);
+      const fileExtension = path.extname(file.name);
       const fileName = `user-${userId}-${Date.now()}${fileExtension}`;
       const filePath = path.join(this.UPLOAD_DIR, fileName);
 
-const bytes = await file.arrayBuffer();
+      const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       await fs.writeFile(filePath, buffer);
 
-const relativePath = `/uploads/avatars/${fileName}`;
+      const relativePath = `/uploads/avatars/${fileName}`;
 
       return {
         success: true,
@@ -87,31 +85,28 @@ const relativePath = `/uploads/avatars/${fileName}`;
 
   static async deleteOldAvatar(avatarPath: string): Promise<void> {
     try {
-
       if (
         avatarPath.startsWith("/uploads/avatars/") ||
         avatarPath.startsWith("/profile-images/custom/")
       ) {
         const fullPath = path.join(process.cwd(), "public", avatarPath);
         await fs.unlink(fullPath).catch(() => {
-
+          // Ignore file not found errors
         });
       }
     } catch (error) {
       console.error("Error deleting old avatar:", error);
-
     }
   }
 }
 
 function getAuthToken(req: NextRequest): string | null {
-
   const authHeader = req.headers.get("authorization");
   if (authHeader && authHeader.startsWith("Bearer ")) {
     return authHeader.substring(7);
   }
 
-const cookieToken = req.cookies.get("accessToken")?.value;
+  const cookieToken = req.cookies.get("accessToken")?.value;
   if (cookieToken) {
     return cookieToken;
   }
@@ -121,7 +116,6 @@ const cookieToken = req.cookies.get("accessToken")?.value;
 
 export async function POST(req: NextRequest) {
   try {
-
     const token = getAuthToken(req);
     if (!token) {
       return NextResponse.json(
@@ -132,7 +126,7 @@ export async function POST(req: NextRequest) {
 
     const decoded = TokenUtils.verifyAccessToken(token);
 
-const formData = await req.formData();
+    const formData = await req.formData();
     const file = formData.get("avatar") as File;
 
     if (!file) {
@@ -142,7 +136,7 @@ const formData = await req.formData();
       );
     }
 
-const uploadResult = await FileUploadService.uploadAvatar(file, decoded.id);
+    const uploadResult = await FileUploadService.uploadAvatar(file, decoded.id);
 
     if (!uploadResult.success) {
       return NextResponse.json(
@@ -151,7 +145,7 @@ const uploadResult = await FileUploadService.uploadAvatar(file, decoded.id);
       );
     }
 
-await connectDB();
+    await connectDB();
 
     const user = await User.findById(decoded.id);
     if (!user) {
@@ -161,7 +155,7 @@ await connectDB();
       );
     }
 
-if (
+    if (
       user.avatar &&
       (user.avatar.startsWith("/uploads/avatars/") ||
         user.avatar.startsWith("/profile-images/custom/"))
@@ -169,7 +163,7 @@ if (
       await FileUploadService.deleteOldAvatar(user.avatar);
     }
 
-const updatedUser = await User.findByIdAndUpdate(
+    const updatedUser = await User.findByIdAndUpdate(
       decoded.id,
       { avatar: uploadResult.path },
       { new: true }
@@ -202,7 +196,6 @@ const updatedUser = await User.findByIdAndUpdate(
 
 export async function DELETE(req: NextRequest) {
   try {
-
     const token = getAuthToken(req);
     if (!token) {
       return NextResponse.json(
@@ -223,7 +216,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-if (
+    if (
       user.avatar &&
       (user.avatar.startsWith("/uploads/avatars/") ||
         user.avatar.startsWith("/profile-images/custom/"))
@@ -231,7 +224,7 @@ if (
       await FileUploadService.deleteOldAvatar(user.avatar);
     }
 
-const defaultAvatar = AvatarUtils.getDefaultAvatar(user.gender);
+    const defaultAvatar = AvatarUtils.getDefaultAvatar(user.gender);
 
     const updatedUser = await User.findByIdAndUpdate(
       decoded.id,

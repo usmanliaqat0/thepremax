@@ -175,15 +175,12 @@ const OrderHistorySection = () => {
     orderId: string,
     orderNumber: string
   ) => {
-    // Add to downloading set
     setDownloadingInvoices((prev) => new Set(prev).add(orderId));
 
     try {
-      // Get the access token from localStorage or cookies
       let token = localStorage.getItem("auth_token");
 
       if (!token) {
-        // Try to get from cookies
         const cookieMatch = document.cookie
           .split("; ")
           .find((row) => row.startsWith("accessToken="));
@@ -242,7 +239,6 @@ const OrderHistorySection = () => {
         variant: "destructive",
       });
     } finally {
-      // Remove from downloading set
       setDownloadingInvoices((prev) => {
         const newSet = new Set(prev);
         newSet.delete(orderId);
@@ -269,7 +265,6 @@ const OrderHistorySection = () => {
       });
 
       if (response.ok) {
-        // Refresh orders
         const ordersResponse = await fetch("/api/orders", {
           headers: {
             Authorization: `Bearer ${state.token}`,
@@ -332,7 +327,6 @@ const OrderHistorySection = () => {
           {loading ? (
             <div className="text-center py-8">
               <RefreshLoader size="lg" className="mx-auto mb-4" />
-              <p className="text-muted-foreground">Loading orders...</p>
             </div>
           ) : filteredOrders.length === 0 ? (
             <div className="text-center py-8">

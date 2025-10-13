@@ -148,7 +148,6 @@ const OrderSuccessContent = () => {
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-2xl mx-auto text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading order details...</p>
           </div>
         </div>
         <Footer />

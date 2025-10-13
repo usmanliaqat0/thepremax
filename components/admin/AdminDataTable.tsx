@@ -117,11 +117,9 @@ export function AdminDataTable<T extends Record<string, unknown>>({
   const [sortKey, setSortKey] = useState<keyof T | string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
-  // Filter and search data
   const filteredData = useMemo(() => {
     let filtered = [...data];
 
-    // Apply search
     if (searchable && search.trim()) {
       filtered = filtered.filter((item) => {
         const searchValue = item[searchKey];
@@ -131,7 +129,6 @@ export function AdminDataTable<T extends Record<string, unknown>>({
       });
     }
 
-    // Apply filters
     filters.forEach((filter) => {
       if (filter.value !== "all") {
         filtered = filtered.filter((item) => {
@@ -144,7 +141,6 @@ export function AdminDataTable<T extends Record<string, unknown>>({
     return filtered;
   }, [data, search, filters, searchable, searchKey]);
 
-  // Sort data
   const sortedData = useMemo(() => {
     if (!sortKey) return filteredData;
 
@@ -158,7 +154,6 @@ export function AdminDataTable<T extends Record<string, unknown>>({
     });
   }, [filteredData, sortKey, sortDirection]);
 
-  // Paginate data
   const paginatedData = useMemo(() => {
     if (!showPagination) return sortedData;
 
@@ -167,12 +162,10 @@ export function AdminDataTable<T extends Record<string, unknown>>({
     return sortedData.slice(startIndex, endIndex);
   }, [sortedData, currentPage, itemsPerPage, showPagination]);
 
-  // Pagination info
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const hasNext = currentPage < totalPages;
   const hasPrev = currentPage > 1;
 
-  // Handle sorting
   const handleSort = (key: keyof T | string) => {
     if (sortKey === key) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -182,13 +175,11 @@ export function AdminDataTable<T extends Record<string, unknown>>({
     }
   };
 
-  // Handle search change
   const handleSearchChange = (value: string) => {
     setSearch(value);
     setCurrentPage(1); // Reset to first page when searching
   };
 
-  // Handle filter change
   const handleFilterChange = (filterKey: string, value: string) => {
     const filter = filters.find((f) => f.key === filterKey);
     if (filter) {
@@ -197,7 +188,6 @@ export function AdminDataTable<T extends Record<string, unknown>>({
     }
   };
 
-  // Clear all filters
   const clearFilters = () => {
     setSearch("");
     filters.forEach((filter) => {
@@ -208,13 +198,11 @@ export function AdminDataTable<T extends Record<string, unknown>>({
     setCurrentPage(1);
   };
 
-  // Render cell content
   const renderCellContent = (item: T, column: TableColumn<T>) => {
     const value = item[column.key as keyof T];
     return column.render ? column.render(item, value) : String(value);
   };
 
-  // Check if any filters are active
   const hasActiveFilters =
     search.trim() || filters.some((filter) => filter.value !== "all");
 

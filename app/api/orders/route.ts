@@ -5,14 +5,12 @@ import { authMiddleware } from "@/lib/auth-middleware";
 import { handleApiError } from "@/lib/error-handler";
 import mongoose from "mongoose";
 
-// Generate unique order number
 function generateOrderNumber(): string {
   const timestamp = Date.now().toString();
   const random = Math.random().toString(36).substring(2, 8).toUpperCase();
   return `ORD-${timestamp.slice(-6)}-${random}`;
 }
 
-// GET /api/orders - Get user's orders
 export async function GET(request: NextRequest) {
   try {
     const user = await authMiddleware(request);
@@ -27,7 +25,6 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const status = searchParams.get("status");
 
-    // Handle both string and ObjectId userIds
     const query: Record<string, unknown> = {
       $or: [
         { userId: user.id },
@@ -59,7 +56,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/orders - Create new order
 export async function POST(request: NextRequest) {
   try {
     const user = await authMiddleware(request);
@@ -82,7 +78,6 @@ export async function POST(request: NextRequest) {
       billingAddress,
     } = body;
 
-    // Validate required fields
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         { error: "Order items are required" },
@@ -97,10 +92,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate unique order number
     const orderNumber = generateOrderNumber();
 
-    // Create order
     const order = new Order({
       userId: new mongoose.Types.ObjectId(user.id),
       orderNumber,

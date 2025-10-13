@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
+import PageLayout from "@/components/ui/page-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -135,7 +134,6 @@ const TrackOrderContent = () => {
   const generateTrackingUpdates = (order: Order): TrackingUpdate[] => {
     const updates: TrackingUpdate[] = [];
 
-    // Order created
     updates.push({
       status: "Order Placed",
       location: "Online Store",
@@ -143,7 +141,6 @@ const TrackOrderContent = () => {
       description: "Your order has been placed successfully",
     });
 
-    // Processing
     if (order.status !== "pending") {
       updates.push({
         status: "Processing",
@@ -153,7 +150,6 @@ const TrackOrderContent = () => {
       });
     }
 
-    // Shipped
     if (order.status === "shipped" || order.status === "delivered") {
       updates.push({
         status: "Shipped",
@@ -167,7 +163,6 @@ const TrackOrderContent = () => {
       });
     }
 
-    // Delivered
     if (order.status === "delivered") {
       updates.push({
         status: "Delivered",
@@ -177,7 +172,6 @@ const TrackOrderContent = () => {
       });
     }
 
-    // Cancelled
     if (order.status === "cancelled") {
       updates.push({
         status: "Cancelled",
@@ -244,11 +238,9 @@ const TrackOrderContent = () => {
     setDownloadingInvoice(true);
 
     try {
-      // Get the access token from localStorage or cookies
       let token = localStorage.getItem("auth_token");
 
       if (!token) {
-        // Try to get from cookies
         const cookieMatch = document.cookie
           .split("; ")
           .find((row) => row.startsWith("accessToken="));
@@ -319,10 +311,8 @@ const TrackOrderContent = () => {
 
   const handleOrderNumberChange = (value: string) => {
     setOrderNumber(value);
-    // Don't clear results or call API - let user decide when to search
   };
 
-  // Auto-search only once when page loads with URL parameter
   useEffect(() => {
     const urlOrderNumber = searchParams.get("orderNumber");
     if (urlOrderNumber && !hasAutoSearched) {
@@ -332,9 +322,7 @@ const TrackOrderContent = () => {
   }, [searchParams, hasAutoSearched, fetchOrder]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-
+    <PageLayout className="bg-gray-50">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -609,9 +597,7 @@ const TrackOrderContent = () => {
           </div>
         )}
       </div>
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 };
 
@@ -619,16 +605,14 @@ const TrackOrderPage = () => {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50">
-          <Navigation />
+        <PageLayout className="bg-gray-50">
           <div className="container mx-auto px-4 py-8 max-w-4xl">
             <div className="text-center">
               <RefreshLoader size="lg" className="mx-auto mb-4" />
               <p className="text-gray-600">Loading...</p>
             </div>
           </div>
-          <Footer />
-        </div>
+        </PageLayout>
       }
     >
       <TrackOrderContent />

@@ -129,7 +129,6 @@ export default function ClientSideAdminTable<
     filterOptions: filters,
   });
 
-  // Use parent loading state if provided, otherwise use internal loading state
   const isTableLoading = isLoading || internalLoading;
 
   const renderSkeletonRows = () => {

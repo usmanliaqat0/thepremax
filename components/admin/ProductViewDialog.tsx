@@ -155,9 +155,7 @@ export default function ProductViewDialog({
         </DialogHeader>
 
         <div className="space-y-4 sm:space-y-6">
-          {/* Product Header */}
           <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
-            {/* Product Image */}
             <div className="flex-shrink-0 self-center sm:self-start">
               {primaryImage ? (
                 <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden border">
@@ -175,7 +173,6 @@ export default function ProductViewDialog({
               )}
             </div>
 
-            {/* Product Basic Info */}
             <div className="flex-1 space-y-3 text-center sm:text-left">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div>
@@ -245,7 +242,6 @@ export default function ProductViewDialog({
             </div>
           </div>
 
-          {/* Product Flags */}
           <div className="flex flex-wrap justify-center sm:justify-start gap-2">
             {product.featured && (
               <Badge variant="outline" className="bg-blue-100 text-blue-800">
@@ -272,9 +268,7 @@ export default function ProductViewDialog({
 
           <Separator />
 
-          {/* Product Details Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Basic Information */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -316,7 +310,6 @@ export default function ProductViewDialog({
               </CardContent>
             </Card>
 
-            {/* Pricing & Sales */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -365,7 +358,6 @@ export default function ProductViewDialog({
             </Card>
           </div>
 
-          {/* Tags */}
           {product.tags.length > 0 && (
             <Card>
               <CardHeader className="pb-3">
@@ -386,7 +378,6 @@ export default function ProductViewDialog({
             </Card>
           )}
 
-          {/* Specifications */}
           {product.specifications && product.specifications.length > 0 && (
             <Card>
               <CardHeader className="pb-3">
@@ -407,7 +398,6 @@ export default function ProductViewDialog({
             </Card>
           )}
 
-          {/* Sizes & Colors */}
           {(product.sizes.length > 0 || product.colors.length > 0) && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {product.sizes.length > 0 && (
@@ -454,7 +444,6 @@ export default function ProductViewDialog({
             </div>
           )}
 
-          {/* Product Variants */}
           {product.variants.length > 0 && (
             <Card>
               <CardHeader className="pb-3">
@@ -506,7 +495,6 @@ export default function ProductViewDialog({
             </Card>
           )}
 
-          {/* SEO Information */}
           {(product.seoTitle || product.seoDescription) && (
             <Card>
               <CardHeader className="pb-3">
@@ -535,7 +523,6 @@ export default function ProductViewDialog({
             </Card>
           )}
 
-          {/* Timestamps */}
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">

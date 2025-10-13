@@ -3,7 +3,6 @@ import connectDB from "@/lib/db";
 import Order from "@/lib/models/Order";
 import { adminMiddleware } from "@/lib/admin-middleware";
 
-// GET /api/admin/orders - Get all orders (admin only)
 export async function GET(request: NextRequest) {
   try {
     const authResult = await adminMiddleware(request);
@@ -45,7 +44,6 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    // If all=true, get all orders without pagination
     let ordersQuery = Order.find(query).sort({ createdAt: -1 }).lean();
 
     if (!all) {
@@ -57,13 +55,10 @@ export async function GET(request: NextRequest) {
       Order.countDocuments(query),
     ]);
 
-    // Manually populate user data for orders that have valid ObjectId userIds
     const ordersWithUsers = await Promise.all(
       orders.map(async (order) => {
         try {
-          // Check if userId exists and is either a string or ObjectId
           if (order.userId) {
-            // Import User model dynamically to avoid circular dependencies
             const { default: User } = await import("@/lib/models/User");
             const user = await User.findById(order.userId)
               .select("firstName lastName email")
@@ -72,14 +67,12 @@ export async function GET(request: NextRequest) {
           }
           return order;
         } catch (error) {
-          // If user lookup fails, return order without user data
           console.log(`Failed to fetch user for order ${order._id}:`, error);
           return order;
         }
       })
     );
 
-    // Get order statistics
     const stats = await Order.aggregate([
       {
         $group: {

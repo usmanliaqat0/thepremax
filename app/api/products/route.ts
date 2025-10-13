@@ -7,7 +7,6 @@ export async function GET(request: NextRequest) {
   try {
     await connectDB();
 
-    // Ensure Category model is registered for population
     if (!mongoose.models.Category) {
       await import("@/lib/models/Category");
     }

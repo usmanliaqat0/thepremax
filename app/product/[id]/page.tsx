@@ -81,7 +81,6 @@ const ProductDetail = () => {
         if (data.success && data.data) {
           setProduct(data.data);
 
-          // Fetch related products from the same category
           const relatedResponse = await fetch(
             `/api/products?category=${data.data.categoryId}&limit=4`
           );

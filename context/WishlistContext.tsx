@@ -124,10 +124,8 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({
   const [state, dispatch] = useReducer(wishlistReducer, initialState);
   const { state: authState } = useAuth();
 
-  // Convert Product to WishlistItem
   const productToWishlistItem = useCallback(
     (product: Product, size?: string, color?: string): WishlistItem => {
-      // Handle image - extract URL from image object or use string
       let imageUrl = "";
       if (product.images && product.images.length > 0) {
         imageUrl =
@@ -136,7 +134,6 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({
             : product.images[0]?.url || "";
       }
 
-      // Handle category - extract name from category object or use string
       let categoryName = "";
       if (typeof product.category === "string") {
         categoryName = product.category;
@@ -162,7 +159,6 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({
     []
   );
 
-  // Fetch wishlist from database
   const fetchWishlist = useCallback(async () => {
     if (!authState.token || !authState.isAuthenticated) {
       dispatch({ type: "INITIALIZE" });
@@ -195,7 +191,6 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, [authState.token, authState.isAuthenticated]);
 
-  // Sync wishlist to database
   const syncToDatabase = useCallback(
     async (
       action: "add" | "remove",
@@ -234,23 +229,18 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({
     [authState.token, authState.isAuthenticated]
   );
 
-  // Add item to wishlist
   const addToWishlist = useCallback(
     async (product: Product, size?: string, color?: string) => {
       const wishlistItem = productToWishlistItem(product, size, color);
 
-      // Add to local state immediately for better UX
       dispatch({ type: "ADD_ITEM", payload: wishlistItem });
 
-      // Show success message
       toast.success(`${product.name} added to wishlist!`);
 
-      // Sync to database if user is authenticated
       if (authState.isAuthenticated) {
         try {
           await syncToDatabase("add", wishlistItem);
         } catch (error) {
-          // Revert local state on error
           dispatch({ type: "REMOVE_ITEM", payload: product._id });
           toast.error("Failed to add to wishlist. Please try again.");
           return;
@@ -260,24 +250,19 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({
     [productToWishlistItem, authState.isAuthenticated, syncToDatabase]
   );
 
-  // Remove item from wishlist
   const removeFromWishlist = useCallback(
     async (productId: string) => {
-      // Remove from local state immediately
       dispatch({ type: "REMOVE_ITEM", payload: productId });
 
-      // Show success message
       const item = state.items.find((item) => item.productId === productId);
       if (item) {
         toast.success(`${item.name} removed from wishlist`);
       }
 
-      // Sync to database if user is authenticated
       if (authState.isAuthenticated) {
         try {
           await syncToDatabase("remove", undefined, productId);
         } catch (error) {
-          // Revert local state on error
           await fetchWishlist();
           toast.error("Failed to remove from wishlist. Please try again.");
           return;
@@ -287,7 +272,6 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({
     [state.items, authState.isAuthenticated, syncToDatabase, fetchWishlist]
   );
 
-  // Check if item is in wishlist
   const isInWishlist = useCallback(
     (productId: string) => {
       return state.items.some((item) => item.productId === productId);
@@ -295,12 +279,10 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({
     [state.items]
   );
 
-  // Clear wishlist
   const clearWishlist = useCallback(async () => {
     dispatch({ type: "CLEAR_WISHLIST" });
     toast.success("Wishlist cleared");
 
-    // Sync to database if user is authenticated
     if (authState.isAuthenticated) {
       try {
         // Remove all items one by one

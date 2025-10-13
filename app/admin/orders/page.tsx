@@ -83,7 +83,6 @@ export default function OrdersManagement() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState("all");
 
-  // Use the custom dialog hook for better state management
   const viewDialog = useDialog({
     onOpenChange: (open) => {
       if (!open) {
@@ -92,7 +91,6 @@ export default function OrdersManagement() {
     },
   });
 
-  // Fetch orders data
   const fetchOrders = async () => {
     setLoading(true);
     setError(null);
@@ -114,7 +112,6 @@ export default function OrdersManagement() {
     }
   };
 
-  // Initial data fetch
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -134,7 +131,6 @@ export default function OrdersManagement() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        // Small delay to ensure database is updated
         setTimeout(async () => {
           await fetchOrders();
         }, 100);
@@ -163,7 +159,6 @@ export default function OrdersManagement() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        // Small delay to ensure database is updated
         setTimeout(async () => {
           await fetchOrders();
         }, 100);
@@ -185,7 +180,6 @@ export default function OrdersManagement() {
       const data = await res.json();
 
       if (res.ok && data.success) {
-        // Small delay to ensure database is updated
         setTimeout(async () => {
           await fetchOrders();
         }, 100);
@@ -204,7 +198,6 @@ export default function OrdersManagement() {
     showSuccessMessage("Orders refreshed successfully");
   };
 
-  // Calculate stats from all orders
   const stats = {
     total: orders.length,
     pending: orders.filter((o) => o.status === "pending").length,
@@ -215,7 +208,6 @@ export default function OrdersManagement() {
     totalRevenue: orders.reduce((sum, order) => sum + order.total, 0),
   };
 
-  // Helper functions for rendering
   const getStatusBadge = (status: string) => {
     const colors = {
       pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
@@ -251,7 +243,6 @@ export default function OrdersManagement() {
     );
   };
 
-  // Table columns configuration
   const columns: TableColumn<Order>[] = [
     {
       key: "orderNumber",
@@ -338,7 +329,6 @@ export default function OrdersManagement() {
       },
     });
 
-    // Status update actions
     if (item.status === "pending") {
       actions.push({
         label: "Mark as Processing",
@@ -377,7 +367,6 @@ export default function OrdersManagement() {
       });
     }
 
-    // Payment status actions
     if (item.paymentStatus === "pending") {
       actions.push({
         label: "Mark as Paid",
@@ -415,7 +404,6 @@ export default function OrdersManagement() {
     return actions;
   };
 
-  // Filter options
   const statusFilterOptions = [
     { key: "all", label: "All Status", value: "all" },
     { key: "pending", label: "Pending", value: "pending" },

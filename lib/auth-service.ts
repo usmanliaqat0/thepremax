@@ -275,7 +275,7 @@ export class AuthService {
       if (!user) {
         return {
           success: false,
-          message: "Invalid email or password",
+          message: "No account found with this email address",
         };
       }
 
@@ -293,7 +293,7 @@ export class AuthService {
       if (!isPasswordValid) {
         return {
           success: false,
-          message: "Invalid email or password",
+          message: "Incorrect password. Please try again.",
         };
       }
 

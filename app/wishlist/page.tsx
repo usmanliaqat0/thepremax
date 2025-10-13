@@ -22,14 +22,12 @@ const Wishlist = () => {
 
   useScrollToTop();
 
-  // Fetch wishlist from database when component mounts
   useEffect(() => {
     if (authState.isAuthenticated) {
       refreshWishlist();
     }
   }, [authState.isAuthenticated, refreshWishlist]);
 
-  // Show loading state while fetching
   if (wishlistState.isLoading) {
     return (
       <div className="min-h-screen bg-background">

@@ -89,15 +89,23 @@ export function handleClientError(
         message: "An account with this email already exists",
         type: "auth",
       });
-    } else if (message.includes("Invalid email or password")) {
+    } else if (message.includes("No account found with this email address")) {
       errors.push({
         field: "email",
-        message: "Invalid email or password",
+        message: "No account found with this email address",
         type: "auth",
       });
+    } else if (message.includes("Incorrect password")) {
       errors.push({
         field: "password",
-        message: "Invalid email or password",
+        message: "Incorrect password. Please try again.",
+        type: "auth",
+      });
+    } else if (message.includes("Invalid email or password")) {
+      // Fallback for any remaining generic messages
+      errors.push({
+        message:
+          "Invalid email or password. Please check your credentials and try again.",
         type: "auth",
       });
     } else if (message.includes("Account is not active")) {

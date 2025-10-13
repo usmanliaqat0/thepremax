@@ -1,8 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
+import PageLayout from "@/components/ui/page-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -90,9 +89,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-
+    <PageLayout>
       {}
       <section className="py-12 sm:py-16 bg-gradient-hero">
         <div className="container mx-auto px-4">
@@ -494,9 +491,7 @@ const Contact = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 };
 

@@ -193,6 +193,15 @@ const Profile = () => {
     fileInputRef.current?.click();
   };
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
   const cancelUpload = () => {
     setSelectedFile(null);
     setPreviewUrl("");
@@ -206,11 +215,7 @@ const Profile = () => {
       <div className="min-h-screen bg-gray-50">
         <Navigation />
         <div className="flex items-center justify-center py-12">
-          <BeautifulLoader
-            size="lg"
-            message="Loading your profile"
-            variant="default"
-          />
+          <BeautifulLoader size="lg" variant="default" />
         </div>
         <Footer />
       </div>
@@ -306,6 +311,7 @@ const Profile = () => {
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"
+                  onChange={handleFileChange}
                   style={{ display: "none" }}
                 />
               </div>
