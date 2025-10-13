@@ -74,7 +74,7 @@ export function PageLoading({
 }: PageLoadingProps) {
   return (
     <div className="min-h-[400px] flex flex-col items-center justify-center space-y-4">
-      <RefreshLoader size="xl" />
+      <RefreshLoader size="lg" />
       {showHeader && (
         <>
           <h2 className="text-xl font-semibold text-primary">{title}</h2>
@@ -100,11 +100,11 @@ interface GridSkeletonProps {
 
 export function GridSkeleton({
   items = 8,
-  columns = { sm: 1, md: 2, lg: 3, xl: 4 },
+  columns = { sm: 2, md: 2, lg: 3, xl: 4 },
   className,
 }: GridSkeletonProps) {
   const getGridClasses = () => {
-    const classes = ["grid", "gap-6"];
+    const classes = ["grid", "gap-4", "sm:gap-6"];
     if (columns.sm) classes.push(`grid-cols-${columns.sm}`);
     if (columns.md) classes.push(`md:grid-cols-${columns.md}`);
     if (columns.lg) classes.push(`lg:grid-cols-${columns.lg}`);

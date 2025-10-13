@@ -348,7 +348,10 @@ const TrackOrderContent = () => {
         {/* Search Form */}
         <Card className="mb-8">
           <CardContent className="p-6">
-            <form onSubmit={handleSearch} className="flex gap-4">
+            <form
+              onSubmit={handleSearch}
+              className="flex flex-col sm:flex-row gap-4"
+            >
               <div className="flex-1">
                 <Input
                   type="text"
@@ -358,7 +361,11 @@ const TrackOrderContent = () => {
                   className="text-lg"
                 />
               </div>
-              <Button type="submit" disabled={loading || !orderNumber.trim()}>
+              <Button
+                type="submit"
+                disabled={loading || !orderNumber.trim()}
+                className="w-full sm:w-auto"
+              >
                 {loading ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
@@ -616,7 +623,7 @@ const TrackOrderPage = () => {
           <Navigation />
           <div className="container mx-auto px-4 py-8 max-w-4xl">
             <div className="text-center">
-              <RefreshLoader size="xl" className="mx-auto mb-4" />
+              <RefreshLoader size="lg" className="mx-auto mb-4" />
               <p className="text-gray-600">Loading...</p>
             </div>
           </div>

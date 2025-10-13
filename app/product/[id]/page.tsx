@@ -117,7 +117,7 @@ const ProductDetail = () => {
         <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center min-h-[400px]">
-            <RefreshLoader size="xl" />
+            <RefreshLoader size="lg" />
           </div>
         </div>
         <Footer />
