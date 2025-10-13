@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import Navigation from "@/components/Navigation";
+import PageLayout from "@/components/ui/page-layout";
 import ProductCard from "@/components/ProductCard";
-import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RefreshLoader } from "@/components/ui/loader";
@@ -17,7 +16,6 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-// Removed dummy data imports - now using real API data
 import { Search, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -40,17 +38,14 @@ const CategoryPage = () => {
 
   useScrollToTop();
 
-  // Fetch data from API
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
 
-        // Fetch products
         const productsResponse = await fetch("/api/products?limit=1000");
         const productsData = await productsResponse.json();
 
-        // Fetch categories
         const categoriesResponse = await fetch("/api/categories");
         const categoriesData = await categoriesResponse.json();
 
@@ -141,23 +136,19 @@ const CategoryPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
+      <PageLayout>
         <div className="container mx-auto px-4 py-16">
           <div className="text-center">
-            <RefreshLoader size="xl" className="mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading category...</p>
+            <RefreshLoader size="lg" className="mx-auto mb-4" />
           </div>
         </div>
-        <Footer />
-      </div>
+      </PageLayout>
     );
   }
 
   if (!category) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
+      <PageLayout>
         <div className="container mx-auto px-4 py-16">
           <Card className="max-w-md mx-auto text-center">
             <CardContent className="py-12">
@@ -176,20 +167,17 @@ const CategoryPage = () => {
             </CardContent>
           </Card>
         </div>
-        <Footer />
-      </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-
+    <PageLayout>
       {/* Header */}
       <section className="py-12 bg-muted/30">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="flex-1">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                 <Link href="/" className="hover:text-primary">
                   Home
@@ -201,8 +189,8 @@ const CategoryPage = () => {
                 <span>/</span>
                 <span className="text-primary">{category.name}</span>
               </div>
-              <div className="flex items-center gap-6 mb-4">
-                <div className="w-20 h-20 flex items-center justify-center rounded-lg overflow-hidden shadow-fashion-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 mb-4">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-lg overflow-hidden shadow-fashion-sm flex-shrink-0">
                   {category.image ? (
                     <Image
                       src={category.image}
@@ -213,12 +201,12 @@ const CategoryPage = () => {
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-accent/20 to-accent/40 flex items-center justify-center">
-                      <span className="text-4xl">📦</span>
+                      <span className="text-3xl sm:text-4xl">📦</span>
                     </div>
                   )}
                 </div>
-                <div>
-                  <h1 className="text-4xl md:text-5xl font-heading font-bold text-primary mb-2">
+                <div className="flex-1">
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-bold text-primary mb-2">
                     {category.name}
                   </h1>
                   <div className="w-16 h-1 bg-gradient-to-r from-accent to-accent/60 rounded-full"></div>
@@ -231,12 +219,14 @@ const CategoryPage = () => {
                 {filteredProducts.length} products available
               </p>
             </div>
-            <Link href="/shop">
-              <Button variant="outline">
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                All Products
-              </Button>
-            </Link>
+            <div className="flex-shrink-0">
+              <Link href="/shop">
+                <Button variant="outline" className="w-full sm:w-auto">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  All Products
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -351,7 +341,7 @@ const CategoryPage = () => {
       {filteredProducts.length > 0 ? (
         <section className="pb-12">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {filteredProducts.map((product) => (
                 <div key={product._id}>
                   <ProductCard product={product} />
@@ -380,9 +370,7 @@ const CategoryPage = () => {
           </div>
         </section>
       )}
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 };
 

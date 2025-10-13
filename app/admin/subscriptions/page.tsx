@@ -60,7 +60,6 @@ export default function AdminSubscriptions() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sourceFilter, setSourceFilter] = useState("all");
 
-  // Fetch all subscriptions once on component mount
   const fetchAllSubscriptions = async () => {
     try {
       setLoading(true);
@@ -82,7 +81,6 @@ export default function AdminSubscriptions() {
     }
   };
 
-  // Load all data once on component mount
   useEffect(() => {
     fetchAllSubscriptions();
   }, []);
@@ -102,7 +100,6 @@ export default function AdminSubscriptions() {
       if (response.ok) {
         toast.success("Subscription status updated successfully");
 
-        // Update the local data instead of refetching
         setAllSubscriptions((prev) =>
           prev.map((sub) =>
             sub._id === id
@@ -117,8 +114,6 @@ export default function AdminSubscriptions() {
               : sub
           )
         );
-
-        // Recalculate stats
         const updatedSubs = allSubscriptions.map((sub) =>
           sub._id === id
             ? {
@@ -227,7 +222,6 @@ export default function AdminSubscriptions() {
     );
   };
 
-  // Table columns configuration
   const columns: TableColumn<EmailSubscription>[] = [
     {
       key: "email",
@@ -252,13 +246,10 @@ export default function AdminSubscriptions() {
     },
   ];
 
-  // Table actions configuration - dynamically generated based on item status
   const getActions = (
     item: EmailSubscription
   ): TableAction<EmailSubscription>[] => {
     const actions: TableAction<EmailSubscription>[] = [];
-
-    // Add status change actions based on current status
     if (item.status !== "active") {
       actions.push({
         label: "Mark as Active",
@@ -283,7 +274,6 @@ export default function AdminSubscriptions() {
       });
     }
 
-    // Always add delete action
     actions.push({
       label: "Delete",
       icon: <AlertTriangle className="h-4 w-4 mr-2" />,
@@ -299,7 +289,6 @@ export default function AdminSubscriptions() {
     return actions;
   };
 
-  // Filter options
   const statusFilterOptions = [
     { key: "all", label: "All Status", value: "all" },
     { key: "active", label: "Active", value: "active" },

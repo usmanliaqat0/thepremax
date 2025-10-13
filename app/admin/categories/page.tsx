@@ -39,7 +39,6 @@ export default function CategoriesPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Use the custom dialog hook for better state management
   const editDialog = useDialog({
     onOpenChange: (open) => {
       if (!open) {
@@ -56,7 +55,6 @@ export default function CategoriesPage() {
     },
   });
 
-  // Use the new hook for fetching all categories
   const {
     data: categories,
     isLoading,
@@ -81,7 +79,6 @@ export default function CategoriesPage() {
       const data = await response.json();
 
       if (data.success) {
-        // Update local data
         setData(categories.filter((c) => c._id !== category._id));
         toast.success("Category deleted successfully");
       } else {
@@ -98,14 +95,12 @@ export default function CategoriesPage() {
     toast.success("Categories refreshed");
   };
 
-  // Calculate stats from all categories
   const stats = {
     total: categories.length,
     active: categories.filter((cat) => cat.status === "active").length,
     inactive: categories.filter((cat) => cat.status === "inactive").length,
   };
 
-  // Helper functions for rendering
   const getStatusBadge = (status: string) => {
     const colors = {
       active: "bg-green-100 text-green-800",
@@ -121,7 +116,6 @@ export default function CategoriesPage() {
     );
   };
 
-  // Table columns configuration
   const columns: TableColumn<Category>[] = [
     {
       key: "name",
@@ -146,7 +140,7 @@ export default function CategoriesPage() {
     {
       key: "productCount",
       label: "Products",
-      render: () => 0, // Placeholder - you can implement product count logic here
+      render: () => 0,
     },
     {
       key: "createdAt",
@@ -156,7 +150,6 @@ export default function CategoriesPage() {
     },
   ];
 
-  // Dynamic actions
   const getActions = (): TableAction<Category>[] => {
     const actions: TableAction<Category>[] = [];
 
@@ -193,7 +186,6 @@ export default function CategoriesPage() {
     return actions;
   };
 
-  // Filter options
   const statusFilterOptions = [
     { key: "all", label: "All Status", value: "all" },
     { key: "active", label: "Active", value: "active" },
@@ -228,7 +220,7 @@ export default function CategoriesPage() {
             Manage product categories and their organization
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Button
             onClick={handleRefresh}
             variant="outline"
@@ -286,7 +278,6 @@ export default function CategoriesPage() {
         </Card>
       </div>
 
-      {/* Categories Data Table */}
       <AdminDataTable
         title="Categories"
         data={categories}

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Head from "next/head";
-import Navigation from "@/components/Navigation";
+import PageLayout from "@/components/ui/page-layout";
 import HeroSection from "@/components/HeroSection";
 import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
@@ -23,10 +23,6 @@ import {
   CreditCard,
 } from "lucide-react";
 import { useScrollToTop } from "@/hooks/use-scroll-to-top";
-
-const Footer = dynamic(() => import("@/components/Footer"), {
-  loading: () => <div className="h-96 bg-muted animate-pulse" />,
-});
 
 const Newsletter = dynamic(
   () =>
@@ -54,19 +50,16 @@ export default function Home() {
         setIsLoading(true);
         setError(null);
 
-        // Fetch featured products
         const featuredResponse = await fetch(
           "/api/products?featured=true&limit=8"
         );
         const featuredData = await featuredResponse.json();
 
-        // Fetch top rated products
         const topRatedResponse = await fetch(
           "/api/products?sortBy=rating&sortOrder=desc&limit=8"
         );
         const topRatedData = await topRatedResponse.json();
 
-        // Fetch categories
         const categoriesResponse = await fetch("/api/categories");
         const categoriesData = await categoriesResponse.json();
 
@@ -187,14 +180,13 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageLayout>
       <Head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
       </Head>
-      <Navigation />
       <HeroSection />
 
       <Section>
@@ -204,7 +196,7 @@ export default function Home() {
             subtitle="Explore our diverse range of products across multiple categories"
           />
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="animate-pulse">
                   <div className="bg-muted rounded-lg h-40 sm:h-48 mb-4"></div>
@@ -227,7 +219,7 @@ export default function Home() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {categories.slice(0, 4).map((category) => (
                 <Card
                   key={category._id}
@@ -237,7 +229,6 @@ export default function Home() {
                     href={`/category/${category.slug}`}
                     className="h-full flex flex-col"
                   >
-                    {/* Image Section */}
                     <div className="relative h-40 sm:h-48 overflow-hidden">
                       {category.image ? (
                         <Image
@@ -253,15 +244,12 @@ export default function Home() {
                           </div>
                         </div>
                       )}
-                      {/* Overlay */}
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
-                      {/* Hover Effect */}
                       <div className="absolute top-2 right-2 sm:top-4 sm:right-4 w-6 h-6 sm:w-8 sm:h-8 bg-white/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
                         <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 text-accent" />
                       </div>
                     </div>
 
-                    {/* Content Section */}
                     <div className="p-4 sm:p-6 flex-1 flex flex-col justify-center">
                       <h3 className="font-bold text-lg sm:text-xl mb-2 sm:mb-3 group-hover:text-accent transition-colors duration-300 text-center">
                         {category.name}
@@ -271,7 +259,6 @@ export default function Home() {
                           "Explore our amazing collection"}
                       </p>
 
-                      {/* Bottom Action */}
                       <div className="mt-3 sm:mt-4 flex justify-center">
                         <div className="inline-flex items-center text-accent text-xs sm:text-sm font-medium opacity-100 transition-all duration-300">
                           Shop Now
@@ -371,8 +358,6 @@ export default function Home() {
       </Section>
 
       <Newsletter variant="accent" />
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 }

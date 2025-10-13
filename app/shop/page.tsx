@@ -44,17 +44,14 @@ const ShopContent = () => {
 
   useScrollToTop();
 
-  // Fetch products and categories from API
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
 
-        // Fetch products
         const productsResponse = await fetch("/api/products?limit=100");
         const productsData = await productsResponse.json();
 
-        // Fetch categories
         const categoriesResponse = await fetch("/api/categories");
         const categoriesData = await categoriesResponse.json();
 
@@ -106,7 +103,6 @@ const ShopContent = () => {
     const timer = setTimeout(() => {
       let filtered = [...products];
 
-      // Search filter
       if (searchTerm.trim()) {
         const searchLower = searchTerm.toLowerCase();
         filtered = filtered.filter(
@@ -117,7 +113,6 @@ const ShopContent = () => {
         );
       }
 
-      // Category filter
       if (categoryFilter !== "all") {
         const selectedCategory = categories.find(
           (cat) => cat.slug === categoryFilter
@@ -129,7 +124,6 @@ const ShopContent = () => {
         }
       }
 
-      // Price range filter
       if (priceRange !== "all") {
         const range = getPriceRangeValues(priceRange);
         if (range) {
@@ -140,7 +134,6 @@ const ShopContent = () => {
         }
       }
 
-      // Sort
       filtered.sort((a, b) => {
         switch (sortBy) {
           case "price-low":
@@ -376,7 +369,7 @@ const Shop = () => {
     <Suspense
       fallback={
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <BeautifulLoader size="lg" message="Loading shop" variant="default" />
+          <BeautifulLoader size="lg" variant="default" />
         </div>
       }
     >

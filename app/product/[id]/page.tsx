@@ -81,7 +81,6 @@ const ProductDetail = () => {
         if (data.success && data.data) {
           setProduct(data.data);
 
-          // Fetch related products from the same category
           const relatedResponse = await fetch(
             `/api/products?category=${data.data.categoryId}&limit=4`
           );
@@ -117,7 +116,7 @@ const ProductDetail = () => {
         <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center min-h-[400px]">
-            <RefreshLoader size="xl" />
+            <RefreshLoader size="lg" />
           </div>
         </div>
         <Footer />

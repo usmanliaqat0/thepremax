@@ -44,7 +44,6 @@ export default function MessagesPage() {
   );
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
-  // Use the new hook for fetching all messages
   const {
     data: messages,
     isLoading: loading,
@@ -80,7 +79,6 @@ export default function MessagesPage() {
         );
         toast.success("Message status updated");
 
-        // Update the selected message if it's the same one being updated
         if (selectedMessage && selectedMessage._id === messageId) {
           setSelectedMessage({
             ...selectedMessage,
@@ -118,7 +116,6 @@ export default function MessagesPage() {
 
   const statusCounts = getStatusCounts();
 
-  // Helper functions for rendering
   const getStatusBadge = (status: string) => {
     const colors = {
       new: "bg-blue-100 text-blue-800",
@@ -136,7 +133,6 @@ export default function MessagesPage() {
     );
   };
 
-  // Table columns configuration
   const columns: TableColumn<ContactMessage>[] = [
     {
       key: "name",
@@ -166,7 +162,6 @@ export default function MessagesPage() {
     },
   ];
 
-  // Dynamic actions based on message status
   const getActions = (item: ContactMessage): TableAction<ContactMessage>[] => {
     const actions: TableAction<ContactMessage>[] = [];
 
@@ -203,7 +198,6 @@ export default function MessagesPage() {
     return actions;
   };
 
-  // Filter options
   const statusFilterOptions = [
     { key: "all", label: "All Status", value: "all" },
     { key: "new", label: "New", value: "new" },

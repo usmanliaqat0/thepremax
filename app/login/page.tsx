@@ -46,6 +46,9 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Clear previous errors
+    setErrors({});
+
     if (!validateForm()) {
       return;
     }
@@ -59,7 +62,8 @@ const Login = () => {
     if (result.success) {
       router.push("/profile");
     } else if (result.errors) {
-      setErrors((prev) => ({ ...prev, ...result.errors }));
+      // Set field-specific errors
+      setErrors(result.errors);
     }
   };
 

@@ -67,12 +67,12 @@ export function ProductGridWrapper({
       gap: "gap-3 md:gap-4",
     },
     comfortable: {
-      grid: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
-      gap: "gap-6",
+      grid: "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
+      gap: "gap-4 sm:gap-6",
     },
     spacious: {
-      grid: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-      gap: "gap-8",
+      grid: "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3",
+      gap: "gap-4 sm:gap-8",
     },
   };
 

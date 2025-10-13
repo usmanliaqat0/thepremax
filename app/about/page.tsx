@@ -1,7 +1,6 @@
 ﻿"use client";
 
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
+import PageLayout from "@/components/ui/page-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
@@ -13,9 +12,7 @@ const About = () => {
   useScrollToTop();
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-
+    <PageLayout>
       <section className="py-12 sm:py-16 lg:py-24 bg-gradient-hero">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
@@ -197,9 +194,7 @@ const About = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
-    </div>
+    </PageLayout>
   );
 };
 

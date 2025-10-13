@@ -36,7 +36,6 @@ export default function UsersManagement() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
 
-  // Use the custom dialog hook for better state management
   const viewDialog = useDialog({
     onOpenChange: (open) => {
       if (!open) {
@@ -53,7 +52,6 @@ export default function UsersManagement() {
     },
   });
 
-  // Use the new hook for fetching all users
   const {
     data: users,
     isLoading: loading,
@@ -119,7 +117,6 @@ export default function UsersManagement() {
     showSuccessMessage("Users refreshed successfully");
   };
 
-  // Calculate stats from all users
   const stats = {
     total: users.length,
     active: users.filter((u) => u.status === "active").length,
@@ -128,7 +125,6 @@ export default function UsersManagement() {
     verifiedPhones: users.filter((u) => u.isPhoneVerified).length,
   };
 
-  // Helper functions for rendering
   const getStatusBadge = (status: string) => {
     const colors = {
       active: "bg-green-100 text-green-800",
@@ -159,7 +155,6 @@ export default function UsersManagement() {
     );
   };
 
-  // Table columns configuration
   const columns: TableColumn<User>[] = [
     {
       key: "email",
@@ -208,7 +203,6 @@ export default function UsersManagement() {
     },
   ];
 
-  // Dynamic actions based on user status
   const getActions = (item: User): TableAction<User>[] => {
     const actions: TableAction<User>[] = [];
 
@@ -261,7 +255,6 @@ export default function UsersManagement() {
     return actions;
   };
 
-  // Filter options
   const statusFilterOptions = [
     { key: "all", label: "All Status", value: "all" },
     { key: "active", label: "Active", value: "active" },
