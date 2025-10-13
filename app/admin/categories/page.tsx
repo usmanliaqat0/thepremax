@@ -228,7 +228,7 @@ export default function CategoriesPage() {
             Manage product categories and their organization
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Button
             onClick={handleRefresh}
             variant="outline"
