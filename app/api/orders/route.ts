@@ -74,6 +74,8 @@ export async function POST(request: NextRequest) {
       shipping,
       total,
       paymentMethod,
+      promoCode,
+      discount,
       shippingAddress,
       billingAddress,
     } = body;
@@ -92,6 +94,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate product IDs
+    for (const item of items) {
+      if (!mongoose.Types.ObjectId.isValid(item.productId)) {
+        return NextResponse.json(
+          { error: `Invalid product ID: ${item.productId}` },
+          { status: 400 }
+        );
+      }
+    }
+
     const orderNumber = generateOrderNumber();
 
     const order = new Order({
@@ -103,6 +115,8 @@ export async function POST(request: NextRequest) {
       shipping,
       total,
       paymentMethod,
+      promoCode,
+      discount,
       shippingAddress,
       billingAddress,
       status: "pending",
@@ -110,6 +124,20 @@ export async function POST(request: NextRequest) {
     });
 
     await order.save();
+
+    // Update promo code usage if applied
+    if (promoCode && promoCode.code) {
+      try {
+        const PromoCode = (await import("@/lib/models/PromoCode")).default;
+        await PromoCode.findOneAndUpdate(
+          { code: promoCode.code },
+          { $inc: { usedCount: 1 } }
+        );
+      } catch (error) {
+        console.error("Error updating promo code usage:", error);
+        // Don't fail the order if promo code update fails
+      }
+    }
 
     return NextResponse.json(
       {

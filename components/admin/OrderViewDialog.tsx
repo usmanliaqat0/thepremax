@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Package, User, MapPin, Calendar, DollarSign } from "lucide-react";
+import { Package, User, MapPin, Calendar, DollarSign, Tag } from "lucide-react";
 import { format } from "date-fns";
 import { formatPrice } from "@/lib/currency";
 
@@ -53,6 +53,13 @@ interface Order {
   trackingNumber?: string;
   estimatedDelivery?: string;
   deliveredAt?: string;
+  promoCode?: {
+    code: string;
+    type: "percentage" | "fixed";
+    value: number;
+    discount: number;
+  };
+  discount?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -313,6 +320,71 @@ export default function OrderViewDialog({
             </CardContent>
           </Card>
 
+          {/* Promo Code Information */}
+          {order.promoCode && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Tag className="h-4 w-4" />
+                  Promo Code Applied
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm font-medium text-green-800">
+                        {order.promoCode.code}
+                      </span>
+                    </div>
+                    <div className="text-sm font-semibold text-green-800">
+                      {order.promoCode.type === "percentage"
+                        ? `-${order.promoCode.value}%`
+                        : `-$${order.promoCode.value}`}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Discount Type:
+                      </span>
+                      <span className="font-medium capitalize">
+                        {order.promoCode.type}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Discount Value:
+                      </span>
+                      <span className="font-medium">
+                        {order.promoCode.type === "percentage"
+                          ? `${order.promoCode.value}%`
+                          : `$${order.promoCode.value}`}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Discount Amount:
+                      </span>
+                      <span className="font-medium text-green-600">
+                        -{formatPrice(order.promoCode.discount)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">
+                        Total Discount:
+                      </span>
+                      <span className="font-medium text-green-600">
+                        -{formatPrice(order.discount || 0)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Order Summary */}
           <Card>
             <CardHeader className="pb-3">
@@ -329,6 +401,16 @@ export default function OrderViewDialog({
                   </span>
                   <span className="text-sm">{formatPrice(order.subtotal)}</span>
                 </div>
+                {order.discount && order.discount > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      Discount:
+                    </span>
+                    <span className="text-sm text-green-600">
+                      -{formatPrice(order.discount)}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Tax:</span>
                   <span className="text-sm">{formatPrice(order.tax)}</span>

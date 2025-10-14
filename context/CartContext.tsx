@@ -21,6 +21,13 @@ export interface CartItem {
 
 interface CartState {
   items: CartItem[];
+  appliedPromoCode?: {
+    code: string;
+    type: "percentage" | "fixed";
+    value: number;
+    discount: number;
+    description?: string;
+  };
 }
 
 type CartAction =
@@ -42,7 +49,18 @@ type CartAction =
       payload: { id: string; size: string; color: string; quantity: number };
     }
   | { type: "CLEAR_CART" }
-  | { type: "LOAD_STATE"; payload: CartState };
+  | { type: "LOAD_STATE"; payload: CartState }
+  | {
+      type: "APPLY_PROMO_CODE";
+      payload: {
+        code: string;
+        type: "percentage" | "fixed";
+        value: number;
+        discount: number;
+        description?: string;
+      };
+    }
+  | { type: "REMOVE_PROMO_CODE" };
 
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
@@ -50,7 +68,9 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       const { product, size, color, quantity = 1 } = action.payload;
       const existingItemIndex = state.items.findIndex(
         (item) =>
-          item.id === product._id && item.size === size && item.color === color
+          item.id === product._id.toString() &&
+          item.size === size &&
+          item.color === color
       );
 
       if (existingItemIndex >= 0) {
@@ -59,7 +79,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         return { ...state, items: updatedItems };
       } else {
         const newItem: CartItem = {
-          id: product._id,
+          id: product._id.toString(),
           product,
           quantity,
           size,
@@ -102,10 +122,22 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     }
 
     case "CLEAR_CART":
-      return { ...state, items: [] };
+      return { ...state, items: [], appliedPromoCode: undefined };
 
     case "LOAD_STATE":
       return action.payload;
+
+    case "APPLY_PROMO_CODE":
+      return {
+        ...state,
+        appliedPromoCode: action.payload,
+      };
+
+    case "REMOVE_PROMO_CODE":
+      return {
+        ...state,
+        appliedPromoCode: undefined,
+      };
 
     default:
       return state;
@@ -131,6 +163,14 @@ interface CartContextValue {
   getCartTotal: () => number;
   getCartItemsCount: () => number;
   isInCart: (id: string, size?: string, color?: string) => boolean;
+  applyPromoCode: (
+    code: string,
+    type: "percentage" | "fixed",
+    value: number,
+    discount: number,
+    description?: string
+  ) => void;
+  removePromoCode: () => void;
 }
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
@@ -222,6 +262,26 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     [state.items]
   );
 
+  const applyPromoCode = useCallback(
+    (
+      code: string,
+      type: "percentage" | "fixed",
+      value: number,
+      discount: number,
+      description?: string
+    ) => {
+      dispatch({
+        type: "APPLY_PROMO_CODE",
+        payload: { code, type, value, discount, description },
+      });
+    },
+    []
+  );
+
+  const removePromoCode = useCallback(() => {
+    dispatch({ type: "REMOVE_PROMO_CODE" });
+  }, []);
+
   const value: CartContextValue = {
     state,
     addToCart,
@@ -231,6 +291,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     getCartTotal,
     getCartItemsCount,
     isInCart,
+    applyPromoCode,
+    removePromoCode,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
