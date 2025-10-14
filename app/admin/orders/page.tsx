@@ -71,6 +71,13 @@ interface Order extends Record<string, unknown> {
   trackingNumber?: string;
   estimatedDelivery?: string;
   deliveredAt?: string;
+  promoCode?: {
+    code: string;
+    type: "percentage" | "fixed";
+    value: number;
+    discount: number;
+  };
+  discount?: number;
   createdAt: string;
   updatedAt: string;
 }

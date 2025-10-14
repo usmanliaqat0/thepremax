@@ -120,9 +120,10 @@ const Checkout = () => {
   }
 
   const subtotal = getCartTotal();
+  const discount = state.appliedPromoCode ? state.appliedPromoCode.discount : 0;
   const shipping = subtotal > 50 ? 0 : 10;
-  const tax = subtotal * 0.08;
-  const total = subtotal + shipping + tax;
+  const tax = (subtotal - discount) * 0.08;
+  const total = subtotal - discount + shipping + tax;
 
   const handleShippingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setShippingInfo({ ...shippingInfo, [e.target.name]: e.target.value });
@@ -149,7 +150,7 @@ const Checkout = () => {
 
     try {
       const orderItems = state.items.map((item) => ({
-        productId: item.id,
+        productId: item.product._id,
         name: item.product.name,
         image: item.product.images[0]?.url || "/placeholder-product.jpg",
         price: item.product.basePrice,
@@ -169,6 +170,15 @@ const Checkout = () => {
         shipping,
         total,
         paymentMethod,
+        promoCode: state.appliedPromoCode
+          ? {
+              code: state.appliedPromoCode.code,
+              type: state.appliedPromoCode.type,
+              value: state.appliedPromoCode.value,
+              discount: state.appliedPromoCode.discount,
+            }
+          : undefined,
+        discount: discount,
         shippingAddress: {
           firstName,
           lastName,

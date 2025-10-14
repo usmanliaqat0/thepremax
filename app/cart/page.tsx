@@ -31,22 +31,75 @@ const Cart = () => {
     removeFromCart,
     getCartTotal,
     getCartItemsCount,
+    applyPromoCode: contextApplyPromoCode,
+    removePromoCode: contextRemovePromoCode,
   } = useCart();
   const [promoCode, setPromoCode] = useState("");
-  const [appliedPromo, setAppliedPromo] = useState("");
+  const [promoError, setPromoError] = useState("");
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
   useScrollToTop();
 
-  const applyPromoCode = () => {
-    if (promoCode.toLowerCase() === "welcome10") {
-      setAppliedPromo("WELCOME10");
+  const applyPromoCode = async () => {
+    if (!promoCode.trim()) {
+      setPromoError("Please enter a promo code");
+      return;
     }
-    setPromoCode("");
+
+    setIsValidatingPromo(true);
+    setPromoError("");
+
+    try {
+      const cartItems = state.items.map((item) => ({
+        productId: item.product._id,
+        categoryId: item.product.category?._id,
+        quantity: item.quantity,
+        price: item.product.basePrice,
+      }));
+
+      const response = await fetch("/api/promo-codes/validate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code: promoCode,
+          cartItems,
+          subtotal: getCartTotal(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        contextApplyPromoCode(
+          data.data.code,
+          data.data.type,
+          data.data.value,
+          data.data.discount,
+          data.data.description
+        );
+        setPromoError("");
+        setPromoCode("");
+      } else {
+        setPromoError(data.error || "Invalid promo code");
+      }
+    } catch (error) {
+      console.error("Error validating promo code:", error);
+      setPromoError("Failed to validate promo code");
+    } finally {
+      setIsValidatingPromo(false);
+    }
+  };
+
+  const removePromoCode = () => {
+    contextRemovePromoCode();
+    setPromoError("");
   };
 
   const subtotal = getCartTotal();
-  const discount = appliedPromo ? subtotal * 0.1 : 0;
+  const discount = state.appliedPromoCode ? state.appliedPromoCode.discount : 0;
   const shipping = subtotal > 50 ? 0 : 10;
   const tax = (subtotal - discount) * 0.08;
   const total = subtotal - discount + shipping + tax;
@@ -118,7 +171,7 @@ const Cart = () => {
                   {state.items.map((item) => (
                     <div
                       key={`${item.id}-${item.size}-${item.color}`}
-                      className="flex flex-col sm:flex-row gap-4 p-4 sm:p-0 border-b last:border-b-0 sm:border-0 sm:border rounded-none sm:rounded-lg hover:shadow-sm transition-shadow"
+                      className="flex flex-col sm:flex-row gap-4 p-4 sm:p-0 border-b last:border-b-0 sm:border sm:rounded-lg hover:shadow-sm transition-shadow"
                     >
                       {/* Product Image & Info */}
                       <div className="flex flex-1 gap-3 sm:gap-4 min-w-0">
@@ -255,20 +308,60 @@ const Cart = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Enter promo code"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
-                    />
-                    <Button variant="outline" onClick={applyPromoCode}>
-                      Apply
-                    </Button>
-                  </div>
-                  {appliedPromo && (
-                    <div className="flex items-center justify-between mt-3 text-sm text-green-600">
-                      <span>WELCOME10 Applied</span>
-                      <span>-10%</span>
+                  {!state.appliedPromoCode ? (
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Enter promo code"
+                          value={promoCode}
+                          onChange={(e) => setPromoCode(e.target.value)}
+                          onKeyPress={(e) =>
+                            e.key === "Enter" && applyPromoCode()
+                          }
+                          disabled={isValidatingPromo}
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={applyPromoCode}
+                          disabled={isValidatingPromo || !promoCode.trim()}
+                        >
+                          {isValidatingPromo ? "Validating..." : "Apply"}
+                        </Button>
+                      </div>
+                      {promoError && (
+                        <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
+                          {promoError}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <span className="text-sm font-medium text-green-800">
+                            {state.appliedPromoCode.code} Applied
+                          </span>
+                        </div>
+                        <div className="text-sm font-semibold text-green-800">
+                          {state.appliedPromoCode.type === "percentage"
+                            ? `-${state.appliedPromoCode.value}%`
+                            : `-$${state.appliedPromoCode.value}`}
+                        </div>
+                      </div>
+                      {state.appliedPromoCode.description && (
+                        <p className="text-xs text-muted-foreground">
+                          {state.appliedPromoCode.description}
+                        </p>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={removePromoCode}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        Remove
+                      </Button>
                     </div>
                   )}
                 </CardContent>

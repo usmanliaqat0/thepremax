@@ -44,6 +44,13 @@ export interface IOrder {
   trackingNumber?: string;
   estimatedDelivery?: Date;
   deliveredAt?: Date;
+  promoCode?: {
+    code: string;
+    type: "percentage" | "fixed";
+    value: number;
+    discount: number;
+  };
+  discount?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -102,6 +109,13 @@ const OrderSchema = new Schema<IOrder>(
     trackingNumber: { type: String },
     estimatedDelivery: { type: Date },
     deliveredAt: { type: Date },
+    promoCode: {
+      code: { type: String },
+      type: { type: String, enum: ["percentage", "fixed"] },
+      value: { type: Number },
+      discount: { type: Number },
+    },
+    discount: { type: Number },
   },
   {
     timestamps: true,

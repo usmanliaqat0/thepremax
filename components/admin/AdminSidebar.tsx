@@ -53,6 +53,11 @@ const sidebarItems = [
     href: "/admin/subscriptions",
     icon: Mail,
   },
+  {
+    title: "Promo Codes",
+    href: "/admin/promo-codes",
+    icon: Tag,
+  },
 ];
 
 interface AdminSidebarProps {
