@@ -10,6 +10,7 @@ import CategoryViewDialog from "@/components/admin/CategoryViewDialog";
 import { toast } from "sonner";
 import { useAdminData } from "@/hooks/use-admin-data";
 import { useDialog } from "@/hooks/use-dialog";
+import { usePermissions } from "@/context/PermissionContext";
 import {
   AdminDataTable,
   TableColumn,
@@ -34,6 +35,7 @@ interface Category extends Record<string, unknown> {
 }
 
 export default function CategoriesPage() {
+  const { hasPermission } = usePermissions();
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [viewingCategory, setViewingCategory] = useState<Category | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -153,35 +155,44 @@ export default function CategoriesPage() {
   const getActions = (): TableAction<Category>[] => {
     const actions: TableAction<Category>[] = [];
 
-    actions.push({
-      label: "View",
-      icon: <Eye className="h-4 w-4 mr-2" />,
-      onClick: (category) => {
-        setViewingCategory(category);
-        viewDialog.openDialog();
-      },
-    });
+    // View action - available to all admins with view permission
+    if (hasPermission("categories", "view")) {
+      actions.push({
+        label: "View",
+        icon: <Eye className="h-4 w-4 mr-2" />,
+        onClick: (category) => {
+          setViewingCategory(category);
+          viewDialog.openDialog();
+        },
+      });
+    }
 
-    actions.push({
-      label: "Edit",
-      icon: <Edit className="h-4 w-4 mr-2" />,
-      onClick: (category) => {
-        setEditingCategory(category);
-        editDialog.openDialog();
-      },
-    });
+    // Edit action - only if user has update permission
+    if (hasPermission("categories", "update")) {
+      actions.push({
+        label: "Edit",
+        icon: <Edit className="h-4 w-4 mr-2" />,
+        onClick: (category) => {
+          setEditingCategory(category);
+          editDialog.openDialog();
+        },
+      });
+    }
 
-    actions.push({
-      label: "Delete",
-      icon: <Trash2 className="h-4 w-4 mr-2" />,
-      onClick: (category) => handleDelete(category),
-      variant: "destructive",
-      confirm: {
-        title: "Delete Category",
-        description:
-          "Are you sure you want to delete this category? This action cannot be undone.",
-      },
-    });
+    // Delete action - only if user has delete permission
+    if (hasPermission("categories", "delete")) {
+      actions.push({
+        label: "Delete",
+        icon: <Trash2 className="h-4 w-4 mr-2" />,
+        onClick: (category) => handleDelete(category),
+        variant: "destructive",
+        confirm: {
+          title: "Delete Category",
+          description:
+            "Are you sure you want to delete this category? This action cannot be undone.",
+        },
+      });
+    }
 
     return actions;
   };
@@ -230,14 +241,19 @@ export default function CategoriesPage() {
             <Package className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Button onClick={editDialog.openDialog} className="w-full sm:w-auto">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Category
-          </Button>
+          {hasPermission("categories", "create") && (
+            <Button
+              onClick={editDialog.openDialog}
+              className="w-full sm:w-auto"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Category
+            </Button>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-sm font-medium">

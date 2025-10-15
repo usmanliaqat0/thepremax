@@ -1,5 +1,40 @@
 ﻿// Shared types for the application
 
+export interface AdminPermissions {
+  dashboard: { view: boolean };
+  users: {
+    view: boolean;
+    create: boolean;
+    update: boolean;
+    delete: boolean;
+    export: boolean;
+  };
+  products: {
+    view: boolean;
+    create: boolean;
+    update: boolean;
+    delete: boolean;
+    export: boolean;
+  };
+  categories: {
+    view: boolean;
+    create: boolean;
+    update: boolean;
+    delete: boolean;
+  };
+  orders: { view: boolean; update: boolean; delete: boolean; export: boolean };
+  promoCodes: {
+    view: boolean;
+    create: boolean;
+    update: boolean;
+    delete: boolean;
+  };
+  subscriptions: { view: boolean; update: boolean; export: boolean };
+  messages: { view: boolean; update: boolean; delete: boolean };
+  admins: { view: boolean; create: boolean; update: boolean; delete: boolean };
+  stats: { view: boolean; export: boolean };
+}
+
 export interface Product {
   _id: string;
   name: string;
@@ -88,7 +123,7 @@ export interface User {
   gender?: "male" | "female" | "other";
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
-  role: "customer" | "admin" | "staff";
+  role: "customer" | "admin" | "staff" | "super_admin";
   status: "active" | "inactive" | "pending" | "archived";
   preferences: {
     currency: "USD" | "EUR" | "PKR";
@@ -97,6 +132,7 @@ export interface User {
     favoriteCategories: string[];
   };
   addresses: Address[];
+  permissions?: AdminPermissions;
   createdAt: string;
   updatedAt: string;
   [key: string]: unknown;

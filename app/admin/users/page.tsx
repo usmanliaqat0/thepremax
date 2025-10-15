@@ -22,6 +22,7 @@ import UserViewDialog from "@/components/admin/UserViewDialog";
 import { showSuccessMessage, showErrorMessage } from "@/lib/error-handler";
 import { useAdminData } from "@/hooks/use-admin-data";
 import { useDialog } from "@/hooks/use-dialog";
+import { usePermissions } from "@/context/PermissionContext";
 import {
   AdminDataTable,
   TableColumn,
@@ -30,6 +31,7 @@ import {
 import { format } from "date-fns";
 
 export default function UsersManagement() {
+  const { hasPermission } = usePermissions();
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editLoading, setEditLoading] = useState(false);
   const [refreshTrigger] = useState(0);
@@ -206,51 +208,63 @@ export default function UsersManagement() {
   const getActions = (item: User): TableAction<User>[] => {
     const actions: TableAction<User>[] = [];
 
-    actions.push({
-      label: "View",
-      icon: <Eye className="h-4 w-4 mr-2" />,
-      onClick: (user) => {
-        setSelectedUser(user);
-        viewDialog.openDialog();
-      },
-    });
-
-    actions.push({
-      label: "Edit",
-      icon: <Edit className="h-4 w-4 mr-2" />,
-      onClick: (user) => {
-        setSelectedUser(user);
-        editDialog.openDialog();
-      },
-    });
-
-    if (item.status !== "active") {
+    // View action - available to all admins with view permission
+    if (hasPermission("users", "view")) {
       actions.push({
-        label: "Activate",
-        icon: <UserCheck className="h-4 w-4 mr-2" />,
-        onClick: (user) => handleToggleUserStatus(user.id, "active"),
+        label: "View",
+        icon: <Eye className="h-4 w-4 mr-2" />,
+        onClick: (user) => {
+          setSelectedUser(user);
+          viewDialog.openDialog();
+        },
       });
     }
 
-    if (item.status !== "inactive") {
+    // Edit action - only if user has update permission
+    if (hasPermission("users", "update")) {
       actions.push({
-        label: "Deactivate",
-        icon: <UserX className="h-4 w-4 mr-2" />,
-        onClick: (user) => handleToggleUserStatus(user.id, "inactive"),
+        label: "Edit",
+        icon: <Edit className="h-4 w-4 mr-2" />,
+        onClick: (user) => {
+          setSelectedUser(user);
+          editDialog.openDialog();
+        },
       });
     }
 
-    actions.push({
-      label: "Delete",
-      icon: <Trash2 className="h-4 w-4 mr-2" />,
-      onClick: (user) => handleDeleteUser(user.id),
-      variant: "destructive",
-      confirm: {
-        title: "Delete User",
-        description:
-          "Are you sure you want to delete this user? This action cannot be undone.",
-      },
-    });
+    // Status toggle - only if user has update permission
+    if (hasPermission("users", "update")) {
+      if (item.status !== "active") {
+        actions.push({
+          label: "Activate",
+          icon: <UserCheck className="h-4 w-4 mr-2" />,
+          onClick: (user) => handleToggleUserStatus(user.id, "active"),
+        });
+      }
+
+      if (item.status !== "inactive") {
+        actions.push({
+          label: "Deactivate",
+          icon: <UserX className="h-4 w-4 mr-2" />,
+          onClick: (user) => handleToggleUserStatus(user.id, "inactive"),
+        });
+      }
+    }
+
+    // Delete action - only if user has delete permission
+    if (hasPermission("users", "delete")) {
+      actions.push({
+        label: "Delete",
+        icon: <Trash2 className="h-4 w-4 mr-2" />,
+        onClick: (user) => handleDeleteUser(user.id),
+        variant: "destructive",
+        confirm: {
+          title: "Delete User",
+          description:
+            "Are you sure you want to delete this user? This action cannot be undone.",
+        },
+      });
+    }
 
     return actions;
   };
@@ -309,14 +323,16 @@ export default function UsersManagement() {
             )}
             {loading ? "Refreshing..." : "Refresh"}
           </Button>
-          <Button variant="outline" className="w-full sm:w-auto">
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
+          {hasPermission("users", "export") && (
+            <Button variant="outline" className="w-full sm:w-auto">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
         <Card className="p-3 sm:p-6">
           <div className="flex flex-col items-center justify-center gap-2">
             <UserCheck className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />

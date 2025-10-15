@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAdminData } from "@/hooks/use-admin-data";
+import { usePermissions } from "@/context/PermissionContext";
 import {
   AdminDataTable,
   TableColumn,
@@ -37,6 +38,7 @@ interface ContactMessage extends Record<string, unknown> {
 }
 
 export default function MessagesPage() {
+  const { hasPermission } = usePermissions();
   const [refreshTrigger] = useState(0);
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(
@@ -165,34 +167,40 @@ export default function MessagesPage() {
   const getActions = (item: ContactMessage): TableAction<ContactMessage>[] => {
     const actions: TableAction<ContactMessage>[] = [];
 
-    actions.push({
-      label: "View",
-      icon: <Eye className="h-4 w-4 mr-2" />,
-      onClick: (message) => handleViewMessage(message),
-    });
-
-    if (item.status !== "read") {
+    // View action - available to all admins with view permission
+    if (hasPermission("messages", "view")) {
       actions.push({
-        label: "Mark as Read",
-        icon: <CheckCircle className="h-4 w-4 mr-2" />,
-        onClick: (message) => handleStatusUpdate(message._id, "read"),
+        label: "View",
+        icon: <Eye className="h-4 w-4 mr-2" />,
+        onClick: (message) => handleViewMessage(message),
       });
     }
 
-    if (item.status !== "replied") {
-      actions.push({
-        label: "Mark as Replied",
-        icon: <CheckCircle className="h-4 w-4 mr-2" />,
-        onClick: (message) => handleStatusUpdate(message._id, "replied"),
-      });
-    }
+    // Status updates - only if user has update permission
+    if (hasPermission("messages", "update")) {
+      if (item.status !== "read") {
+        actions.push({
+          label: "Mark as Read",
+          icon: <CheckCircle className="h-4 w-4 mr-2" />,
+          onClick: (message) => handleStatusUpdate(message._id, "read"),
+        });
+      }
 
-    if (item.status !== "closed") {
-      actions.push({
-        label: "Close",
-        icon: <XCircle className="h-4 w-4 mr-2" />,
-        onClick: (message) => handleStatusUpdate(message._id, "closed"),
-      });
+      if (item.status !== "replied") {
+        actions.push({
+          label: "Mark as Replied",
+          icon: <CheckCircle className="h-4 w-4 mr-2" />,
+          onClick: (message) => handleStatusUpdate(message._id, "replied"),
+        });
+      }
+
+      if (item.status !== "closed") {
+        actions.push({
+          label: "Close",
+          icon: <XCircle className="h-4 w-4 mr-2" />,
+          onClick: (message) => handleStatusUpdate(message._id, "closed"),
+        });
+      }
     }
 
     return actions;
@@ -248,8 +256,8 @@ export default function MessagesPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-        <Card className="p-2 sm:p-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
+        <Card className="p-3 sm:p-4 md:p-6">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               New Messages
@@ -264,7 +272,7 @@ export default function MessagesPage() {
           </div>
         </Card>
 
-        <Card className="p-2 sm:p-3">
+        <Card className="p-3 sm:p-4 md:p-6">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Read
@@ -279,7 +287,7 @@ export default function MessagesPage() {
           </div>
         </Card>
 
-        <Card className="p-2 sm:p-3">
+        <Card className="p-3 sm:p-4 md:p-6">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Replied
@@ -294,7 +302,7 @@ export default function MessagesPage() {
           </div>
         </Card>
 
-        <Card className="p-2 sm:p-3">
+        <Card className="p-3 sm:p-4 md:p-6">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Closed

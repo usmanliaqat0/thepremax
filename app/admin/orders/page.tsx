@@ -21,6 +21,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import { useDialog } from "@/hooks/use-dialog";
+import { usePermissions } from "@/context/PermissionContext";
 import {
   AdminDataTable,
   TableColumn,
@@ -83,6 +84,7 @@ interface Order extends Record<string, unknown> {
 }
 
 export default function OrdersManagement() {
+  const { hasPermission } = usePermissions();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
@@ -323,90 +325,99 @@ export default function OrdersManagement() {
     },
   ];
 
-  // Dynamic actions based on order status
+  // Dynamic actions based on order status and permissions
   const getActions = (item: Order): TableAction<Order>[] => {
     const actions: TableAction<Order>[] = [];
 
-    actions.push({
-      label: "View Details",
-      icon: <Eye className="h-4 w-4 mr-2" />,
-      onClick: (order) => {
-        setSelectedOrder(order);
-        viewDialog.openDialog();
-      },
-    });
-
-    if (item.status === "pending") {
+    // View action - available to all admins with view permission
+    if (hasPermission("orders", "view")) {
       actions.push({
-        label: "Mark as Processing",
-        icon: <Package className="h-4 w-4 mr-2" />,
-        onClick: (order) => handleUpdateOrderStatus(order._id, "processing"),
-      });
-    }
-
-    if (item.status === "processing") {
-      actions.push({
-        label: "Mark as Shipped",
-        icon: <Truck className="h-4 w-4 mr-2" />,
-        onClick: (order) => handleUpdateOrderStatus(order._id, "shipped"),
-      });
-    }
-
-    if (item.status === "shipped") {
-      actions.push({
-        label: "Mark as Delivered",
-        icon: <CheckCircle className="h-4 w-4 mr-2" />,
-        onClick: (order) => handleUpdateOrderStatus(order._id, "delivered"),
-      });
-    }
-
-    if (item.status !== "cancelled" && item.status !== "delivered") {
-      actions.push({
-        label: "Cancel Order",
-        icon: <XCircle className="h-4 w-4 mr-2" />,
-        onClick: (order) => handleUpdateOrderStatus(order._id, "cancelled"),
-        variant: "destructive",
-        confirm: {
-          title: "Cancel Order",
-          description:
-            "Are you sure you want to cancel this order? This action cannot be undone.",
+        label: "View Details",
+        icon: <Eye className="h-4 w-4 mr-2" />,
+        onClick: (order) => {
+          setSelectedOrder(order);
+          viewDialog.openDialog();
         },
       });
     }
 
-    if (item.paymentStatus === "pending") {
-      actions.push({
-        label: "Mark as Paid",
-        icon: <CheckCircle className="h-4 w-4 mr-2" />,
-        onClick: (order) => handleUpdatePaymentStatus(order._id, "paid"),
-      });
+    // Order status updates - only if user has update permission
+    if (hasPermission("orders", "update")) {
+      if (item.status === "pending") {
+        actions.push({
+          label: "Mark as Processing",
+          icon: <Package className="h-4 w-4 mr-2" />,
+          onClick: (order) => handleUpdateOrderStatus(order._id, "processing"),
+        });
+      }
+
+      if (item.status === "processing") {
+        actions.push({
+          label: "Mark as Shipped",
+          icon: <Truck className="h-4 w-4 mr-2" />,
+          onClick: (order) => handleUpdateOrderStatus(order._id, "shipped"),
+        });
+      }
+
+      if (item.status === "shipped") {
+        actions.push({
+          label: "Mark as Delivered",
+          icon: <CheckCircle className="h-4 w-4 mr-2" />,
+          onClick: (order) => handleUpdateOrderStatus(order._id, "delivered"),
+        });
+      }
+
+      if (item.status !== "cancelled" && item.status !== "delivered") {
+        actions.push({
+          label: "Cancel Order",
+          icon: <XCircle className="h-4 w-4 mr-2" />,
+          onClick: (order) => handleUpdateOrderStatus(order._id, "cancelled"),
+          variant: "destructive",
+          confirm: {
+            title: "Cancel Order",
+            description:
+              "Are you sure you want to cancel this order? This action cannot be undone.",
+          },
+        });
+      }
+
+      if (item.paymentStatus === "pending") {
+        actions.push({
+          label: "Mark as Paid",
+          icon: <CheckCircle className="h-4 w-4 mr-2" />,
+          onClick: (order) => handleUpdatePaymentStatus(order._id, "paid"),
+        });
+      }
+
+      if (item.paymentStatus === "paid") {
+        actions.push({
+          label: "Mark as Refunded",
+          icon: <XCircle className="h-4 w-4 mr-2" />,
+          onClick: (order) => handleUpdatePaymentStatus(order._id, "refunded"),
+          variant: "destructive",
+          confirm: {
+            title: "Mark as Refunded",
+            description:
+              "Are you sure you want to mark this payment as refunded?",
+          },
+        });
+      }
     }
 
-    if (item.paymentStatus === "paid") {
+    // Delete action - only if user has delete permission
+    if (hasPermission("orders", "delete")) {
       actions.push({
-        label: "Mark as Refunded",
-        icon: <XCircle className="h-4 w-4 mr-2" />,
-        onClick: (order) => handleUpdatePaymentStatus(order._id, "refunded"),
+        label: "Delete Order",
+        icon: <Trash2 className="h-4 w-4 mr-2" />,
+        onClick: (order) => handleDeleteOrder(order._id),
         variant: "destructive",
         confirm: {
-          title: "Mark as Refunded",
+          title: "Delete Order",
           description:
-            "Are you sure you want to mark this payment as refunded?",
+            "Are you sure you want to delete this order? This action cannot be undone.",
         },
       });
     }
-
-    actions.push({
-      label: "Delete Order",
-      icon: <Trash2 className="h-4 w-4 mr-2" />,
-      onClick: (order) => handleDeleteOrder(order._id),
-      variant: "destructive",
-      confirm: {
-        title: "Delete Order",
-        description:
-          "Are you sure you want to delete this order? This action cannot be undone.",
-      },
-    });
 
     return actions;
   };
@@ -470,15 +481,17 @@ export default function OrdersManagement() {
             )}
             {loading ? "Refreshing..." : "Refresh"}
           </Button>
-          <Button variant="outline" className="w-full sm:w-auto">
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
+          {hasPermission("orders", "export") && (
+            <Button variant="outline" className="w-full sm:w-auto">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Order Statistics */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
         <Card className="p-3 sm:p-6">
           <div className="flex flex-col items-center gap-2">
             <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />

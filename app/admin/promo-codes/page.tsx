@@ -18,6 +18,7 @@ import PromoCodeViewDialog from "@/components/admin/PromoCodeViewDialog";
 import { toast } from "sonner";
 import { useAdminData } from "@/hooks/use-admin-data";
 import { useDialog } from "@/hooks/use-dialog";
+import { usePermissions } from "@/context/PermissionContext";
 import {
   AdminDataTable,
   TableColumn,
@@ -43,6 +44,7 @@ interface PromoCode extends Record<string, unknown> {
 }
 
 export default function PromoCodesPage() {
+  const { hasPermission } = usePermissions();
   const [editingPromoCode, setEditingPromoCode] = useState<PromoCode | null>(
     null
   );
@@ -229,35 +231,44 @@ export default function PromoCodesPage() {
   const getActions = (): TableAction<PromoCode>[] => {
     const actions: TableAction<PromoCode>[] = [];
 
-    actions.push({
-      label: "View",
-      icon: <Eye className="h-4 w-4 mr-2" />,
-      onClick: (promoCode) => {
-        setViewingPromoCode(promoCode);
-        viewDialog.openDialog();
-      },
-    });
+    // View action - available to all admins with view permission
+    if (hasPermission("promoCodes", "view")) {
+      actions.push({
+        label: "View",
+        icon: <Eye className="h-4 w-4 mr-2" />,
+        onClick: (promoCode) => {
+          setViewingPromoCode(promoCode);
+          viewDialog.openDialog();
+        },
+      });
+    }
 
-    actions.push({
-      label: "Edit",
-      icon: <Edit className="h-4 w-4 mr-2" />,
-      onClick: (promoCode) => {
-        setEditingPromoCode(promoCode);
-        editDialog.openDialog();
-      },
-    });
+    // Edit action - only if user has update permission
+    if (hasPermission("promoCodes", "update")) {
+      actions.push({
+        label: "Edit",
+        icon: <Edit className="h-4 w-4 mr-2" />,
+        onClick: (promoCode) => {
+          setEditingPromoCode(promoCode);
+          editDialog.openDialog();
+        },
+      });
+    }
 
-    actions.push({
-      label: "Delete",
-      icon: <Trash2 className="h-4 w-4 mr-2" />,
-      onClick: (promoCode) => handleDelete(promoCode),
-      variant: "destructive",
-      confirm: {
-        title: "Delete Promo Code",
-        description:
-          "Are you sure you want to delete this promo code? This action cannot be undone.",
-      },
-    });
+    // Delete action - only if user has delete permission
+    if (hasPermission("promoCodes", "delete")) {
+      actions.push({
+        label: "Delete",
+        icon: <Trash2 className="h-4 w-4 mr-2" />,
+        onClick: (promoCode) => handleDelete(promoCode),
+        variant: "destructive",
+        confirm: {
+          title: "Delete Promo Code",
+          description:
+            "Are you sure you want to delete this promo code? This action cannot be undone.",
+        },
+      });
+    }
 
     return actions;
   };
@@ -314,14 +325,19 @@ export default function PromoCodesPage() {
             <Tag className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Button onClick={editDialog.openDialog} className="w-full sm:w-auto">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Promo Code
-          </Button>
+          {hasPermission("promoCodes", "create") && (
+            <Button
+              onClick={editDialog.openDialog}
+              className="w-full sm:w-auto"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Promo Code
+            </Button>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-sm font-medium">

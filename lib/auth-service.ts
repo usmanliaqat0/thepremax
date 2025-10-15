@@ -218,55 +218,33 @@ export class AuthService {
 
       const normalizedEmail = EmailUtils.normalize(email);
 
-      const adminEmail = process.env.ADMIN_EMAIL;
-      const adminPassword = process.env.ADMIN_PASSWORD;
-
+      // Check if this is an admin email trying to login through normal login
+      const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
       if (
-        adminEmail &&
-        adminPassword &&
-        normalizedEmail === EmailUtils.normalize(adminEmail)
+        superAdminEmail &&
+        normalizedEmail === EmailUtils.normalize(superAdminEmail)
       ) {
-        if (password === adminPassword) {
-          const adminUserData: AuthUser = {
-            id: "admin-super-user",
-            email: normalizedEmail,
-            firstName: "Super",
-            lastName: "Admin",
-            role: "admin",
-            avatar: AvatarUtils.getDefaultAvatar(),
-            isEmailVerified: true,
-            isPhoneVerified: false,
-            status: "active",
-            preferences: {
-              currency: "USD",
-              language: "en",
-              theme: "light",
-              favoriteCategories: [],
-            },
-            addresses: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-
-          const accessToken = TokenUtils.generateAccessToken(adminUserData);
-          const refreshToken = TokenUtils.generateRefreshToken(adminUserData);
-
-          return {
-            success: true,
-            user: adminUserData,
-            accessToken,
-            refreshToken,
-            message: "Admin login successful",
-          };
-        } else {
-          return {
-            success: false,
-            message: "Invalid admin credentials",
-          };
-        }
+        return {
+          success: false,
+          message: "Admin accounts must use the admin login portal",
+        };
       }
 
       await connectDB();
+
+      // Check if this email belongs to an admin user
+      const { default: Admin } = await import("./models/Admin");
+      const adminUser = await Admin.findOne({
+        email: normalizedEmail,
+        status: "active",
+      });
+
+      if (adminUser) {
+        return {
+          success: false,
+          message: "Admin accounts must use the admin login portal",
+        };
+      }
 
       const user = await User.findOne({ email: normalizedEmail }).select(
         "+password"

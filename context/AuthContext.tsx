@@ -36,6 +36,9 @@ interface AuthContextType {
   signin: (
     data: SigninData
   ) => Promise<{ success: boolean; errors?: Record<string, string> }>;
+  adminSignin: (
+    data: SigninData
+  ) => Promise<{ success: boolean; errors?: Record<string, string> }>;
   signup: (
     data: SignupData
   ) => Promise<{ success: boolean; errors?: Record<string, string> }>;
@@ -45,6 +48,7 @@ interface AuthContextType {
   resetAvatar: () => Promise<boolean>;
   refreshUser: () => Promise<void>;
   isAdmin: () => boolean;
+  isSuperAdmin: () => boolean;
   requireAdmin: () => boolean;
 }
 
@@ -197,6 +201,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       dispatch({ type: "AUTH_FAILURE" });
       showErrorMessage("Network error. Please try again.");
       console.error("Signin error:", error);
+      return { success: false };
+    }
+  };
+
+  const adminSignin = async (
+    data: SigninData
+  ): Promise<{ success: boolean; errors?: Record<string, string> }> => {
+    try {
+      dispatch({ type: "AUTH_START" });
+
+      const response = await fetch("/api/admin/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      console.log("Admin signin result:", result);
+
+      if (result.success && result.user && result.accessToken) {
+        console.log("Admin signin successful, updating auth state");
+        localStorage.setItem("auth_token", result.accessToken);
+        localStorage.setItem("user_data", JSON.stringify(result.user));
+
+        dispatch({
+          type: "AUTH_SUCCESS",
+          payload: { user: result.user, token: result.accessToken },
+        });
+
+        showSuccessMessage("Admin login successful!");
+        return { success: true };
+      } else {
+        dispatch({ type: "AUTH_FAILURE" });
+        const apiErrors = handleClientError(result, "Admin sign in failed");
+        const fieldErrors = displayApiErrors(apiErrors);
+        return { success: false, errors: fieldErrors };
+      }
+    } catch (error) {
+      dispatch({ type: "AUTH_FAILURE" });
+      showErrorMessage("Network error. Please try again.");
+      console.error("Admin signin error:", error);
       return { success: false };
     }
   };
@@ -368,7 +413,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const isAdmin = (): boolean => {
-    return state.user?.role === "admin";
+    return state.user?.role === "admin" || state.user?.role === "super_admin";
+  };
+
+  const isSuperAdmin = (): boolean => {
+    return (
+      state.user?.role === "super_admin" && state.user?.id === "super-admin"
+    );
   };
 
   const requireAdmin = (): boolean => {
@@ -381,6 +432,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const contextValue: AuthContextType = {
     state,
     signin,
+    adminSignin,
     signup,
     logout,
     updateProfile,
@@ -388,6 +440,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     resetAvatar,
     refreshUser,
     isAdmin,
+    isSuperAdmin,
     requireAdmin,
   };
 

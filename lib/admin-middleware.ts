@@ -1,11 +1,13 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
-import { TokenUtils } from "./auth-service";
+import { AdminAuthService } from "./admin-auth-service";
+import { AdminPermissions } from "./types";
 
-interface JWTPayload {
+interface AdminJWTPayload {
   id: string;
   email: string;
-  role?: string;
-  type: string;
+  role: string;
+  type: "admin";
+  permissions?: AdminPermissions;
   iat?: number;
   exp?: number;
 }
@@ -15,7 +17,8 @@ export interface AdminUser {
   email: string;
   firstName: string;
   lastName: string;
-  role: "admin";
+  role: "super_admin" | "admin";
+  permissions?: AdminPermissions;
 }
 
 export class AdminMiddleware {
@@ -38,23 +41,31 @@ export class AdminMiddleware {
         };
       }
 
-      const decoded = TokenUtils.verifyAccessToken(token) as JWTPayload;
+      const decoded = AdminAuthService.verifyAccessToken(
+        token
+      ) as AdminJWTPayload;
 
-      if (decoded.role !== "admin") {
+      if (decoded.type !== "admin") {
         return {
           success: false,
           error: "Insufficient permissions. Admin access required.",
         };
       }
 
+      // For super admin, we need to get the name from environment or hardcode
+      const isSuperAdmin = decoded.id === "super-admin";
+      const firstName = isSuperAdmin ? "Super" : "Admin";
+      const lastName = isSuperAdmin ? "Admin" : "User";
+
       return {
         success: true,
         user: {
           id: decoded.id,
           email: decoded.email,
-          firstName: "Super",
-          lastName: "Admin",
-          role: "admin",
+          firstName,
+          lastName,
+          role: decoded.role as "super_admin" | "admin",
+          permissions: decoded.permissions,
         },
       };
     } catch {
@@ -85,6 +96,88 @@ export class AdminMiddleware {
             message: verification.error || "Admin access required",
           },
           { status: 401 }
+        );
+      }
+
+      return handler(request, verification.user, ...args);
+    };
+  }
+
+  static requirePermission(section: string, action: string) {
+    return (
+      handler: (
+        request: NextRequest,
+        adminUser: AdminUser,
+        ...args: unknown[]
+      ) => Promise<NextResponse>
+    ) => {
+      return async (
+        request: NextRequest,
+        ...args: unknown[]
+      ): Promise<NextResponse> => {
+        const verification = AdminMiddleware.verifyAdminToken(request);
+
+        if (!verification.success || !verification.user) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: verification.error || "Admin access required",
+            },
+            { status: 401 }
+          );
+        }
+
+        // Super admin has all permissions
+        if (verification.user.id === "super-admin") {
+          return handler(request, verification.user, ...args);
+        }
+
+        // Check specific permission - only super admin can access all routes
+        if (verification.user.id !== "super-admin") {
+          return NextResponse.json(
+            {
+              success: false,
+              message: `Insufficient permissions. ${section}.${action} required.`,
+            },
+            { status: 403 }
+          );
+        }
+
+        return handler(request, verification.user, ...args);
+      };
+    };
+  }
+
+  static requireSuperAdmin(
+    handler: (
+      request: NextRequest,
+      adminUser: AdminUser,
+      ...args: unknown[]
+    ) => Promise<NextResponse>
+  ) {
+    return async (
+      request: NextRequest,
+      ...args: unknown[]
+    ): Promise<NextResponse> => {
+      const verification = AdminMiddleware.verifyAdminToken(request);
+
+      if (!verification.success || !verification.user) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: verification.error || "Admin access required",
+          },
+          { status: 401 }
+        );
+      }
+
+      if (verification.user.role !== "super_admin") {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Super admin access required",
+          },
+          { status: 403 }
         );
       }
 
@@ -124,7 +217,11 @@ export class AdminMiddleware {
 }
 
 export function isAdmin(userRole?: string): boolean {
-  return userRole === "admin";
+  return ["super_admin", "admin"].includes(userRole || "");
+}
+
+export function isSuperAdmin(userRole?: string): boolean {
+  return userRole === "super_admin";
 }
 
 export function useAdminAuth() {
@@ -132,7 +229,11 @@ export function useAdminAuth() {
     return isAdmin(userRole);
   };
 
-  return { checkAdminAccess, isAdmin };
+  const checkSuperAdminAccess = (userRole?: string) => {
+    return isSuperAdmin(userRole);
+  };
+
+  return { checkAdminAccess, checkSuperAdminAccess, isAdmin, isSuperAdmin };
 }
 
 // Export a function that can be used in API routes
