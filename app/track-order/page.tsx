@@ -609,7 +609,6 @@ const TrackOrderPage = () => {
           <div className="container mx-auto px-4 py-8 max-w-4xl">
             <div className="text-center">
               <RefreshLoader size="lg" className="mx-auto mb-4" />
-              <p className="text-gray-600">Loading...</p>
             </div>
           </div>
         </PageLayout>

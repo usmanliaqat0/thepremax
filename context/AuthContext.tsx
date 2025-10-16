@@ -357,12 +357,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await response.json();
 
       if (result.success && result.avatar) {
+        console.log("Avatar upload successful, updating state:", result.avatar);
         dispatch({ type: "UPDATE_AVATAR", payload: result.avatar });
         const updatedUser = { ...state.user!, avatar: result.avatar };
         localStorage.setItem("user_data", JSON.stringify(updatedUser));
         toast.success("Profile image updated successfully");
         return true;
       } else {
+        console.error("Avatar upload failed:", result.message);
         toast.error(result.message || "Image upload failed");
         return false;
       }
@@ -382,12 +384,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await response.json();
 
       if (result.success && result.avatar) {
+        console.log("Avatar reset successful, updating state:", result.avatar);
         dispatch({ type: "UPDATE_AVATAR", payload: result.avatar });
         const updatedUser = { ...state.user!, avatar: result.avatar };
         localStorage.setItem("user_data", JSON.stringify(updatedUser));
         toast.success("Profile image reset to default");
         return true;
       } else {
+        console.error("Avatar reset failed:", result.message);
         toast.error(result.message || "Reset avatar failed");
         return false;
       }

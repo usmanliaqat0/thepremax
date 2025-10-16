@@ -169,10 +169,23 @@ export async function POST(req: NextRequest) {
       { new: true }
     );
 
+    if (!updatedUser) {
+      return NextResponse.json(
+        { success: false, message: "Failed to update user avatar" },
+        { status: 500 }
+      );
+    }
+
+    console.log("Avatar updated successfully:", {
+      userId: decoded.id,
+      avatarPath: uploadResult.path,
+      updatedAvatar: updatedUser.avatar,
+    });
+
     return NextResponse.json({
       success: true,
       message: "Avatar updated successfully",
-      avatar: updatedUser?.avatar,
+      avatar: updatedUser.avatar,
     });
   } catch (error) {
     console.error("Avatar upload error:", error);
