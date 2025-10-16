@@ -59,7 +59,7 @@ export function handleApiError(
 
 // For validation errors with detailed field information
 export function handleValidationError(
-  validationErrors: any[],
+  validationErrors: unknown[],
   defaultMessage: string = "Validation failed"
 ): NextResponse {
   return NextResponse.json(

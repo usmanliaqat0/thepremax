@@ -1,13 +1,10 @@
 ﻿import mongoose, { type Mongoose } from "mongoose";
+import { getEnvConfig } from "./env-validation";
+import { initializeServerApp } from "./server-init";
 
-const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/thepremax";
-
-if (!process.env.MONGODB_URI) {
-  console.warn(
-    "⚠️  MONGODB_URI environment variable not found. Using default local MongoDB connection."
-  );
-}
+// Get environment configuration
+const env = getEnvConfig();
+const MONGODB_URI = env.MONGODB_URI;
 
 interface MongooseConnection {
   conn: Mongoose | null;
@@ -63,6 +60,9 @@ function getConnectionState(state: number): string {
 }
 
 async function connectDB(): Promise<Mongoose> {
+  // Initialize server application on first connection
+  initializeServerApp();
+
   if (cached.conn && mongooseStatic.connection.readyState === 1) {
     return cached.conn;
   }

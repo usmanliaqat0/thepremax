@@ -25,7 +25,8 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { state, signin, isAdmin } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { state, signinForm, isAdmin } = useAuth();
   const router = useRouter();
 
   // Redirect authenticated users away from login page
@@ -67,17 +68,23 @@ const Login = () => {
       return;
     }
 
-    const signinData: SigninData = {
-      email,
-      password,
-    };
+    setIsSubmitting(true);
 
-    const result = await signin(signinData);
-    if (result.success) {
-      router.push("/profile");
-    } else if (result.errors) {
-      // Set field-specific errors
-      setErrors(result.errors);
+    try {
+      const signinData: SigninData = {
+        email,
+        password,
+      };
+
+      const result = await signinForm(signinData);
+      if (result.success) {
+        router.push("/profile");
+      } else if (result.errors) {
+        // Set field-specific errors
+        setErrors(result.errors);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -174,10 +181,10 @@ const Login = () => {
                 <Button
                   type="submit"
                   className="w-full h-12 text-base font-semibold bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600 transition-all duration-200 shadow-lg hover:shadow-xl"
-                  disabled={state.isLoading}
+                  disabled={isSubmitting}
                 >
-                  {state.isLoading && <ButtonLoader variant="light" />}
-                  {state.isLoading ? "Signing In" : "Sign In"}
+                  {isSubmitting && <ButtonLoader variant="light" />}
+                  {isSubmitting ? "Signing In..." : "Sign In"}
                 </Button>
               </form>
 

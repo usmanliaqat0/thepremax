@@ -32,8 +32,9 @@ const Signup = () => {
     agreeToTerms: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { state, signup, isAdmin } = useAuth();
+  const { state, signupForm, isAdmin } = useAuth();
   const router = useRouter();
 
   // Redirect authenticated users away from signup page
@@ -87,17 +88,23 @@ const Signup = () => {
       return;
     }
 
-    const result = await signup({
-      email: formData.email,
-      password: formData.password,
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-    });
+    setIsSubmitting(true);
 
-    if (result.success) {
-      router.push("/profile");
-    } else if (result.errors) {
-      setErrors((prev) => ({ ...prev, ...result.errors }));
+    try {
+      const result = await signupForm({
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      });
+
+      if (result.success) {
+        router.push("/profile");
+      } else if (result.errors) {
+        setErrors((prev) => ({ ...prev, ...result.errors }));
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -295,11 +302,11 @@ const Signup = () => {
                 </div>
                 <Button
                   type="submit"
-                  disabled={state.isLoading}
+                  disabled={isSubmitting}
                   className="w-full h-12 text-base font-semibold bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
-                  {state.isLoading && <ButtonLoader variant="light" />}
-                  Create Account
+                  {isSubmitting && <ButtonLoader variant="light" />}
+                  {isSubmitting ? "Creating Account..." : "Create Account"}
                 </Button>
 
                 <div className="text-center pt-2">

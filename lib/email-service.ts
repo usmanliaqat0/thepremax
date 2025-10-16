@@ -1,10 +1,12 @@
 ﻿import * as brevo from "@getbrevo/brevo";
+import { getEnvConfig } from "./env-validation";
 
 let apiInstance: brevo.TransactionalEmailsApi;
 
 if (typeof window === "undefined") {
+  const env = getEnvConfig();
+  const apiKey = env.BREVO_API_KEY;
 
-  const apiKey = process.env.BREVO_API_KEY;
   if (apiKey) {
     apiInstance = new brevo.TransactionalEmailsApi();
     apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, apiKey);
@@ -16,7 +18,6 @@ if (typeof window === "undefined") {
 }
 
 export class EmailService {
-
   static async sendPasswordResetEmail(
     email: string,
     firstName: string,
@@ -41,17 +42,16 @@ export class EmailService {
         };
       }
 
-      const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
+      const env = getEnvConfig();
+      const resetUrl = `${env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
 
       const emailData = {
         to: [{ email, name: firstName }],
-        templateId: parseInt(
-          process.env.BREVO_PASSWORD_RESET_TEMPLATE_ID || "0"
-        ),
+        templateId: parseInt(env.BREVO_PASSWORD_RESET_TEMPLATE_ID || "0"),
         params: {
           firstName,
           resetUrl,
-          companyName: process.env.NEXT_PUBLIC_APP_NAME || "ThePreMax",
+          companyName: env.NEXT_PUBLIC_APP_NAME,
         },
       };
 
@@ -70,7 +70,7 @@ export class EmailService {
     }
   }
 
-static async sendEmail(
+  static async sendEmail(
     to: { email: string; name?: string }[],
     subject: string,
     htmlContent: string,
@@ -95,14 +95,15 @@ static async sendEmail(
         };
       }
 
+      const env = getEnvConfig();
       const emailData = {
         to,
         subject,
         htmlContent,
         textContent,
         sender: {
-          name: process.env.BREVO_SENDER_NAME || "ThePreMax",
-          email: process.env.BREVO_SENDER_EMAIL || "no-reply@usmanliaqat.com",
+          name: env.BREVO_SENDER_NAME || "ThePreMax",
+          email: env.BREVO_SENDER_EMAIL || "no-reply@usmanliaqat.com",
         },
       };
 
@@ -121,7 +122,7 @@ static async sendEmail(
     }
   }
 
-static async sendPasswordResetVerificationEmail(
+  static async sendPasswordResetVerificationEmail(
     email: string,
     firstName: string,
     verificationToken: string
@@ -152,22 +153,21 @@ static async sendPasswordResetVerificationEmail(
       );
       console.log("Full token:", verificationToken);
 
+      const env = getEnvConfig();
       const resetUrl = `${
-        process.env.NEXT_PUBLIC_APP_URL
+        env.NEXT_PUBLIC_APP_URL
       }/reset-password-verify?email=${encodeURIComponent(
         email
       )}&code=${verificationCode}`;
 
       const emailData = {
         to: [{ email, name: firstName }],
-        templateId: parseInt(
-          process.env.BREVO_PASSWORD_RESET_TEMPLATE_ID || "0"
-        ),
+        templateId: parseInt(env.BREVO_PASSWORD_RESET_TEMPLATE_ID || "0"),
         params: {
           firstName,
           verificationCode,
           resetUrl,
-          companyName: process.env.NEXT_PUBLIC_APP_NAME || "ThePreMax",
+          companyName: env.NEXT_PUBLIC_APP_NAME,
         },
       };
 
@@ -180,17 +180,19 @@ static async sendPasswordResetVerificationEmail(
     } catch (error) {
       console.error("Send password reset verification email error:", error);
 
-try {
+      // Fallback to direct email sending if template fails
+      try {
+        const env = getEnvConfig();
         const verificationCode = verificationToken
           .substring(0, 6)
           .toUpperCase();
         const resetUrl = `${
-          process.env.NEXT_PUBLIC_APP_URL
+          env.NEXT_PUBLIC_APP_URL
         }/reset-password-verify?email=${encodeURIComponent(
           email
         )}&code=${verificationCode}`;
 
-        const companyName = process.env.NEXT_PUBLIC_APP_NAME || "ThePreMax";
+        const companyName = env.NEXT_PUBLIC_APP_NAME;
 
         const htmlContent = `
           <!DOCTYPE html>
@@ -284,7 +286,7 @@ try {
     }
   }
 
-static async sendEmailVerificationEmail(
+  static async sendEmailVerificationEmail(
     email: string,
     firstName: string,
     verificationToken: string
@@ -312,22 +314,21 @@ static async sendEmailVerificationEmail(
       console.log("Generated verification code:", verificationCode);
       console.log("Full token:", verificationToken);
 
+      const env = getEnvConfig();
       const verificationUrl = `${
-        process.env.NEXT_PUBLIC_APP_URL
+        env.NEXT_PUBLIC_APP_URL
       }/verify-code?email=${encodeURIComponent(
         email
       )}&code=${verificationCode}`;
 
       const emailData = {
         to: [{ email, name: firstName }],
-        templateId: parseInt(
-          process.env.BREVO_EMAIL_VERIFICATION_TEMPLATE_ID || "0"
-        ),
+        templateId: parseInt(env.BREVO_EMAIL_VERIFICATION_TEMPLATE_ID || "0"),
         params: {
           firstName,
           verificationCode,
           verificationUrl,
-          companyName: process.env.NEXT_PUBLIC_APP_NAME || "ThePreMax",
+          companyName: env.NEXT_PUBLIC_APP_NAME,
         },
       };
 
@@ -340,7 +341,7 @@ static async sendEmailVerificationEmail(
     } catch (error) {
       console.error("Send email verification email error:", error);
 
-try {
+      try {
         const verificationCode = verificationToken
           .substring(0, 6)
           .toUpperCase();
@@ -350,12 +351,13 @@ try {
         );
         console.log("Fallback - Full token:", verificationToken);
 
+        const env = getEnvConfig();
         const verificationUrl = `${
-          process.env.NEXT_PUBLIC_APP_URL
+          env.NEXT_PUBLIC_APP_URL
         }/verify-code?email=${encodeURIComponent(
           email
         )}&code=${verificationCode}`;
-        const companyName = process.env.NEXT_PUBLIC_APP_NAME || "ThePreMax";
+        const companyName = env.NEXT_PUBLIC_APP_NAME;
 
         const htmlContent = `
           <!DOCTYPE html>
@@ -607,7 +609,7 @@ try {
     }
   }
 
-static async sendWelcomeEmail(
+  static async sendWelcomeEmail(
     email: string,
     firstName: string
   ): Promise<{
@@ -630,15 +632,16 @@ static async sendWelcomeEmail(
         };
       }
 
-      const welcomeUrl = `${process.env.NEXT_PUBLIC_APP_URL}/profile`;
+      const env = getEnvConfig();
+      const welcomeUrl = `${env.NEXT_PUBLIC_APP_URL}/profile`;
 
       const emailData = {
         to: [{ email, name: firstName }],
-        templateId: parseInt(process.env.BREVO_WELCOME_TEMPLATE_ID || "0"),
+        templateId: parseInt(env.BREVO_WELCOME_TEMPLATE_ID || "0"),
         params: {
           firstName,
           welcomeUrl,
-          companyName: process.env.NEXT_PUBLIC_APP_NAME || "ThePreMax",
+          companyName: env.NEXT_PUBLIC_APP_NAME,
         },
       };
 

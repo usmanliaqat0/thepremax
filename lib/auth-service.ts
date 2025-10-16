@@ -6,6 +6,7 @@ import { AuthUser, SigninData, SignupData } from "./types";
 import User, { IUser } from "./models/User";
 import connectDB from "./db";
 import { EmailService } from "./email-service";
+import { getEnvConfig } from "./env-validation";
 
 interface JWTPayload {
   id: string;
@@ -16,17 +17,12 @@ interface JWTPayload {
   exp?: number;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key-here";
-const JWT_REFRESH_SECRET =
-  process.env.JWT_REFRESH_SECRET || "your-super-secret-refresh-key-here";
-const TOKEN_EXPIRY = process.env.JWT_EXPIRES_IN || "7d";
-const REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_EXPIRES_IN || "30d";
-
-if (!process.env.JWT_SECRET) {
-  console.warn(
-    "⚠️  JWT_SECRET environment variable not found. Using default secret (not recommended for production)."
-  );
-}
+// Get environment configuration
+const env = getEnvConfig();
+const JWT_SECRET = env.JWT_SECRET;
+const JWT_REFRESH_SECRET = env.JWT_REFRESH_SECRET;
+const TOKEN_EXPIRY = env.JWT_EXPIRES_IN;
+const REFRESH_TOKEN_EXPIRY = env.JWT_REFRESH_EXPIRES_IN;
 
 const REFRESH_TOKENS_ENABLED = !!JWT_REFRESH_SECRET;
 

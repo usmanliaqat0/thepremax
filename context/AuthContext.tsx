@@ -36,10 +36,16 @@ interface AuthContextType {
   signin: (
     data: SigninData
   ) => Promise<{ success: boolean; errors?: Record<string, string> }>;
+  signinForm: (
+    data: SigninData
+  ) => Promise<{ success: boolean; errors?: Record<string, string> }>;
   adminSignin: (
     data: SigninData
   ) => Promise<{ success: boolean; errors?: Record<string, string> }>;
   signup: (
+    data: SignupData
+  ) => Promise<{ success: boolean; errors?: Record<string, string> }>;
+  signupForm: (
     data: SignupData
   ) => Promise<{ success: boolean; errors?: Record<string, string> }>;
   logout: () => void;
@@ -205,6 +211,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Separate signin function for form submissions that doesn't use global loading state
+  const signinForm = async (
+    data: SigninData
+  ): Promise<{ success: boolean; errors?: Record<string, string> }> => {
+    try {
+      const response = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result: AuthResponse = await response.json();
+
+      if (result.success && result.user && result.token) {
+        localStorage.setItem("auth_token", result.token);
+        localStorage.setItem("user_data", JSON.stringify(result.user));
+
+        dispatch({
+          type: "AUTH_SUCCESS",
+          payload: { user: result.user, token: result.token },
+        });
+
+        if (!result.user.isEmailVerified && result.user.role !== "admin") {
+          localStorage.setItem("pending_verification_email", result.user.email);
+
+          window.location.href = `/verify-code?email=${encodeURIComponent(
+            result.user.email
+          )}`;
+          return { success: true };
+        }
+
+        showSuccessMessage("Welcome back!");
+        return { success: true };
+      } else {
+        const apiErrors = handleClientError(result, "Sign in failed");
+        const fieldErrors = displayApiErrors(apiErrors);
+        return { success: false, errors: fieldErrors };
+      }
+    } catch (error) {
+      showErrorMessage("Network error. Please try again.");
+      console.error("Signin error:", error);
+      return { success: false };
+    }
+  };
+
   const adminSignin = async (
     data: SigninData
   ): Promise<{ success: boolean; errors?: Record<string, string> }> => {
@@ -298,6 +349,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       dispatch({ type: "AUTH_FAILURE" });
+      showErrorMessage("Network error. Please try again.");
+      console.error("Signup error:", error);
+      return { success: false };
+    }
+  };
+
+  // Separate signup function for form submissions that doesn't use global loading state
+  const signupForm = async (
+    data: SignupData
+  ): Promise<{ success: boolean; errors?: Record<string, string> }> => {
+    try {
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result: AuthResponse = await response.json();
+
+      if (result.success && result.user) {
+        if (result.requiresVerification && result.token) {
+          localStorage.setItem("auth_token", result.token);
+          localStorage.setItem("user_data", JSON.stringify(result.user));
+
+          dispatch({
+            type: "AUTH_SUCCESS",
+            payload: { user: result.user, token: result.token },
+          });
+
+          localStorage.setItem("pending_verification_email", result.user.email);
+
+          window.location.href = `/verify-code?email=${encodeURIComponent(
+            result.user.email
+          )}`;
+          return { success: true };
+        } else if (result.token) {
+          localStorage.setItem("auth_token", result.token);
+          localStorage.setItem("user_data", JSON.stringify(result.user));
+
+          dispatch({
+            type: "AUTH_SUCCESS",
+            payload: { user: result.user, token: result.token },
+          });
+
+          showSuccessMessage("Account created successfully!");
+          return { success: true };
+        } else {
+          return { success: true };
+        }
+      } else {
+        const apiErrors = handleClientError(result, "Sign up failed");
+        const fieldErrors = displayApiErrors(apiErrors);
+        return { success: false, errors: fieldErrors };
+      }
+    } catch (error) {
       showErrorMessage("Network error. Please try again.");
       console.error("Signup error:", error);
       return { success: false };
@@ -436,8 +542,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const contextValue: AuthContextType = {
     state,
     signin,
+    signinForm,
     adminSignin,
     signup,
+    signupForm,
     logout,
     updateProfile,
     uploadAvatar,

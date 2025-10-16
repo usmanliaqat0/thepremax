@@ -6,6 +6,9 @@ import { AuthProvider } from "@/context/AuthContext";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { Toaster } from "@/components/ui/sonner";
 
+// Application initialization is now handled in next.config.ts
+// This ensures proper initialization during the Next.js build process
+
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],

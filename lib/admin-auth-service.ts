@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import { AuthUser, AdminPermissions } from "./types";
 import connectDB from "./db";
 import { PasswordUtils } from "./auth-service";
+import { getEnvConfig } from "./env-validation";
 
 interface AdminJWTPayload {
   id: string;
@@ -13,15 +14,12 @@ interface AdminJWTPayload {
   exp?: number;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key-here";
-const JWT_REFRESH_SECRET =
-  process.env.JWT_REFRESH_SECRET || "your-super-secret-refresh-key-here";
-
-if (!process.env.JWT_SECRET) {
-  throw new Error("JWT_SECRET environment variable is required");
-}
-const TOKEN_EXPIRY = process.env.JWT_EXPIRES_IN || "7d";
-const REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_EXPIRES_IN || "30d";
+// Get environment configuration
+const env = getEnvConfig();
+const JWT_SECRET = env.JWT_SECRET;
+const JWT_REFRESH_SECRET = env.JWT_REFRESH_SECRET;
+const TOKEN_EXPIRY = env.JWT_EXPIRES_IN;
+const REFRESH_TOKEN_EXPIRY = env.JWT_REFRESH_EXPIRES_IN;
 
 export class AdminAuthService {
   static async signin(
@@ -38,8 +36,8 @@ export class AdminAuthService {
       const normalizedEmail = email.toLowerCase().trim();
 
       // Check for super admin first (hardcoded in .env)
-      const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
-      const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD;
+      const superAdminEmail = env.SUPER_ADMIN_EMAIL;
+      const superAdminPassword = env.SUPER_ADMIN_PASSWORD;
 
       if (
         superAdminEmail &&
