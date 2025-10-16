@@ -1,5 +1,6 @@
 ﻿import { NextResponse } from "next/server";
 import { AuthResponse } from "@/lib/types";
+import { CookieUtils } from "@/lib/cookie-utils";
 
 export async function POST() {
   try {
@@ -11,21 +12,7 @@ export async function POST() {
       { status: 200 }
     );
 
-    response.cookies.set("accessToken", "", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 0,
-      path: "/",
-    });
-
-    response.cookies.set("refreshToken", "", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 0,
-      path: "/",
-    });
+    CookieUtils.clearAuthCookies(response);
 
     return response;
   } catch (error) {

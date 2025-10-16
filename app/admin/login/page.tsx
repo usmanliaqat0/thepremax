@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -14,18 +14,26 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Loader2, Shield } from "lucide-react";
+import { AuthPageLoader } from "@/components/ui/auth-loader";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
 
 export default function AdminLoginPage() {
   const { toast } = useToast();
   const router = useRouter();
-  const { adminSignin } = useAuth();
+  const { adminSignin, state, isAdmin } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  // Redirect authenticated admin users away from admin login page
+  useEffect(() => {
+    if (!state.isLoading && state.isAuthenticated && state.user && isAdmin()) {
+      router.push("/admin");
+    }
+  }, [state.isLoading, state.isAuthenticated, state.user, isAdmin, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +68,11 @@ export default function AdminLoginPage() {
       setLoading(false);
     }
   };
+
+  // Show loading while checking authentication status
+  if (state.isLoading) {
+    return <AuthPageLoader />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

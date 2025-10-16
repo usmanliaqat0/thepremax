@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ButtonLoader } from "@/components/ui/loader";
+import { AuthPageLoader } from "@/components/ui/auth-loader";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
@@ -32,8 +33,21 @@ const Signup = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { state, signup } = useAuth();
+  const { state, signup, isAdmin } = useAuth();
   const router = useRouter();
+
+  // Redirect authenticated users away from signup page
+  useEffect(() => {
+    if (!state.isLoading && state.isAuthenticated && state.user) {
+      // If user is admin, redirect to admin dashboard
+      if (isAdmin()) {
+        router.push("/admin");
+      } else {
+        // Regular users go to profile
+        router.push("/profile");
+      }
+    }
+  }, [state.isLoading, state.isAuthenticated, state.user, isAdmin, router]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -94,6 +108,11 @@ const Signup = () => {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
+
+  // Show loading while checking authentication status
+  if (state.isLoading) {
+    return <AuthPageLoader />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AdminAuthService } from "@/lib/admin-auth-service";
+import { CookieUtils } from "@/lib/cookie-utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,25 +41,11 @@ export async function POST(request: NextRequest) {
     );
 
     // Set HTTP-only cookies for security
-    if (result.accessToken) {
-      response.cookies.set("accessToken", result.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 7 * 24 * 60 * 60, // 7 days
-        path: "/",
-      });
-    }
-
-    if (result.refreshToken) {
-      response.cookies.set("refreshToken", result.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 30 * 24 * 60 * 60, // 30 days
-        path: "/",
-      });
-    }
+    CookieUtils.setAuthCookies(
+      response,
+      result.accessToken!,
+      result.refreshToken
+    );
 
     return response;
   } catch (error) {
