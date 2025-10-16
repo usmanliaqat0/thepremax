@@ -12,7 +12,10 @@ export async function GET(
   try {
     const user = await authMiddleware(request);
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     await connectDB();
@@ -41,7 +44,10 @@ export async function PUT(
   try {
     const user = await authMiddleware(request);
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     await connectDB();
@@ -111,12 +117,15 @@ export async function DELETE(
   try {
     const user = await authMiddleware(request);
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     if (user.role !== "admin") {
       return NextResponse.json(
-        { error: "Admin access required" },
+        { success: false, message: "Admin access required" },
         { status: 403 }
       );
     }

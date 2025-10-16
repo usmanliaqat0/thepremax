@@ -88,7 +88,7 @@ export default function MessagesPage() {
           });
         }
       } else {
-        toast.error(data.error || "Failed to update message status");
+        toast.error(data.message || "Failed to update message status");
       }
     } catch (error) {
       console.error("Error updating message status:", error);

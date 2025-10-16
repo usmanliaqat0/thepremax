@@ -13,7 +13,7 @@ export async function GET(
     const user = await adminMiddleware(request);
     if (!user) {
       return NextResponse.json(
-        { error: "Admin access required" },
+        { success: false, message: "Admin access required" },
         { status: 403 }
       );
     }
@@ -44,7 +44,7 @@ export async function PUT(
     const user = await adminMiddleware(request);
     if (!user) {
       return NextResponse.json(
-        { error: "Admin access required" },
+        { success: false, message: "Admin access required" },
         { status: 403 }
       );
     }
@@ -105,7 +105,7 @@ export async function DELETE(
     const user = await adminMiddleware(request);
     if (!user) {
       return NextResponse.json(
-        { error: "Admin access required" },
+        { success: false, message: "Admin access required" },
         { status: 403 }
       );
     }

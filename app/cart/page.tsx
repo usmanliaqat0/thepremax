@@ -83,7 +83,7 @@ const Cart = () => {
         setPromoError("");
         setPromoCode("");
       } else {
-        setPromoError(data.error || "Invalid promo code");
+        setPromoError(data.message || "Invalid promo code");
       }
     } catch (error) {
       console.error("Error validating promo code:", error);

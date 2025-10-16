@@ -111,7 +111,7 @@ export default function OrdersManagement() {
         const ordersData = result.data || [];
         setOrders(ordersData);
       } else {
-        setError(result.error || "Failed to fetch orders");
+        setError(result.message || "Failed to fetch orders");
       }
     } catch (err) {
       console.error("Error fetching orders:", err);

@@ -159,7 +159,7 @@ export default function ProductsPage() {
         setData(products.filter((p) => p._id !== product._id));
         toast.success("Product deleted successfully");
       } else {
-        toast.error(data.error || "Failed to delete product");
+        toast.error(data.message || "Failed to delete product");
       }
     } catch (error) {
       console.error("Error deleting product:", error);

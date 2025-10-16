@@ -75,7 +75,7 @@ const ProductDetail = () => {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || "Failed to fetch product");
+          throw new Error(data.message || "Failed to fetch product");
         }
 
         if (data.success && data.data) {

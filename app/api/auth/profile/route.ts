@@ -2,6 +2,7 @@
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
 import { TokenUtils } from "@/lib/auth-service";
+import { handleApiError } from "@/lib/error-handler";
 
 export async function GET(req: NextRequest) {
   try {
@@ -45,20 +46,13 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Get profile error:", error);
     if (
       error instanceof Error &&
       error.message === "Invalid or expired token"
     ) {
-      return NextResponse.json(
-        { success: false, message: "Invalid or expired token" },
-        { status: 401 }
-      );
+      return handleApiError(error, "Invalid or expired token", 401);
     }
-    return NextResponse.json(
-      { success: false, message: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Internal server error");
   }
 }
 
@@ -76,7 +70,7 @@ export async function PUT(req: NextRequest) {
     const decoded = TokenUtils.verifyAccessToken(token);
     const updates = await req.json();
 
-const allowedUpdates = {
+    const allowedUpdates = {
       firstName: updates.firstName,
       lastName: updates.lastName,
       phone: updates.phone,
@@ -87,7 +81,7 @@ const allowedUpdates = {
       addresses: updates.addresses,
     };
 
-Object.keys(allowedUpdates).forEach((key) => {
+    Object.keys(allowedUpdates).forEach((key) => {
       if (allowedUpdates[key as keyof typeof allowedUpdates] === undefined) {
         delete allowedUpdates[key as keyof typeof allowedUpdates];
       }
@@ -127,19 +121,12 @@ Object.keys(allowedUpdates).forEach((key) => {
       },
     });
   } catch (error) {
-    console.error("Update profile error:", error);
     if (
       error instanceof Error &&
       error.message === "Invalid or expired token"
     ) {
-      return NextResponse.json(
-        { success: false, message: "Invalid or expired token" },
-        { status: 401 }
-      );
+      return handleApiError(error, "Invalid or expired token", 401);
     }
-    return NextResponse.json(
-      { success: false, message: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Internal server error");
   }
 }

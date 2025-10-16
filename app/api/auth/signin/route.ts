@@ -2,6 +2,7 @@
 import { AuthService } from "@/lib/auth-service";
 import { SigninData, AuthResponse } from "@/lib/types";
 import { CookieUtils } from "@/lib/cookie-utils";
+import { handleApiError } from "@/lib/error-handler";
 
 export async function POST(req: NextRequest) {
   try {
@@ -39,10 +40,6 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch (error) {
-    console.error("Signin route error:", error);
-    return NextResponse.json<AuthResponse>(
-      { success: false, message: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Internal server error");
   }
 }

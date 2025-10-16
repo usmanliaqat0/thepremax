@@ -39,7 +39,7 @@ export function useAdminData<T>({
           setData([]);
         }
       } else {
-        setError(result.error || "Failed to fetch data");
+        setError(result.message || "Failed to fetch data");
         setData([]);
       }
     } catch (err) {

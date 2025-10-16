@@ -15,7 +15,13 @@ export async function GET(request: NextRequest) {
   try {
     const user = await authMiddleware(request);
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized",
+        },
+        { status: 401 }
+      );
     }
 
     await connectDB();
@@ -43,6 +49,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     return NextResponse.json({
+      success: true,
       orders,
       pagination: {
         page,
@@ -60,7 +67,13 @@ export async function POST(request: NextRequest) {
   try {
     const user = await authMiddleware(request);
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized",
+        },
+        { status: 401 }
+      );
     }
 
     await connectDB();
@@ -82,14 +95,17 @@ export async function POST(request: NextRequest) {
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { error: "Order items are required" },
+        { success: false, message: "Order items are required" },
         { status: 400 }
       );
     }
 
     if (!shippingAddress || !billingAddress) {
       return NextResponse.json(
-        { error: "Shipping and billing addresses are required" },
+        {
+          success: false,
+          message: "Shipping and billing addresses are required",
+        },
         { status: 400 }
       );
     }
@@ -98,7 +114,7 @@ export async function POST(request: NextRequest) {
     for (const item of items) {
       if (!mongoose.Types.ObjectId.isValid(item.productId)) {
         return NextResponse.json(
-          { error: `Invalid product ID: ${item.productId}` },
+          { success: false, message: `Invalid product ID: ${item.productId}` },
           { status: 400 }
         );
       }
@@ -141,6 +157,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
+        success: true,
         message: "Order created successfully",
         order: {
           _id: order._id,

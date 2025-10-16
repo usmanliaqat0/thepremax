@@ -2,6 +2,7 @@
 import connectDB from "@/lib/db";
 import Product from "@/lib/models/Product";
 import mongoose from "mongoose";
+import { handleApiError } from "@/lib/error-handler";
 
 export async function GET(request: NextRequest) {
   try {
@@ -87,10 +88,6 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching products:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch products" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to fetch products");
   }
 }

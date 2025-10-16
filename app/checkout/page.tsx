@@ -212,7 +212,7 @@ const Checkout = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create order");
+        throw new Error(errorData.message || "Failed to create order");
       }
 
       const result = await response.json();

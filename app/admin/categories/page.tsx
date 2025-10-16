@@ -84,7 +84,7 @@ export default function CategoriesPage() {
         setData(categories.filter((c) => c._id !== category._id));
         toast.success("Category deleted successfully");
       } else {
-        toast.error(data.error || "Failed to delete category");
+        toast.error(data.message || "Failed to delete category");
       }
     } catch (error) {
       console.error("Error deleting category:", error);

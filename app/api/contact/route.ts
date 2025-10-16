@@ -2,6 +2,7 @@
 import connectDB from "@/lib/db";
 import ContactMessage from "@/lib/models/ContactMessage";
 import { z } from "zod";
+import { handleApiError, handleValidationError } from "@/lib/error-handler";
 
 const contactSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name is too long"),
@@ -19,21 +20,17 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-const validationResult = contactSchema.safeParse(body);
+    const validationResult = contactSchema.safeParse(body);
     if (!validationResult.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Validation failed",
-          details: validationResult.error.issues,
-        },
-        { status: 400 }
+      return handleValidationError(
+        validationResult.error.issues,
+        "Validation failed"
       );
     }
 
     const { name, email, subject, message } = validationResult.data;
 
-const contactMessage = new ContactMessage({
+    const contactMessage = new ContactMessage({
       name,
       email,
       subject: subject || "",
@@ -54,13 +51,9 @@ const contactMessage = new ContactMessage({
       { status: 201 }
     );
   } catch (error) {
-    console.error("Contact form submission error:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to send message. Please try again later.",
-      },
-      { status: 500 }
+    return handleApiError(
+      error,
+      "Failed to send message. Please try again later."
     );
   }
 }

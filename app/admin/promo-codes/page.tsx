@@ -98,7 +98,7 @@ export default function PromoCodesPage() {
         setData(promoCodes.filter((p) => p._id !== promoCode._id));
         toast.success("Promo code deleted successfully");
       } else {
-        toast.error(data.error || "Failed to delete promo code");
+        toast.error(data.message || "Failed to delete promo code");
       }
     } catch (error) {
       console.error("Error deleting promo code:", error);

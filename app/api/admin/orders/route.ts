@@ -8,7 +8,10 @@ export async function GET(request: NextRequest) {
     const authResult = await adminMiddleware(request);
     if (!authResult.success || !authResult.user) {
       return NextResponse.json(
-        { error: authResult.error || "Admin access required" },
+        {
+          success: false,
+          message: authResult.error || "Admin access required",
+        },
         { status: authResult.status || 403 }
       );
     }

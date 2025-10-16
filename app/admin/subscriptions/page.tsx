@@ -71,7 +71,7 @@ export default function AdminSubscriptions() {
         setStats(data.stats);
         setSourceStats(data.sourceStats);
       } else {
-        toast.error(data.error || "Failed to fetch subscriptions");
+        toast.error(data.message || "Failed to fetch subscriptions");
       }
     } catch (error) {
       console.error("Error fetching subscriptions:", error);
@@ -136,7 +136,7 @@ export default function AdminSubscriptions() {
         };
         setStats(newStats);
       } else {
-        toast.error(data.error || "Failed to update subscription");
+        toast.error(data.message || "Failed to update subscription");
       }
     } catch (error) {
       console.error("Error updating subscription:", error);
@@ -169,7 +169,7 @@ export default function AdminSubscriptions() {
         };
         setStats(newStats);
       } else {
-        toast.error(data.error || "Failed to delete subscription");
+        toast.error(data.message || "Failed to delete subscription");
       }
     } catch (error) {
       console.error("Error deleting subscription:", error);
