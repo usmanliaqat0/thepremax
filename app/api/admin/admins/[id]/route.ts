@@ -85,8 +85,7 @@ export async function PUT(
       );
     }
 
-    // Prevent updating super admin
-    if (admin._id.toString() === "super-admin") {
+    if (admin.email === process.env.SUPER_ADMIN_EMAIL) {
       return NextResponse.json(
         { success: false, message: "Cannot update super admin" },
         { status: 400 }
@@ -168,8 +167,7 @@ export async function DELETE(
       );
     }
 
-    // Prevent deleting super admin
-    if (admin._id.toString() === "super-admin") {
+    if (admin.email === process.env.SUPER_ADMIN_EMAIL) {
       return NextResponse.json(
         { success: false, message: "Cannot delete super admin" },
         { status: 400 }

@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     // Only super admin can create new admins
     if (
       currentUser.role !== "super_admin" ||
-      currentUser.id !== "super-admin"
+      currentUser.email !== process.env.SUPER_ADMIN_EMAIL
     ) {
       return NextResponse.json(
         {
@@ -105,7 +105,10 @@ export async function POST(request: NextRequest) {
       lastName: lastName.trim(),
       role: "admin",
       status: "active",
-      createdBy: currentUser.id === "super-admin" ? null : currentUser.id,
+      createdBy:
+        currentUser.email === process.env.SUPER_ADMIN_EMAIL
+          ? null
+          : currentUser.id,
     });
 
     return NextResponse.json(

@@ -10,7 +10,6 @@ export interface AuthenticatedRequest extends NextRequest {
   };
 }
 
-// Helper functions for token extraction
 function extractTokenFromHeader(req: NextRequest): string | null {
   const authHeader = req.headers.get("authorization");
 
@@ -25,7 +24,6 @@ function extractTokenFromCookies(req: NextRequest): string | null {
   return req.cookies.get("accessToken")?.value || null;
 }
 
-// Simple auth middleware function for API routes
 export async function authMiddleware(req: NextRequest): Promise<{
   id: string;
   email: string;

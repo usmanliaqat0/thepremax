@@ -137,7 +137,9 @@ export async function POST(request: NextRequest) {
       permissions: permissions || {},
       status,
       createdBy:
-        authResult.user.id === "super-admin" ? undefined : authResult.user.id,
+        authResult.user.email === process.env.SUPER_ADMIN_EMAIL
+          ? undefined
+          : authResult.user.id,
     });
 
     const adminData = await Admin.findById(admin._id)

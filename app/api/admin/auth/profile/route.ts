@@ -34,15 +34,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // If super admin, return hardcoded data
     if (
       currentUser.role === "super_admin" &&
-      currentUser.id === "super-admin"
+      currentUser.email === process.env.SUPER_ADMIN_EMAIL
     ) {
       return NextResponse.json({
         success: true,
         user: {
-          id: "super-admin",
+          id: currentUser.id,
           email: currentUser.email,
           firstName: "Super",
           lastName: "Admin",

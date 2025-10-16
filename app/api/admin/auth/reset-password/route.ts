@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     // Only super admin can reset passwords
     if (
       currentUser.role !== "super_admin" ||
-      currentUser.id !== "super-admin"
+      currentUser.email !== process.env.SUPER_ADMIN_EMAIL
     ) {
       return NextResponse.json(
         {
@@ -75,8 +75,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Cannot reset super admin password through this endpoint
-    if (adminId === "super-admin") {
+    const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
+    const targetAdmin = await Admin.findById(adminId).select("email");
+    if (targetAdmin?.email === superAdminEmail) {
       return NextResponse.json(
         {
           success: false,

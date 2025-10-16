@@ -40,7 +40,7 @@ export async function PUT(
     // Only super admin can update permissions
     if (
       currentUser.role !== "super_admin" ||
-      currentUser.id !== "super-admin"
+      currentUser.email !== process.env.SUPER_ADMIN_EMAIL
     ) {
       return NextResponse.json(
         {
@@ -82,8 +82,9 @@ export async function PUT(
       );
     }
 
-    // Cannot update super admin permissions
-    if (id === "super-admin") {
+    const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
+    const targetAdmin = await Admin.findById(id).select("email");
+    if (targetAdmin?.email === superAdminEmail) {
       return NextResponse.json(
         {
           success: false,
