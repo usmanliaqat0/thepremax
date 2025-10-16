@@ -17,7 +17,6 @@ const PasswordResetSchema = new Schema<IPasswordReset>(
       required: true,
       lowercase: true,
       trim: true,
-      index: true,
     },
     token: {
       type: String,
@@ -46,12 +45,10 @@ PasswordResetSchema.index({ token: 1, used: 1 });
 let PasswordReset: mongoose.Model<IPasswordReset> | Record<string, never>;
 
 if (typeof window === "undefined") {
-
   PasswordReset =
     mongoose.models.PasswordReset ||
     mongoose.model<IPasswordReset>("PasswordReset", PasswordResetSchema);
 } else {
-
   PasswordReset = {};
 }
 

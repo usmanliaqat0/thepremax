@@ -200,7 +200,6 @@ const AdminSchema = new Schema<IAdmin>(
 );
 
 // Indexes
-AdminSchema.index({ email: 1 });
 AdminSchema.index({ role: 1 });
 AdminSchema.index({ status: 1 });
 AdminSchema.index({ createdAt: -1 });
