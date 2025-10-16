@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Product from "@/lib/models/Product";
+import { handleApiError } from "@/lib/error-handler";
 
 export async function GET(
   request: NextRequest,
@@ -19,7 +20,7 @@ export async function GET(
 
     if (!product) {
       return NextResponse.json(
-        { success: false, error: "Product not found" },
+        { success: false, message: "Product not found" },
         { status: 404 }
       );
     }
@@ -29,10 +30,6 @@ export async function GET(
       data: product,
     });
   } catch (error) {
-    console.error("Error fetching product:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch product" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to fetch product");
   }
 }

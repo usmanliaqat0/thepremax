@@ -1,5 +1,6 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { saveFile, validateImageFile } from "@/lib/file-upload";
+import { handleApiError } from "@/lib/error-handler";
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,30 +10,26 @@ export async function POST(request: NextRequest) {
 
     if (!file) {
       return NextResponse.json(
-        { success: false, error: "No file provided" },
+        { success: false, message: "No file provided" },
         { status: 400 }
       );
     }
 
-const validation = validateImageFile(file);
+    const validation = validateImageFile(file);
     if (!validation.valid) {
       return NextResponse.json(
-        { success: false, error: validation.error },
+        { success: false, message: validation.error },
         { status: 400 }
       );
     }
 
-const uploadedFile = await saveFile(file, folder);
+    const uploadedFile = await saveFile(file, folder);
 
     return NextResponse.json({
       success: true,
       data: uploadedFile,
     });
   } catch (error) {
-    console.error("Upload error:", error);
-    return NextResponse.json(
-      { success: false, error: "Upload failed" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Upload failed");
   }
 }

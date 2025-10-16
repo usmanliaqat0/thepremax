@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { handleApiError } from "@/lib/error-handler";
 import connectDB from "@/lib/db";
 import PromoCode from "@/lib/models/PromoCode";
 import { AdminMiddleware } from "@/lib/admin-middleware";
@@ -8,7 +9,7 @@ export async function GET(request: NextRequest) {
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -92,11 +93,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching promo codes:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch promo codes" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }
 
@@ -105,7 +102,7 @@ export async function POST(request: NextRequest) {
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -129,9 +126,7 @@ export async function POST(request: NextRequest) {
     // Validation
     if (!code || !type || value === undefined || !validFrom || !validUntil) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Required fields: code, type, value, validFrom, validUntil",
+        { success: false, message: "Required fields: code, type, value, validFrom, validUntil",
         },
         { status: 400 }
       );
@@ -139,16 +134,14 @@ export async function POST(request: NextRequest) {
 
     if (type === "percentage" && value > 100) {
       return NextResponse.json(
-        { success: false, error: "Percentage value cannot exceed 100" },
+        { success: false, message: "Percentage value cannot exceed 100" },
         { status: 400 }
       );
     }
 
     if (new Date(validFrom) >= new Date(validUntil)) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Valid from date must be before valid until date",
+        { success: false, message: "Valid from date must be before valid until date",
         },
         { status: 400 }
       );
@@ -161,7 +154,7 @@ export async function POST(request: NextRequest) {
 
     if (existingPromoCode) {
       return NextResponse.json(
-        { success: false, error: "Promo code already exists" },
+        { success: false, message: "Promo code already exists" },
         { status: 400 }
       );
     }
@@ -187,10 +180,6 @@ export async function POST(request: NextRequest) {
       message: "Promo code created successfully",
     });
   } catch (error) {
-    console.error("Error creating promo code:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to create promo code" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }

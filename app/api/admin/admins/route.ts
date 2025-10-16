@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { handleApiError } from "@/lib/error-handler";
 import connectDB from "@/lib/db";
 import Admin from "@/lib/models/Admin";
 import { AdminMiddleware } from "@/lib/admin-middleware";
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
     // Check if user has permission to view admins
     if (authResult.user?.role !== "super_admin") {
       return NextResponse.json(
-        { success: false, error: "Insufficient permissions to view admins" },
+        { success: false, message: "Insufficient permissions to view admins" },
         { status: 403 }
       );
     }
@@ -71,11 +72,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching admins:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch admins" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }
 
@@ -84,7 +81,7 @@ export async function POST(request: NextRequest) {
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -92,7 +89,7 @@ export async function POST(request: NextRequest) {
     // Only super admin can create admins
     if (authResult.user?.role !== "super_admin") {
       return NextResponse.json(
-        { success: false, error: "Only super admin can create admins" },
+        { success: false, message: "Only super admin can create admins" },
         { status: 403 }
       );
     }
@@ -111,7 +108,7 @@ export async function POST(request: NextRequest) {
 
     if (!email || !password || !firstName || !lastName) {
       return NextResponse.json(
-        { success: false, error: "All required fields must be provided" },
+        { success: false, message: "All required fields must be provided" },
         { status: 400 }
       );
     }
@@ -122,7 +119,7 @@ export async function POST(request: NextRequest) {
     });
     if (existingAdmin) {
       return NextResponse.json(
-        { success: false, error: "Admin with this email already exists" },
+        { success: false, message: "Admin with this email already exists" },
         { status: 400 }
       );
     }
@@ -154,10 +151,6 @@ export async function POST(request: NextRequest) {
       message: "Admin created successfully",
     });
   } catch (error) {
-    console.error("Error creating admin:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to create admin" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }

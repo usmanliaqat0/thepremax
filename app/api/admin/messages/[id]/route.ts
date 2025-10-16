@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { handleApiError } from "@/lib/error-handler";
 import connectDB from "@/lib/db";
 import ContactMessage from "@/lib/models/ContactMessage";
 import { AdminMiddleware } from "@/lib/admin-middleware";
@@ -19,7 +20,7 @@ export async function GET(
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -32,9 +33,7 @@ export async function GET(
 
     if (!message) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Message not found",
+        { success: false, message: "Message not found",
         },
         { status: 404 }
       );
@@ -47,9 +46,7 @@ export async function GET(
   } catch (error) {
     console.error("Get message error:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to fetch message",
+      { success: false, message: "Failed to fetch message",
       },
       { status: 500 }
     );
@@ -64,7 +61,7 @@ export async function PUT(
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -77,9 +74,7 @@ export async function PUT(
     const validationResult = updateMessageSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Validation failed",
+        { success: false, message: "Validation failed",
           details: validationResult.error.issues,
         },
         { status: 400 }
@@ -103,9 +98,7 @@ export async function PUT(
 
     if (!message) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Message not found",
+        { success: false, message: "Message not found",
         },
         { status: 404 }
       );
@@ -119,9 +112,7 @@ export async function PUT(
   } catch (error) {
     console.error("Update message error:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to update message",
+      { success: false, message: "Failed to update message",
       },
       { status: 500 }
     );
@@ -136,7 +127,7 @@ export async function DELETE(
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -149,9 +140,7 @@ export async function DELETE(
 
     if (!message) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Message not found",
+        { success: false, message: "Message not found",
         },
         { status: 404 }
       );
@@ -164,9 +153,7 @@ export async function DELETE(
   } catch (error) {
     console.error("Delete message error:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to delete message",
+      { success: false, message: "Failed to delete message",
       },
       { status: 500 }
     );

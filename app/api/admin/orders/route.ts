@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Order from "@/lib/models/Order";
 import { adminMiddleware } from "@/lib/admin-middleware";
+import { handleApiError } from "@/lib/error-handler";
 
 export async function GET(request: NextRequest) {
   try {
@@ -125,14 +126,6 @@ export async function GET(request: NextRequest) {
           },
     });
   } catch (error) {
-    console.error("Admin orders API error:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to fetch orders",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to fetch orders");
   }
 }

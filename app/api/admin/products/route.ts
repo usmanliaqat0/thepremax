@@ -1,4 +1,5 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
+import { handleApiError } from "@/lib/error-handler";
 import connectDB from "@/lib/db";
 import Product from "@/lib/models/Product";
 import Category from "@/lib/models/Category";
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -98,11 +99,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching products:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch products" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }
 
@@ -111,7 +108,7 @@ export async function POST(request: NextRequest) {
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -146,28 +143,28 @@ export async function POST(request: NextRequest) {
 
     if (!name) {
       return NextResponse.json(
-        { success: false, error: "Name is required" },
+        { success: false, message: "Name is required" },
         { status: 400 }
       );
     }
 
     if (!description) {
       return NextResponse.json(
-        { success: false, error: "Description is required" },
+        { success: false, message: "Description is required" },
         { status: 400 }
       );
     }
 
     if (basePrice === undefined || basePrice < 0) {
       return NextResponse.json(
-        { success: false, error: "Valid base price is required" },
+        { success: false, message: "Valid base price is required" },
         { status: 400 }
       );
     }
 
     if (!categoryId) {
       return NextResponse.json(
-        { success: false, error: "Category is required" },
+        { success: false, message: "Category is required" },
         { status: 400 }
       );
     }
@@ -175,7 +172,7 @@ export async function POST(request: NextRequest) {
     const category = await Category.findById(categoryId);
     if (!category) {
       return NextResponse.json(
-        { success: false, error: "Category not found" },
+        { success: false, message: "Category not found" },
         { status: 400 }
       );
     }
@@ -186,7 +183,7 @@ export async function POST(request: NextRequest) {
 
     if (existingProduct) {
       return NextResponse.json(
-        { success: false, error: "Product with this name already exists" },
+        { success: false, message: "Product with this name already exists" },
         { status: 400 }
       );
     }
@@ -199,7 +196,7 @@ export async function POST(request: NextRequest) {
     const existingSlug = await Product.findOne({ slug });
     if (existingSlug) {
       return NextResponse.json(
-        { success: false, error: "Product with this slug already exists" },
+        { success: false, message: "Product with this slug already exists" },
         { status: 400 }
       );
     }
@@ -209,7 +206,7 @@ export async function POST(request: NextRequest) {
       const uniqueSkus = new Set(skus);
       if (skus.length !== uniqueSkus.size) {
         return NextResponse.json(
-          { success: false, error: "Duplicate SKUs found in variants" },
+          { success: false, message: "Duplicate SKUs found in variants" },
           { status: 400 }
         );
       }
@@ -219,7 +216,7 @@ export async function POST(request: NextRequest) {
       });
       if (existingSkus.length > 0) {
         return NextResponse.json(
-          { success: false, error: "Some SKUs already exist" },
+          { success: false, message: "Some SKUs already exist" },
           { status: 400 }
         );
       }
@@ -271,10 +268,6 @@ export async function POST(request: NextRequest) {
       message: "Product created successfully",
     });
   } catch (error) {
-    console.error("Error creating product:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to create product" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }

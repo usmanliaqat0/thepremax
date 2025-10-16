@@ -3,6 +3,7 @@ import connectDB from "@/lib/db";
 import Admin from "@/lib/models/Admin";
 import { AdminMiddleware } from "@/lib/admin-middleware";
 import { PasswordUtils } from "@/lib/auth-service";
+import { handleApiError } from "@/lib/error-handler";
 
 export async function GET(
   request: NextRequest,
@@ -12,7 +13,7 @@ export async function GET(
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -20,7 +21,7 @@ export async function GET(
     // Check if user has permission to view admins
     if (authResult.user?.role !== "super_admin") {
       return NextResponse.json(
-        { success: false, error: "Insufficient permissions to view admins" },
+        { success: false, message: "Insufficient permissions to view admins" },
         { status: 403 }
       );
     }
@@ -35,7 +36,7 @@ export async function GET(
 
     if (!admin) {
       return NextResponse.json(
-        { success: false, error: "Admin not found" },
+        { success: false, message: "Admin not found" },
         { status: 404 }
       );
     }
@@ -45,11 +46,7 @@ export async function GET(
       data: admin,
     });
   } catch (error) {
-    console.error("Error fetching admin:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch admin" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to fetch admin");
   }
 }
 
@@ -61,7 +58,7 @@ export async function PUT(
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -69,7 +66,7 @@ export async function PUT(
     // Only super admin can update admins
     if (authResult.user?.role !== "super_admin") {
       return NextResponse.json(
-        { success: false, error: "Only super admin can update admins" },
+        { success: false, message: "Only super admin can update admins" },
         { status: 403 }
       );
     }
@@ -83,7 +80,7 @@ export async function PUT(
     const admin = await Admin.findById(id);
     if (!admin) {
       return NextResponse.json(
-        { success: false, error: "Admin not found" },
+        { success: false, message: "Admin not found" },
         { status: 404 }
       );
     }
@@ -91,7 +88,7 @@ export async function PUT(
     // Prevent updating super admin
     if (admin._id.toString() === "super-admin") {
       return NextResponse.json(
-        { success: false, error: "Cannot update super admin" },
+        { success: false, message: "Cannot update super admin" },
         { status: 400 }
       );
     }
@@ -106,7 +103,7 @@ export async function PUT(
       });
       if (existingAdmin) {
         return NextResponse.json(
-          { success: false, error: "Email already taken by another admin" },
+          { success: false, message: "Email already taken by another admin" },
           { status: 400 }
         );
       }
@@ -135,11 +132,7 @@ export async function PUT(
       message: "Admin updated successfully",
     });
   } catch (error) {
-    console.error("Error updating admin:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to update admin" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to update admin");
   }
 }
 
@@ -151,7 +144,7 @@ export async function DELETE(
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -159,7 +152,7 @@ export async function DELETE(
     // Only super admin can delete admins
     if (authResult.user?.role !== "super_admin") {
       return NextResponse.json(
-        { success: false, error: "Only super admin can delete admins" },
+        { success: false, message: "Only super admin can delete admins" },
         { status: 403 }
       );
     }
@@ -170,7 +163,7 @@ export async function DELETE(
     const admin = await Admin.findById(id);
     if (!admin) {
       return NextResponse.json(
-        { success: false, error: "Admin not found" },
+        { success: false, message: "Admin not found" },
         { status: 404 }
       );
     }
@@ -178,7 +171,7 @@ export async function DELETE(
     // Prevent deleting super admin
     if (admin._id.toString() === "super-admin") {
       return NextResponse.json(
-        { success: false, error: "Cannot delete super admin" },
+        { success: false, message: "Cannot delete super admin" },
         { status: 400 }
       );
     }
@@ -186,7 +179,7 @@ export async function DELETE(
     // Prevent deleting self
     if (admin._id.toString() === authResult.user.id) {
       return NextResponse.json(
-        { success: false, error: "Cannot delete your own account" },
+        { success: false, message: "Cannot delete your own account" },
         { status: 400 }
       );
     }
@@ -198,10 +191,6 @@ export async function DELETE(
       message: "Admin deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting admin:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to delete admin" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to delete admin");
   }
 }

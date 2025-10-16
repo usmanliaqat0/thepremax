@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { handleApiError } from "@/lib/error-handler";
 import connectDB from "@/lib/db";
 import Category from "@/lib/models/Category";
 import Product from "@/lib/models/Product";
@@ -13,7 +14,7 @@ export async function GET(
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -33,7 +34,7 @@ export async function GET(
 
     if (!category) {
       return NextResponse.json(
-        { success: false, error: "Category not found" },
+        { success: false, message: "Category not found" },
         { status: 404 }
       );
     }
@@ -43,11 +44,7 @@ export async function GET(
       data: category,
     });
   } catch (error) {
-    console.error("Error fetching category:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch category" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }
 
@@ -59,7 +56,7 @@ export async function PUT(
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -87,14 +84,14 @@ export async function PUT(
     const category = await Category.findById(id);
     if (!category) {
       return NextResponse.json(
-        { success: false, error: "Category not found" },
+        { success: false, message: "Category not found" },
         { status: 404 }
       );
     }
 
     if (name && !name.trim()) {
       return NextResponse.json(
-        { success: false, error: "Name is required" },
+        { success: false, message: "Name is required" },
         { status: 400 }
       );
     }
@@ -107,7 +104,7 @@ export async function PUT(
 
       if (existingCategory) {
         return NextResponse.json(
-          { success: false, error: "Category with this name already exists" },
+          { success: false, message: "Category with this name already exists" },
           { status: 400 }
         );
       }
@@ -123,7 +120,7 @@ export async function PUT(
       });
       if (existingSlug) {
         return NextResponse.json(
-          { success: false, error: "Category with this slug already exists" },
+          { success: false, message: "Category with this slug already exists" },
           { status: 400 }
         );
       }
@@ -152,11 +149,7 @@ export async function PUT(
       message: "Category updated successfully",
     });
   } catch (error) {
-    console.error("Error updating category:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to update category" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }
 
@@ -168,7 +161,7 @@ export async function DELETE(
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -185,7 +178,7 @@ export async function DELETE(
     const category = await Category.findById(id);
     if (!category) {
       return NextResponse.json(
-        { success: false, error: "Category not found" },
+        { success: false, message: "Category not found" },
         { status: 404 }
       );
     }
@@ -193,9 +186,7 @@ export async function DELETE(
     const products = await Product.find({ categoryId: id });
     if (products.length > 0) {
       return NextResponse.json(
-        {
-          success: false,
-          error:
+        { success: false, message:
             "Cannot delete category with products. Please move or delete products first.",
         },
         { status: 400 }
@@ -209,10 +200,6 @@ export async function DELETE(
       message: "Category deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting category:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to delete category" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }

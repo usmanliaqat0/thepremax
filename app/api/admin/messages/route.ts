@@ -1,4 +1,5 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
+import { handleApiError } from "@/lib/error-handler";
 import connectDB from "@/lib/db";
 import ContactMessage from "@/lib/models/ContactMessage";
 import { AdminMiddleware } from "@/lib/admin-middleware";
@@ -8,7 +9,7 @@ export async function GET(request: NextRequest) {
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -76,9 +77,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Get messages error:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to fetch messages",
+      { success: false, message: "Failed to fetch messages",
       },
       { status: 500 }
     );

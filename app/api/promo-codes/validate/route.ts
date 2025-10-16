@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { handleApiError } from "@/lib/error-handler";
 import connectDB from "@/lib/db";
 import PromoCode from "@/lib/models/PromoCode";
 
@@ -11,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     if (!code) {
       return NextResponse.json(
-        { success: false, error: "Promo code is required" },
+        { success: false, message: "Promo code is required" },
         { status: 400 }
       );
     }
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     if (!promoCode) {
       return NextResponse.json(
-        { success: false, error: "Invalid promo code" },
+        { success: false, message: "Invalid promo code" },
         { status: 404 }
       );
     }
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
       }
 
       return NextResponse.json(
-        { success: false, error: errorMessage },
+        { success: false, message: errorMessage },
         { status: 400 }
       );
     }
@@ -60,9 +61,7 @@ export async function POST(request: NextRequest) {
     // Check minimum amount requirement
     if (promoCode.minimumAmount && subtotal < promoCode.minimumAmount) {
       return NextResponse.json(
-        {
-          success: false,
-          error: `Minimum order amount of $${promoCode.minimumAmount} required`,
+        { success: false, message: `Minimum order amount of $${promoCode.minimumAmount} required`,
         },
         { status: 400 }
       );
@@ -92,10 +91,6 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error validating promo code:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to validate promo code" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }

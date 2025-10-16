@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { handleApiError } from "@/lib/error-handler";
 import connectDB from "@/lib/db";
 import Product from "@/lib/models/Product";
 import Category from "@/lib/models/Category";
@@ -12,7 +13,7 @@ export async function GET(
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -26,7 +27,7 @@ export async function GET(
 
     if (!product) {
       return NextResponse.json(
-        { success: false, error: "Product not found" },
+        { success: false, message: "Product not found" },
         { status: 404 }
       );
     }
@@ -36,11 +37,7 @@ export async function GET(
       data: product,
     });
   } catch (error) {
-    console.error("Error fetching product:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch product" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }
 
@@ -52,7 +49,7 @@ export async function PUT(
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -89,28 +86,28 @@ export async function PUT(
     const product = await Product.findById(id);
     if (!product) {
       return NextResponse.json(
-        { success: false, error: "Product not found" },
+        { success: false, message: "Product not found" },
         { status: 404 }
       );
     }
 
     if (name && !name.trim()) {
       return NextResponse.json(
-        { success: false, error: "Name is required" },
+        { success: false, message: "Name is required" },
         { status: 400 }
       );
     }
 
     if (description && !description.trim()) {
       return NextResponse.json(
-        { success: false, error: "Description is required" },
+        { success: false, message: "Description is required" },
         { status: 400 }
       );
     }
 
     if (basePrice !== undefined && basePrice < 0) {
       return NextResponse.json(
-        { success: false, error: "Valid base price is required" },
+        { success: false, message: "Valid base price is required" },
         { status: 400 }
       );
     }
@@ -119,7 +116,7 @@ export async function PUT(
       const category = await Category.findById(categoryId);
       if (!category) {
         return NextResponse.json(
-          { success: false, error: "Category not found" },
+          { success: false, message: "Category not found" },
           { status: 400 }
         );
       }
@@ -133,7 +130,7 @@ export async function PUT(
 
       if (existingProduct) {
         return NextResponse.json(
-          { success: false, error: "Product with this name already exists" },
+          { success: false, message: "Product with this name already exists" },
           { status: 400 }
         );
       }
@@ -149,7 +146,7 @@ export async function PUT(
       });
       if (existingSlug) {
         return NextResponse.json(
-          { success: false, error: "Product with this slug already exists" },
+          { success: false, message: "Product with this slug already exists" },
           { status: 400 }
         );
       }
@@ -162,7 +159,7 @@ export async function PUT(
       const uniqueSkus = new Set(skus);
       if (skus.length !== uniqueSkus.size) {
         return NextResponse.json(
-          { success: false, error: "Duplicate SKUs found in variants" },
+          { success: false, message: "Duplicate SKUs found in variants" },
           { status: 400 }
         );
       }
@@ -173,7 +170,7 @@ export async function PUT(
       });
       if (existingSkus.length > 0) {
         return NextResponse.json(
-          { success: false, error: "Some SKUs already exist" },
+          { success: false, message: "Some SKUs already exist" },
           { status: 400 }
         );
       }
@@ -228,11 +225,7 @@ export async function PUT(
       message: "Product updated successfully",
     });
   } catch (error) {
-    console.error("Error updating product:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to update product" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }
 
@@ -244,7 +237,7 @@ export async function DELETE(
     const authResult = AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -255,7 +248,7 @@ export async function DELETE(
     const product = await Product.findById(id);
     if (!product) {
       return NextResponse.json(
-        { success: false, error: "Product not found" },
+        { success: false, message: "Product not found" },
         { status: 404 }
       );
     }
@@ -267,10 +260,6 @@ export async function DELETE(
       message: "Product deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting product:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to delete product" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }

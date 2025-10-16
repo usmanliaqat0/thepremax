@@ -2,6 +2,7 @@
 import connectDB from "@/lib/db";
 import Category from "@/lib/models/Category";
 import mongoose from "mongoose";
+import { handleApiError } from "@/lib/error-handler";
 
 export async function GET(request: NextRequest) {
   try {
@@ -31,10 +32,6 @@ export async function GET(request: NextRequest) {
       data: categories,
     });
   } catch (error) {
-    console.error("Error fetching categories:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch categories" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to fetch categories");
   }
 }
