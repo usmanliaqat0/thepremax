@@ -2,6 +2,7 @@
 import bcrypt from "bcryptjs";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
+import { PasswordUtils } from "@/lib/auth-service";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,11 +18,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-if (newPassword.length < 8) {
+    // Validate password strength using the same validation as registration
+    const passwordValidation = PasswordUtils.validate(newPassword);
+    if (!passwordValidation.valid) {
       return NextResponse.json(
         {
           success: false,
-          message: "Password must be at least 8 characters long",
+          message: passwordValidation.message!,
         },
         { status: 400 }
       );
@@ -29,13 +32,12 @@ if (newPassword.length < 8) {
 
     await connectDB();
 
-let user;
+    let user;
     if (code.length === 6) {
-
       const upperCode = code.toUpperCase();
       console.log("Looking for user with password reset code:", upperCode);
 
-const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
       user = await User.findOne({
         passwordResetToken: { $regex: `^${escapedCode}`, $options: "i" },
@@ -50,7 +52,6 @@ const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         );
       }
     } else {
-
       user = await User.findOne({
         passwordResetToken: code,
         passwordResetExpires: { $gt: new Date() },
@@ -64,9 +65,9 @@ const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       );
     }
 
-const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const hashedPassword = await PasswordUtils.hash(newPassword);
 
-user.password = hashedPassword;
+    user.password = hashedPassword;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save();
@@ -83,4 +84,3 @@ user.password = hashedPassword;
     );
   }
 }
-
