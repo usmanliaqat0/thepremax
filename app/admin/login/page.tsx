@@ -21,7 +21,7 @@ import { useAuth } from "@/context/AuthContext";
 export default function AdminLoginPage() {
   const { toast } = useToast();
   const router = useRouter();
-  const { adminSignin, state, isAdmin } = useAuth();
+  const { adminSigninForm, state, isAdmin } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -40,16 +40,13 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const result = await adminSignin({
+      const result = await adminSigninForm({
         email: formData.email,
         password: formData.password,
       });
 
       if (result.success) {
-        toast({
-          title: "Success",
-          description: "Admin login successful",
-        });
+        // Don't show toast here as it's already shown in adminSignin
         router.push("/admin");
       } else {
         toast({

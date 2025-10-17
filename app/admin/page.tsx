@@ -32,8 +32,8 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <div className="space-y-6 sm:space-y-8">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3">
+    <div className="space-y-6 sm:space-y-8 -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4 px-3 sm:px-4 lg:px-6 xl:px-8">
         {loading || !stats ? (
           Array.from({ length: 6 }).map((_, i) => (
             <Card key={i} className="p-2 sm:p-3">
@@ -167,7 +167,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      <Card className="shadow-sm">
+      <Card className="shadow-sm mx-3 sm:mx-4 lg:mx-6 xl:mx-8">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg sm:text-xl">Recent Users</CardTitle>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">

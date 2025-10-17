@@ -42,6 +42,9 @@ interface AuthContextType {
   adminSignin: (
     data: SigninData
   ) => Promise<{ success: boolean; errors?: Record<string, string> }>;
+  adminSigninForm: (
+    data: SigninData
+  ) => Promise<{ success: boolean; errors?: Record<string, string> }>;
   signup: (
     data: SignupData
   ) => Promise<{ success: boolean; errors?: Record<string, string> }>;
@@ -297,6 +300,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Separate admin signin function for form submissions that doesn't use global loading state
+  const adminSigninForm = async (
+    data: SigninData
+  ): Promise<{ success: boolean; errors?: Record<string, string> }> => {
+    try {
+      const response = await fetch("/api/admin/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      console.log("Admin signin result:", result);
+
+      if (result.success && result.user && result.accessToken) {
+        console.log("Admin signin successful, updating auth state");
+        localStorage.setItem("auth_token", result.accessToken);
+        localStorage.setItem("user_data", JSON.stringify(result.user));
+
+        dispatch({
+          type: "AUTH_SUCCESS",
+          payload: { user: result.user, token: result.accessToken },
+        });
+
+        showSuccessMessage("Admin login successful!");
+        return { success: true };
+      } else {
+        const apiErrors = handleClientError(result, "Admin sign in failed");
+        const fieldErrors = displayApiErrors(apiErrors);
+        return { success: false, errors: fieldErrors };
+      }
+    } catch (error) {
+      showErrorMessage("Network error. Please try again.");
+      console.error("Admin signin error:", error);
+      return { success: false };
+    }
+  };
+
   const signup = async (
     data: SignupData
   ): Promise<{ success: boolean; errors?: Record<string, string> }> => {
@@ -544,6 +585,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signin,
     signinForm,
     adminSignin,
+    adminSigninForm,
     signup,
     signupForm,
     logout,
