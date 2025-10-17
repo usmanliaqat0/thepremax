@@ -75,6 +75,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    await connectDB();
+
+    // Import Admin model only on server side
+    const { default: Admin } = await import("@/lib/models/Admin");
+
     const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
     const targetAdmin = await Admin.findById(adminId).select("email");
     if (targetAdmin?.email === superAdminEmail) {
@@ -86,11 +91,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    await connectDB();
-
-    // Import Admin model only on server side
-    const { default: Admin } = await import("@/lib/models/Admin");
 
     // Find the admin to reset
     const admin = await Admin.findById(adminId);

@@ -1,5 +1,4 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
 import { PasswordUtils } from "@/lib/auth-service";
