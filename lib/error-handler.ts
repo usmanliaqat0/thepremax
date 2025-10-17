@@ -20,7 +20,25 @@ export function handleApiError(
   let status = statusCode || 500;
 
   if (error instanceof Error) {
-    message = error.message;
+    // Handle database connection errors specifically
+    if (
+      error.message.includes("ECONNREFUSED") ||
+      error.message.includes("MongoNetworkError") ||
+      error.message.includes("MongoServerError") ||
+      error.message.includes("MongoTimeoutError") ||
+      error.message.includes("connection")
+    ) {
+      message = "Database is temporarily unavailable. Please try again later.";
+      status = 503; // Service Unavailable
+    } else if (
+      error.message.includes("authentication") &&
+      error.message.includes("Mongo")
+    ) {
+      message = "Database authentication failed. Please contact support.";
+      status = 503;
+    } else {
+      message = error.message;
+    }
   } else if (typeof error === "string") {
     message = error;
   }

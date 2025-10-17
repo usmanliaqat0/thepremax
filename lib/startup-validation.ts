@@ -42,9 +42,11 @@ export function validateStartupForDevelopment(): void {
     const config = getEnvConfig();
 
     console.log("✅ Configuration validation completed successfully");
-    console.log(`📊 Using MongoDB: ${config.MONGODB_URI}`);
-    console.log(`🔐 JWT Secret length: ${config.JWT_SECRET.length} characters`);
-    console.log(`👤 Super Admin: ${config.SUPER_ADMIN_EMAIL}`);
+    console.log(`📊 MongoDB connection configured`);
+    console.log(
+      `🔐 JWT Secret configured (${config.JWT_SECRET.length} characters)`
+    );
+    console.log(`👤 Super Admin account configured`);
   } catch (error) {
     console.error("❌ Startup validation failed:");
     console.error(error);

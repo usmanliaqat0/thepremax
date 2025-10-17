@@ -1,16 +1,6 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
-import { AdminAuthService } from "./admin-auth-service";
+import { TokenValidator } from "./token-validator";
 import { AdminPermissions } from "./types";
-
-interface AdminJWTPayload {
-  id: string;
-  email: string;
-  role: string;
-  type: "admin";
-  permissions?: AdminPermissions;
-  iat?: number;
-  exp?: number;
-}
 
 export interface AdminUser {
   id: string;
@@ -22,58 +12,36 @@ export interface AdminUser {
 }
 
 export class AdminMiddleware {
-  static verifyAdminToken(request: NextRequest): {
+  static async verifyAdminToken(request: NextRequest): Promise<{
     success: boolean;
     user?: AdminUser;
     error?: string;
-  } {
-    try {
-      let token = request.headers.get("authorization")?.replace("Bearer ", "");
+  }> {
+    const result = await TokenValidator.validateAdminToken(request);
 
-      if (!token) {
-        token = request.cookies.get("accessToken")?.value;
-      }
-
-      if (!token) {
-        return {
-          success: false,
-          error: "No authentication token provided",
-        };
-      }
-
-      const decoded = AdminAuthService.verifyAccessToken(
-        token
-      ) as AdminJWTPayload;
-
-      if (decoded.type !== "admin") {
-        return {
-          success: false,
-          error: "Insufficient permissions. Admin access required.",
-        };
-      }
-
-      // For super admin, we need to get the name from environment or hardcode
-      const isSuperAdmin = decoded.id === "super-admin";
-      const firstName = isSuperAdmin ? "Super" : "Admin";
-      const lastName = isSuperAdmin ? "Admin" : "User";
-
-      return {
-        success: true,
-        user: {
-          id: decoded.id,
-          email: decoded.email,
-          firstName,
-          lastName,
-          role: decoded.role as "super_admin" | "admin",
-          permissions: decoded.permissions,
-        },
-      };
-    } catch {
+    if (!result.success) {
       return {
         success: false,
-        error: "Invalid or expired token",
+        error: result.error,
       };
     }
+
+    // For super admin, we need to get the name from environment or hardcode
+    const isSuperAdmin = result.user!.id === "super-admin";
+    const firstName = isSuperAdmin ? "Super" : "Admin";
+    const lastName = isSuperAdmin ? "Admin" : "User";
+
+    return {
+      success: true,
+      user: {
+        id: result.user!.id,
+        email: result.user!.email,
+        firstName,
+        lastName,
+        role: result.user!.role as "super_admin" | "admin",
+        permissions: result.user!.permissions as AdminPermissions | undefined,
+      },
+    };
   }
 
   static requireAdmin(
@@ -87,7 +55,7 @@ export class AdminMiddleware {
       request: NextRequest,
       ...args: unknown[]
     ): Promise<NextResponse> => {
-      const verification = AdminMiddleware.verifyAdminToken(request);
+      const verification = await AdminMiddleware.verifyAdminToken(request);
 
       if (!verification.success || !verification.user) {
         return NextResponse.json(
@@ -115,7 +83,7 @@ export class AdminMiddleware {
         request: NextRequest,
         ...args: unknown[]
       ): Promise<NextResponse> => {
-        const verification = AdminMiddleware.verifyAdminToken(request);
+        const verification = await AdminMiddleware.verifyAdminToken(request);
 
         if (!verification.success || !verification.user) {
           return NextResponse.json(
@@ -159,7 +127,7 @@ export class AdminMiddleware {
       request: NextRequest,
       ...args: unknown[]
     ): Promise<NextResponse> => {
-      const verification = AdminMiddleware.verifyAdminToken(request);
+      const verification = await AdminMiddleware.verifyAdminToken(request);
 
       if (!verification.success || !verification.user) {
         return NextResponse.json(
@@ -243,7 +211,7 @@ export async function adminMiddleware(request: NextRequest): Promise<{
   error?: string;
   status?: number;
 }> {
-  const verification = AdminMiddleware.verifyAdminToken(request);
+  const verification = await AdminMiddleware.verifyAdminToken(request);
 
   if (!verification.success) {
     return {

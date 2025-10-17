@@ -1,11 +1,12 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { PasswordResetService } from "@/lib/password-reset-service";
+import { PasswordUtils } from "@/lib/auth-service";
 
 export async function POST(req: NextRequest) {
   try {
     const { token, password } = await req.json();
 
-if (!token || typeof token !== "string") {
+    if (!token || typeof token !== "string") {
       return NextResponse.json(
         { success: false, message: "Reset token is required" },
         { status: 400 }
@@ -19,17 +20,19 @@ if (!token || typeof token !== "string") {
       );
     }
 
-if (password.length < 6) {
+    // Validate password strength using the same validation as registration
+    const passwordValidation = PasswordUtils.validate(password);
+    if (!passwordValidation.valid) {
       return NextResponse.json(
         {
           success: false,
-          message: "Password must be at least 6 characters long",
+          message: passwordValidation.message!,
         },
         { status: 400 }
       );
     }
 
-const resetResult = await PasswordResetService.resetPassword(
+    const resetResult = await PasswordResetService.resetPassword(
       token,
       password
     );

@@ -150,7 +150,6 @@ const Wishlist = () => {
                       },
                     ],
                     totalSold: 0,
-                    featured: false,
                     topRated: false,
                     onSale: false,
                     status: "active",

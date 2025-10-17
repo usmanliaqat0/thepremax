@@ -69,20 +69,19 @@ async function connectDB(): Promise<Mongoose> {
 
   if (!cached.promise) {
     const connectionOptions = {
-      maxPoolSize: 10,
-      minPoolSize: 2,
+      maxPoolSize: 20, // Increased for better concurrency
+      minPoolSize: 5, // Increased minimum connections
       maxIdleTimeMS: 30000,
-
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 5000, // Reduced for faster failover
       socketTimeoutMS: 45000,
       connectTimeoutMS: 10000,
-
       bufferCommands: false,
-
       authSource: "admin",
-
       retryWrites: true,
       w: "majority",
+      // Performance optimizations
+      readPreference: "secondaryPreferred", // Use secondary for reads when available
+      maxStalenessSeconds: 90, // Allow slightly stale reads for better performance
     };
 
     console.log("🔄 Connecting to MongoDB...");

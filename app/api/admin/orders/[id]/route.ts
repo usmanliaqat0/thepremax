@@ -26,7 +26,13 @@ export async function GET(
       .lean();
 
     if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Order not found",
+        },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ order });
@@ -64,7 +70,13 @@ export async function PUT(
 
     const order = await Order.findById(id);
     if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Order not found",
+        },
+        { status: 404 }
+      );
     }
 
     // Update order
@@ -115,7 +127,13 @@ export async function DELETE(
     const { id } = await params;
     const order = await Order.findByIdAndDelete(id);
     if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Order not found",
+        },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({

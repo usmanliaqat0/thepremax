@@ -5,7 +5,7 @@ import { AdminMiddleware } from "@/lib/admin-middleware";
 
 export async function GET(request: NextRequest) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },

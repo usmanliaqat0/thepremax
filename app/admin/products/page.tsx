@@ -67,7 +67,6 @@ interface Product extends Record<string, unknown> {
   variants: ProductVariant[];
   images: ProductImage[];
   totalSold: number;
-  featured: boolean;
   topRated: boolean;
   onSale: boolean;
   status: "active" | "inactive" | "pending" | "archived";
@@ -175,7 +174,6 @@ export default function ProductsPage() {
   const stats = {
     total: products.length,
     active: products.filter((p) => p.status === "active").length,
-    featured: products.filter((p) => p.featured).length,
     onSale: products.filter((p) => p.onSale).length,
     outOfStock: products.filter((p) => !p.inStock).length,
     totalRevenue: products.reduce(
@@ -391,15 +389,13 @@ export default function ProductsPage() {
         <Card className="p-3 sm:p-4 md:p-6">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
-              Featured
+              On Sale
             </CardTitle>
             <Star className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            <div className="text-lg sm:text-xl font-bold">{stats.featured}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.onSale} on sale
-            </p>
+            <div className="text-lg sm:text-xl font-bold">{stats.onSale}</div>
+            <p className="text-xs text-muted-foreground">on sale</p>
           </div>
         </Card>
 

@@ -6,7 +6,7 @@ import { AdminMiddleware } from "@/lib/admin-middleware";
 
 export async function GET(request: NextRequest) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },
@@ -126,7 +126,9 @@ export async function POST(request: NextRequest) {
     // Validation
     if (!code || !type || value === undefined || !validFrom || !validUntil) {
       return NextResponse.json(
-        { success: false, message: "Required fields: code, type, value, validFrom, validUntil",
+        {
+          success: false,
+          message: "Required fields: code, type, value, validFrom, validUntil",
         },
         { status: 400 }
       );
@@ -141,7 +143,9 @@ export async function POST(request: NextRequest) {
 
     if (new Date(validFrom) >= new Date(validUntil)) {
       return NextResponse.json(
-        { success: false, message: "Valid from date must be before valid until date",
+        {
+          success: false,
+          message: "Valid from date must be before valid until date",
         },
         { status: 400 }
       );

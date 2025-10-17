@@ -7,7 +7,7 @@ import { AdminMiddleware } from "@/lib/admin-middleware";
 
 export async function GET(request: NextRequest) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },
@@ -39,7 +39,6 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "";
     const categoryId = searchParams.get("categoryId") || "";
-    const featured = searchParams.get("featured") || "";
     const onSale = searchParams.get("onSale") || "";
     const inStock = searchParams.get("inStock") || "";
 
@@ -61,10 +60,6 @@ export async function GET(request: NextRequest) {
 
     if (categoryId) {
       filter.categoryId = categoryId;
-    }
-
-    if (featured !== "") {
-      filter.featured = featured === "true";
     }
 
     if (onSale !== "") {
@@ -105,7 +100,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },
@@ -126,7 +121,6 @@ export async function POST(request: NextRequest) {
       variants = [],
       images = [],
       totalSold = 0,
-      featured = false,
       topRated = false,
       onSale = false,
       status = "active",
@@ -242,7 +236,6 @@ export async function POST(request: NextRequest) {
       variants,
       images,
       totalSold,
-      featured,
       topRated,
       onSale,
       status,

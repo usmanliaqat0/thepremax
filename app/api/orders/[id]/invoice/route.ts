@@ -77,7 +77,13 @@ export async function GET(
     ).lean()) as unknown as PopulatedOrder;
 
     if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Order not found",
+        },
+        { status: 404 }
+      );
     }
 
     // Check if user is admin or order owner
@@ -85,7 +91,13 @@ export async function GET(
     const orderUserId = order.userId?.toString();
 
     if (user.role !== "admin" && orderUserId && orderUserId !== user.id) {
-      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Access denied",
+        },
+        { status: 403 }
+      );
     }
 
     const invoiceData: InvoiceData = {

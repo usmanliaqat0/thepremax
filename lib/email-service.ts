@@ -147,11 +147,7 @@ export class EmailService {
       }
 
       const verificationCode = verificationToken.substring(0, 6).toUpperCase();
-      console.log(
-        "Generated password reset verification code:",
-        verificationCode
-      );
-      console.log("Full token:", verificationToken);
+      // Note: Removed console.log statements for security - tokens should not be logged
 
       const env = getEnvConfig();
       const resetUrl = `${

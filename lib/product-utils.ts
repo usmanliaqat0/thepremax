@@ -4,7 +4,6 @@ export type SortOption =
   | "name"
   | "price-low"
   | "price-high"
-  | "featured"
   | "newest"
   | "popular";
 
@@ -18,7 +17,6 @@ export type FilterOptions = {
   colors?: string[];
   inStock?: boolean;
   onSale?: boolean;
-  featured?: boolean;
   topRated?: boolean;
 };
 
@@ -79,13 +77,6 @@ export function filterProducts(
     }
 
     if (
-      filters.featured !== undefined &&
-      product.featured !== filters.featured
-    ) {
-      return false;
-    }
-
-    if (
       filters.topRated !== undefined &&
       product.topRated !== filters.topRated
     ) {
@@ -112,13 +103,6 @@ export function sortProducts(
     case "price-high":
       return sorted.sort((a, b) => b.basePrice - a.basePrice);
 
-    case "featured":
-      return sorted.sort((a, b) => {
-        if (a.featured && !b.featured) return -1;
-        if (!a.featured && b.featured) return 1;
-        return a.name.localeCompare(b.name);
-      });
-
     case "newest":
       return sorted.sort(
         (a, b) =>
@@ -127,8 +111,8 @@ export function sortProducts(
 
     case "popular":
       return sorted.sort((a, b) => {
-        const aScore = (a.featured ? 2 : 0) + (a.topRated ? 1 : 0);
-        const bScore = (b.featured ? 2 : 0) + (b.topRated ? 1 : 0);
+        const aScore = a.topRated ? 1 : 0;
+        const bScore = b.topRated ? 1 : 0;
         if (aScore !== bScore) return bScore - aScore;
         return a.name.localeCompare(b.name);
       });
@@ -184,13 +168,6 @@ export function getProductBadges(product: Product) {
           )}% OFF`
         : "SALE",
       variant: "destructive" as const,
-    });
-  }
-
-  if (product.featured) {
-    badges.push({
-      text: "FEATURED",
-      variant: "accent" as const,
     });
   }
 

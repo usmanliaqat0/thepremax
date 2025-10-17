@@ -1,18 +1,9 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import ContactMessage from "@/lib/models/ContactMessage";
-import { z } from "zod";
 import { handleApiError, handleValidationError } from "@/lib/error-handler";
-
-const contactSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100, "Name is too long"),
-  email: z.string().email("Invalid email address"),
-  subject: z.string().max(200, "Subject is too long").optional(),
-  message: z
-    .string()
-    .min(1, "Message is required")
-    .max(2000, "Message is too long"),
-});
+import { contactSchema } from "@/lib/validation/schemas";
+import { InputSanitizer } from "@/lib/validation/sanitizer";
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,11 +21,12 @@ export async function POST(request: NextRequest) {
 
     const { name, email, subject, message } = validationResult.data;
 
+    // Sanitize inputs before saving
     const contactMessage = new ContactMessage({
-      name,
-      email,
-      subject: subject || "",
-      message,
+      name: InputSanitizer.sanitizeString(name, 100),
+      email: InputSanitizer.sanitizeEmail(email),
+      subject: subject ? InputSanitizer.sanitizeString(subject, 200) : "",
+      message: InputSanitizer.sanitizeString(message, 2000),
       status: "new",
     });
 

@@ -34,7 +34,6 @@ export interface IProduct extends Document {
   variants: IProductVariant[];
   images: IProductImage[];
   totalSold: number;
-  featured: boolean;
   topRated: boolean;
   onSale: boolean;
   status: "active" | "inactive" | "pending" | "archived";
@@ -121,10 +120,6 @@ const ProductSchema = new Schema<IProduct>(
       default: 0,
       min: 0,
     },
-    featured: {
-      type: Boolean,
-      default: false,
-    },
     topRated: {
       type: Boolean,
       default: false,
@@ -194,15 +189,17 @@ const ProductSchema = new Schema<IProduct>(
   }
 );
 
-ProductSchema.index({ name: 1 });
-ProductSchema.index({ categoryId: 1, status: 1 });
-ProductSchema.index({ basePrice: 1 });
-ProductSchema.index({ featured: 1, status: 1 });
-ProductSchema.index({ topRated: 1, status: 1 });
-ProductSchema.index({ onSale: 1, status: 1 });
-ProductSchema.index({ inStock: 1, status: 1 });
-ProductSchema.index({ tags: 1 });
-ProductSchema.index({ createdAt: -1 });
+// Optimized indexes for common query patterns
+ProductSchema.index({ name: 1, status: 1 }); // Search by name with status
+ProductSchema.index({ categoryId: 1, status: 1 }); // Category filtering with status
+ProductSchema.index({ basePrice: 1, status: 1 }); // Price sorting with status
+ProductSchema.index({ topRated: 1, status: 1 }); // Top rated with status
+ProductSchema.index({ onSale: 1, status: 1 }); // Sale products with status
+ProductSchema.index({ inStock: 1, status: 1 }); // Stock filtering with status
+ProductSchema.index({ tags: 1, status: 1 }); // Tag filtering with status
+ProductSchema.index({ createdAt: -1, status: 1 }); // Date sorting with status
+ProductSchema.index({ rating: -1, status: 1 }); // Rating sorting with status
+// Note: slug and variants.sku already have unique indexes defined in schema
 
 ProductSchema.virtual("category", {
   ref: "Category",

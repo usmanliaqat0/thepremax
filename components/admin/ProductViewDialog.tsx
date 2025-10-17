@@ -68,7 +68,6 @@ interface Product {
   variants: ProductVariant[];
   images: ProductImage[];
   totalSold: number;
-  featured: boolean;
   topRated: boolean;
   onSale: boolean;
   status: "active" | "inactive" | "pending" | "archived";
@@ -243,12 +242,6 @@ export default function ProductViewDialog({
           </div>
 
           <div className="flex flex-wrap justify-center sm:justify-start gap-2">
-            {product.featured && (
-              <Badge variant="outline" className="bg-blue-100 text-blue-800">
-                <Star className="h-3 w-3 mr-1" />
-                Featured
-              </Badge>
-            )}
             {product.topRated && (
               <Badge
                 variant="outline"

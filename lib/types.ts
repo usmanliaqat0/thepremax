@@ -66,7 +66,6 @@ export interface Product {
     order: number;
   }>;
   totalSold: number;
-  featured: boolean;
   topRated: boolean;
   onSale: boolean;
   status: string;

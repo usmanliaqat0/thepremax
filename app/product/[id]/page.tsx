@@ -8,7 +8,6 @@ import Navigation from "@/components/Navigation";
 import ProductGrid from "@/components/ProductGrid";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { RefreshLoader } from "@/components/ui/loader";
 
 import {
@@ -256,11 +255,6 @@ const ProductDetail = () => {
                 className="object-cover rounded-lg"
                 priority
               />
-              {product.featured && (
-                <Badge className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-accent text-accent-foreground text-xs sm:text-sm">
-                  Featured
-                </Badge>
-              )}
             </div>
 
             {/* Image Thumbnails - Only show if there are multiple images */}

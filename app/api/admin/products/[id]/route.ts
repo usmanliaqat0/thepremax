@@ -10,7 +10,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },
@@ -46,7 +46,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },
@@ -68,7 +68,6 @@ export async function PUT(
       variants,
       images,
       totalSold,
-      featured,
       topRated,
       onSale,
       status,
@@ -194,7 +193,6 @@ export async function PUT(
     if (variants !== undefined) product.variants = variants;
     if (images !== undefined) product.images = images;
     if (totalSold !== undefined) product.totalSold = totalSold;
-    if (featured !== undefined) product.featured = featured;
     if (topRated !== undefined) product.topRated = topRated;
     if (onSale !== undefined) product.onSale = onSale;
     if (status !== undefined) {
@@ -234,7 +232,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },

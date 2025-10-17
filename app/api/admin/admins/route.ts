@@ -7,7 +7,7 @@ import { PasswordUtils } from "@/lib/auth-service";
 
 export async function GET(request: NextRequest) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
         { success: false, message: authResult.error },

@@ -13,7 +13,10 @@ export async function GET(request: NextRequest) {
 
     if (!orderNumber) {
       return NextResponse.json(
-        { error: "Order number is required" },
+        {
+          success: false,
+          message: "Order number is required",
+        },
         { status: 400 }
       );
     }
@@ -24,7 +27,13 @@ export async function GET(request: NextRequest) {
       .lean()) as unknown as any;
 
     if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Order not found",
+        },
+        { status: 404 }
+      );
     }
 
     // Return order data (without sensitive information)

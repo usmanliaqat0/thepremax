@@ -1,6 +1,5 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
-import connectDB from "@/lib/db";
-import User from "@/lib/models/User";
+import { PasswordResetService } from "@/lib/password-reset-service";
 import { PasswordUtils } from "@/lib/auth-service";
 
 export async function POST(req: NextRequest) {
@@ -29,47 +28,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await connectDB();
+    // Use the secure password reset service
+    const resetResult = await PasswordResetService.resetPassword(
+      code,
+      newPassword
+    );
 
-    let user;
-    if (code.length === 6) {
-      const upperCode = code.toUpperCase();
-      console.log("Looking for user with password reset code:", upperCode);
-
-      const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-      user = await User.findOne({
-        passwordResetToken: { $regex: `^${escapedCode}`, $options: "i" },
-        passwordResetExpires: { $gt: new Date() },
-      });
-
-      console.log("Found user:", user ? "Yes" : "No");
-      if (user) {
-        console.log(
-          "User token starts with:",
-          user.passwordResetToken?.substring(0, 6)
-        );
-      }
-    } else {
-      user = await User.findOne({
-        passwordResetToken: code,
-        passwordResetExpires: { $gt: new Date() },
-      });
-    }
-
-    if (!user) {
+    if (!resetResult.success) {
       return NextResponse.json(
-        { success: false, message: "Invalid or expired verification code" },
+        {
+          success: false,
+          message: resetResult.message,
+        },
         { status: 400 }
       );
     }
-
-    const hashedPassword = await PasswordUtils.hash(newPassword);
-
-    user.password = hashedPassword;
-    user.passwordResetToken = undefined;
-    user.passwordResetExpires = undefined;
-    await user.save();
 
     return NextResponse.json({
       success: true,

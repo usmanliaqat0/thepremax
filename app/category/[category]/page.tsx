@@ -113,8 +113,6 @@ const CategoryPage = () => {
           return a.name.localeCompare(b.name);
         case "rating":
           return b.rating - a.rating;
-        case "featured":
-          return b.featured ? 1 : -1;
         default:
           return 0;
       }
@@ -272,7 +270,6 @@ const CategoryPage = () => {
                   <SelectItem value="price-high">Price: High to Low</SelectItem>
                   <SelectItem value="rating">Highest Rated</SelectItem>
                   <SelectItem value="brand">Brand A-Z</SelectItem>
-                  <SelectItem value="featured">Featured First</SelectItem>
                 </SelectContent>
               </Select>
 

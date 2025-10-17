@@ -66,8 +66,31 @@ const ResetPasswordForm = () => {
     e.preventDefault();
     setError("");
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long");
+      return;
+    }
+
+    // Additional password strength validation
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    if (!hasUpperCase) {
+      setError("Password must contain at least one uppercase letter");
+      return;
+    }
+    if (!hasLowerCase) {
+      setError("Password must contain at least one lowercase letter");
+      return;
+    }
+    if (!hasNumbers) {
+      setError("Password must contain at least one number");
+      return;
+    }
+    if (!hasSpecialChar) {
+      setError("Password must contain at least one special character");
       return;
     }
 
@@ -231,10 +254,11 @@ const ResetPasswordForm = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isLoading}
-                  minLength={6}
+                  minLength={8}
                 />
                 <p className="text-xs text-gray-500">
-                  Password must be at least 6 characters long
+                  Password must be at least 8 characters with uppercase,
+                  lowercase, number, and special character
                 </p>
               </div>
 
@@ -247,7 +271,7 @@ const ResetPasswordForm = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                   disabled={isLoading}
-                  minLength={6}
+                  minLength={8}
                 />
               </div>
 

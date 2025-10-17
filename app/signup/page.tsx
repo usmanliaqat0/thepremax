@@ -66,8 +66,27 @@ const Signup = () => {
     }
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    } else {
+      // Additional password strength validation
+      const hasUpperCase = /[A-Z]/.test(formData.password);
+      const hasLowerCase = /[a-z]/.test(formData.password);
+      const hasNumbers = /\d/.test(formData.password);
+      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(formData.password);
+
+      if (!hasUpperCase) {
+        newErrors.password =
+          "Password must contain at least one uppercase letter";
+      } else if (!hasLowerCase) {
+        newErrors.password =
+          "Password must contain at least one lowercase letter";
+      } else if (!hasNumbers) {
+        newErrors.password = "Password must contain at least one number";
+      } else if (!hasSpecialChar) {
+        newErrors.password =
+          "Password must contain at least one special character";
+      }
     }
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords don&apos;t match";

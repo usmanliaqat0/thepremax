@@ -250,7 +250,6 @@ const ShopContent = () => {
                     <SelectItem value="price-high">
                       Price: High to Low
                     </SelectItem>
-                    <SelectItem value="featured">Featured First</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

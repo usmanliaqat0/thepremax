@@ -27,7 +27,13 @@ export async function GET(
     }).lean();
 
     if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Order not found",
+        },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ order });
@@ -59,25 +65,43 @@ export async function PUT(
     // Check if user is admin or order owner
     const order = await Order.findById(id);
     if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Order not found",
+        },
+        { status: 404 }
+      );
     }
 
     // Regular users can only cancel their own orders
     if (user.role !== "admin" && order.userId !== user.id) {
-      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Access denied",
+        },
+        { status: 403 }
+      );
     }
 
     // Regular users can only cancel pending orders
     if (user.role !== "admin" && status && status !== "cancelled") {
       return NextResponse.json(
-        { error: "You can only cancel orders" },
+        {
+          success: false,
+          message: "You can only cancel orders",
+        },
         { status: 403 }
       );
     }
 
     if (user.role !== "admin" && order.status !== "pending") {
       return NextResponse.json(
-        { error: "Cannot cancel order that is already processed" },
+        {
+          success: false,
+          message: "Cannot cancel order that is already processed",
+        },
         { status: 400 }
       );
     }
@@ -135,7 +159,13 @@ export async function DELETE(
     const { id } = await params;
     const order = await Order.findByIdAndDelete(id);
     if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Order not found",
+        },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({

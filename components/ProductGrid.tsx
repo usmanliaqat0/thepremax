@@ -10,7 +10,7 @@ interface ProductGridProps {
   title?: string;
   subtitle?: string;
   limit?: number;
-  variant?: "default" | "compact" | "featured";
+  variant?: "default" | "compact";
   className?: string;
   showHeader?: boolean;
 }
@@ -49,13 +49,7 @@ const ProductGrid = ({
         )}
 
         <ProductGridWrapper
-          variant={
-            variant === "compact"
-              ? "compact"
-              : variant === "featured"
-              ? "spacious"
-              : "comfortable"
-          }
+          variant={variant === "compact" ? "compact" : "comfortable"}
         >
           {displayProducts.map((product) => (
             <ProductCard

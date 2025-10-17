@@ -1,5 +1,6 @@
 ﻿import { NextRequest } from "next/server";
 import { TokenUtils } from "@/lib/auth-service";
+import { TokenValidator } from "@/lib/token-validator";
 
 export interface AuthenticatedRequest extends NextRequest {
   user?: {
@@ -65,48 +66,24 @@ export class AuthMiddleware {
     };
     error?: string;
   }> {
-    try {
-      let token = this.extractTokenFromHeader(req);
+    const result = await TokenValidator.validateUserToken(req);
 
-      if (!token) {
-        token = this.extractTokenFromCookies(req);
-      }
-
-      if (!token) {
-        return {
-          success: false,
-          error: "Authorization token required",
-        };
-      }
-
-      const decoded = TokenUtils.verifyAccessToken(token);
-
-      return {
-        success: true,
-        user: {
-          id: decoded.id,
-          email: decoded.email,
-          role: decoded.role,
-        },
-      };
-    } catch (error) {
-      console.error("Auth middleware error:", error);
-
-      if (
-        error instanceof Error &&
-        error.message.includes("Invalid or expired")
-      ) {
-        return {
-          success: false,
-          error: "Invalid or expired token",
-        };
-      }
-
+    if (!result.success) {
       return {
         success: false,
-        error: "Authentication failed",
+        error: result.error,
       };
     }
+
+    return {
+      success: true,
+      user: {
+        id: result.user!.id,
+        email: result.user!.email,
+        role: result.user!.role,
+        isEmailVerified: result.user!.isEmailVerified,
+      },
+    };
   }
 
   private static extractTokenFromHeader(req: NextRequest): string | null {

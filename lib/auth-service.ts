@@ -13,6 +13,7 @@ interface JWTPayload {
   email: string;
   role: string;
   type: string;
+  isEmailVerified?: boolean;
   iat?: number;
   exp?: number;
 }
