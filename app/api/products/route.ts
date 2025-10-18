@@ -1,5 +1,5 @@
 ﻿import { NextRequest } from "next/server";
-import connectDB from "@/lib/db";
+import { withDatabaseOperation } from "@/lib/db";
 import { productQuerySchema } from "@/lib/validation/schemas";
 import { InputSanitizer } from "@/lib/validation/sanitizer";
 import { QueryOptimizer } from "@/lib/query-optimizer";
@@ -7,7 +7,7 @@ import { ApiResponseBuilder } from "@/lib/api-response";
 
 export async function GET(request: NextRequest) {
   try {
-    await connectDB();
+    // Database connection is handled by withDatabaseOperation
 
     const { searchParams } = new URL(request.url);
     const queryParams = Object.fromEntries(searchParams.entries());
@@ -68,14 +68,16 @@ export async function GET(request: NextRequest) {
       filter.inStock = true;
     }
 
-    // Use optimized query
-    const result = await QueryOptimizer.getProductsOptimized(
-      filter,
-      page,
-      limit,
-      sortBy,
-      sortOrder
-    );
+    // Use optimized query with database operation wrapper
+    const result = await withDatabaseOperation(async () => {
+      return await QueryOptimizer.getProductsOptimized(
+        filter,
+        page,
+        limit,
+        sortBy,
+        sortOrder
+      );
+    });
 
     return ApiResponseBuilder.success(
       result.data,

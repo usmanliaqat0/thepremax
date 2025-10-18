@@ -1,5 +1,5 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
-import connectDB from "@/lib/db";
+import { withDatabaseOperation } from "@/lib/db";
 import User from "@/lib/models/User";
 import { TokenUtils } from "@/lib/auth-service";
 import { handleApiError } from "@/lib/error-handler";
@@ -17,18 +17,15 @@ export async function GET(req: NextRequest) {
     const token = authHeader.substring(7);
     const decoded = TokenUtils.verifyAccessToken(token);
 
-    await connectDB();
-
-    const user = await User.findById(decoded.id).select("-password");
+    const user = await withDatabaseOperation(async () => {
+      return await User.findById(decoded.id).select("-password");
+    });
     if (!user) {
       return NextResponse.json(
         { success: false, message: "User not found" },
         { status: 404 }
       );
     }
-
-    console.log("Profile API - User addresses:", user.addresses);
-    console.log("Profile API - User addresses length:", user.addresses?.length);
 
     return NextResponse.json({
       success: true,
@@ -93,12 +90,12 @@ export async function PUT(req: NextRequest) {
       }
     });
 
-    await connectDB();
-
-    const user = await User.findByIdAndUpdate(decoded.id, allowedUpdates, {
-      new: true,
-      runValidators: true,
-    }).select("-password");
+    const user = await withDatabaseOperation(async () => {
+      return await User.findByIdAndUpdate(decoded.id, allowedUpdates, {
+        new: true,
+        runValidators: true,
+      }).select("-password");
+    });
 
     if (!user) {
       return NextResponse.json(

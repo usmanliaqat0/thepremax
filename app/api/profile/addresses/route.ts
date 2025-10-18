@@ -38,12 +38,9 @@ export async function POST(request: NextRequest) {
       return ApiResponseBuilder.unauthorized("Authentication required");
     }
 
-    console.log("Address API - Authenticated user ID:", user.id);
-
     await connectDB();
 
     const body = await request.json();
-    console.log("Address API - Received data:", body);
 
     const {
       type = "shipping",
@@ -103,12 +100,6 @@ export async function POST(request: NextRequest) {
       return ApiResponseBuilder.notFound("User not found");
     }
 
-    console.log("Address API - Found user document:", userDoc._id);
-    console.log(
-      "Address API - Current addresses count:",
-      userDoc.addresses?.length || 0
-    );
-
     const currentAddresses = userDoc.addresses || [];
 
     // If setting as default, remove default from other addresses
@@ -124,12 +115,6 @@ export async function POST(request: NextRequest) {
     // Update user
     userDoc.addresses = currentAddresses;
     await userDoc.save();
-
-    console.log("Address API - Successfully saved address:", sanitizedData);
-    console.log(
-      "Address API - User now has addresses:",
-      userDoc.addresses.length
-    );
 
     return ApiResponseBuilder.success(
       sanitizedData,

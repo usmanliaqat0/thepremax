@@ -74,8 +74,7 @@ export async function GET(request: NextRequest) {
             return { ...order, user };
           }
           return order;
-        } catch (error) {
-          console.log(`Failed to fetch user for order ${order._id}:`, error);
+        } catch {
           return order;
         }
       })

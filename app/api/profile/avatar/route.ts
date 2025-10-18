@@ -2,6 +2,8 @@
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
 import { TokenUtils, AvatarUtils } from "@/lib/auth-service";
+import { logError } from "@/lib/logger";
+import { handleApiError } from "@/lib/error-handler";
 import fs from "fs/promises";
 import path from "path";
 
@@ -75,7 +77,7 @@ class FileUploadService {
         message: "File uploaded successfully",
       };
     } catch (error) {
-      console.error("Upload error:", error);
+      logError("Upload error", "FileUpload", error as Error);
       return {
         success: false,
         message: "Failed to upload file",
@@ -101,7 +103,7 @@ class FileUploadService {
         });
       }
     } catch (error) {
-      console.error("Error deleting old avatar:", error);
+      logError("Error deleting old avatar", "FileUpload", error as Error);
     }
   }
 }
@@ -183,34 +185,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log("Avatar updated successfully:", {
-      userId: decoded.id,
-      avatarPath: uploadResult.path,
-      updatedAvatar: updatedUser.avatar,
-    });
-
     return NextResponse.json({
       success: true,
       message: "Avatar updated successfully",
       avatar: updatedUser.avatar,
     });
   } catch (error) {
-    console.error("Avatar upload error:", error);
-
     if (
       error instanceof Error &&
       error.message.includes("Invalid or expired")
     ) {
-      return NextResponse.json(
-        { success: false, message: "Invalid or expired token" },
-        { status: 401 }
-      );
+      return handleApiError(error, "Invalid or expired token", 401);
     }
 
-    return NextResponse.json(
-      { success: false, message: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to update avatar");
   }
 }
 
@@ -259,21 +247,13 @@ export async function DELETE(req: NextRequest) {
       avatar: updatedUser?.avatar,
     });
   } catch (error) {
-    console.error("Avatar reset error:", error);
-
     if (
       error instanceof Error &&
       error.message.includes("Invalid or expired")
     ) {
-      return NextResponse.json(
-        { success: false, message: "Invalid or expired token" },
-        { status: 401 }
-      );
+      return handleApiError(error, "Invalid or expired token", 401);
     }
 
-    return NextResponse.json(
-      { success: false, message: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to reset avatar");
   }
 }

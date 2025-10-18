@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import EmailSubscription from "@/lib/models/EmailSubscription";
 import { headers } from "next/headers";
+import { logError } from "@/lib/logger";
 import { handleApiError } from "@/lib/error-handler";
 
 export async function POST(request: NextRequest) {
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Email subscription error:", error);
+    logError("Email subscription error", "API", error as Error);
 
     // Handle duplicate key error (MongoDB unique constraint)
     if (error instanceof Error && error.message.includes("duplicate key")) {

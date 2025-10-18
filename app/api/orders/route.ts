@@ -3,6 +3,7 @@ import connectDB from "@/lib/db";
 import Order, { IOrder } from "@/lib/models/Order";
 import { authMiddleware } from "@/lib/auth-middleware";
 import { handleApiError } from "@/lib/error-handler";
+import { logError } from "@/lib/logger";
 import mongoose from "mongoose";
 
 function generateOrderNumber(): string {
@@ -155,7 +156,7 @@ export async function POST(request: NextRequest) {
           { $inc: { usedCount: 1 } }
         );
       } catch (error) {
-        console.error("Error updating promo code usage:", error);
+        logError("Error updating promo code usage", "API", error as Error);
         // Don't fail the order if promo code update fails
       }
     }

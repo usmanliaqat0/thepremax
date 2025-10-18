@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import connectDB from "@/lib/db";
+import { withDatabaseOperation } from "@/lib/db";
 import Product from "@/lib/models/Product";
 import { handleApiError } from "@/lib/error-handler";
 
@@ -8,15 +8,16 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await connectDB();
     const { id } = await params;
 
-    const product = await Product.findOne({
-      $or: [{ _id: id }, { slug: id }],
-      status: "active",
-    })
-      .populate("category", "name slug")
-      .lean();
+    const product = await withDatabaseOperation(async () => {
+      return await Product.findOne({
+        $or: [{ _id: id }, { slug: id }],
+        status: "active",
+      })
+        .populate("category", "name slug")
+        .lean();
+    });
 
     if (!product) {
       return NextResponse.json(
