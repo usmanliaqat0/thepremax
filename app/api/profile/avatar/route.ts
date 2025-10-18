@@ -67,7 +67,7 @@ class FileUploadService {
       const buffer = Buffer.from(bytes);
       await fs.writeFile(filePath, buffer);
 
-      const relativePath = `/uploads/avatars/${fileName}`;
+      const relativePath = `/api/uploads/avatars/${fileName}`;
 
       return {
         success: true,
@@ -86,10 +86,16 @@ class FileUploadService {
   static async deleteOldAvatar(avatarPath: string): Promise<void> {
     try {
       if (
+        avatarPath.startsWith("/api/uploads/avatars/") ||
         avatarPath.startsWith("/uploads/avatars/") ||
         avatarPath.startsWith("/profile-images/custom/")
       ) {
-        const fullPath = path.join(process.cwd(), "public", avatarPath);
+        // Handle both API path and direct path formats
+        const filePath = avatarPath.startsWith("/api/uploads/")
+          ? avatarPath.replace("/api/uploads/", "/uploads/")
+          : avatarPath;
+
+        const fullPath = path.join(process.cwd(), "public", filePath);
         await fs.unlink(fullPath).catch(() => {
           // Ignore file not found errors
         });
@@ -157,7 +163,8 @@ export async function POST(req: NextRequest) {
 
     if (
       user.avatar &&
-      (user.avatar.startsWith("/uploads/avatars/") ||
+      (user.avatar.startsWith("/api/uploads/avatars/") ||
+        user.avatar.startsWith("/uploads/avatars/") ||
         user.avatar.startsWith("/profile-images/custom/"))
     ) {
       await FileUploadService.deleteOldAvatar(user.avatar);
@@ -231,7 +238,8 @@ export async function DELETE(req: NextRequest) {
 
     if (
       user.avatar &&
-      (user.avatar.startsWith("/uploads/avatars/") ||
+      (user.avatar.startsWith("/api/uploads/avatars/") ||
+        user.avatar.startsWith("/uploads/avatars/") ||
         user.avatar.startsWith("/profile-images/custom/"))
     ) {
       await FileUploadService.deleteOldAvatar(user.avatar);
