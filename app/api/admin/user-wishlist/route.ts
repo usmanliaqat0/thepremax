@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import Wishlist from "@/lib/models/Wishlist";
+import Wishlist, { IWishlist } from "@/lib/models/Wishlist";
 import { TokenUtils } from "@/lib/auth-service";
+import mongoose from "mongoose";
 
 export async function GET(req: NextRequest) {
   try {
@@ -36,7 +37,9 @@ export async function GET(req: NextRequest) {
 
     await connectDB();
 
-    const wishlist = await Wishlist.findOne({ userId }).lean();
+    const wishlist = await (Wishlist as mongoose.Model<IWishlist>)
+      .findOne({ userId })
+      .lean();
 
     if (!wishlist) {
       return NextResponse.json({

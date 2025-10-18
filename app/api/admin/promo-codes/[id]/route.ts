@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { handleApiError } from "@/lib/error-handler";
 import connectDB from "@/lib/db";
 import PromoCode from "@/lib/models/PromoCode";
 import { AdminMiddleware } from "@/lib/admin-middleware";
@@ -9,10 +10,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -23,7 +24,7 @@ export async function GET(
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { success: false, error: "Invalid promo code ID" },
+        { success: false, message: "Invalid promo code ID" },
         { status: 400 }
       );
     }
@@ -32,7 +33,7 @@ export async function GET(
 
     if (!promoCode) {
       return NextResponse.json(
-        { success: false, error: "Promo code not found" },
+        { success: false, message: "Promo code not found" },
         { status: 404 }
       );
     }
@@ -42,11 +43,7 @@ export async function GET(
       data: promoCode,
     });
   } catch (error) {
-    console.error("Error fetching promo code:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch promo code" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }
 
@@ -55,10 +52,10 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -69,7 +66,7 @@ export async function PUT(
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { success: false, error: "Invalid promo code ID" },
+        { success: false, message: "Invalid promo code ID" },
         { status: 400 }
       );
     }
@@ -91,7 +88,7 @@ export async function PUT(
     // Validation
     if (type === "percentage" && value > 100) {
       return NextResponse.json(
-        { success: false, error: "Percentage value cannot exceed 100" },
+        { success: false, message: "Percentage value cannot exceed 100" },
         { status: 400 }
       );
     }
@@ -104,7 +101,7 @@ export async function PUT(
       return NextResponse.json(
         {
           success: false,
-          error: "Valid from date must be before valid until date",
+          message: "Valid from date must be before valid until date",
         },
         { status: 400 }
       );
@@ -119,7 +116,7 @@ export async function PUT(
 
       if (existingPromoCode) {
         return NextResponse.json(
-          { success: false, error: "Promo code already exists" },
+          { success: false, message: "Promo code already exists" },
           { status: 400 }
         );
       }
@@ -145,7 +142,7 @@ export async function PUT(
 
     if (!promoCode) {
       return NextResponse.json(
-        { success: false, error: "Promo code not found" },
+        { success: false, message: "Promo code not found" },
         { status: 404 }
       );
     }
@@ -156,11 +153,7 @@ export async function PUT(
       message: "Promo code updated successfully",
     });
   } catch (error) {
-    console.error("Error updating promo code:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to update promo code" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }
 
@@ -169,10 +162,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -183,7 +176,7 @@ export async function DELETE(
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
-        { success: false, error: "Invalid promo code ID" },
+        { success: false, message: "Invalid promo code ID" },
         { status: 400 }
       );
     }
@@ -192,7 +185,7 @@ export async function DELETE(
 
     if (!promoCode) {
       return NextResponse.json(
-        { success: false, error: "Promo code not found" },
+        { success: false, message: "Promo code not found" },
         { status: 404 }
       );
     }
@@ -202,10 +195,6 @@ export async function DELETE(
       message: "Promo code deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting promo code:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to delete promo code" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }

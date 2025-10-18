@@ -1,47 +1,63 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest } from "next/server";
 import connectDB from "@/lib/db";
-import Product from "@/lib/models/Product";
-import mongoose from "mongoose";
+import { productQuerySchema } from "@/lib/validation/schemas";
+import { InputSanitizer } from "@/lib/validation/sanitizer";
+import { QueryOptimizer } from "@/lib/query-optimizer";
+import { ApiResponseBuilder } from "@/lib/api-response";
 
 export async function GET(request: NextRequest) {
   try {
     await connectDB();
 
-    if (!mongoose.models.Category) {
-      await import("@/lib/models/Category");
+    const { searchParams } = new URL(request.url);
+    const queryParams = Object.fromEntries(searchParams.entries());
+
+    // Validate and sanitize input
+    const validationResult = productQuerySchema.safeParse(queryParams);
+    if (!validationResult.success) {
+      const errors = validationResult.error.issues.map((issue) => ({
+        code: "VALIDATION_ERROR",
+        message: issue.message,
+        field: issue.path.join("."),
+      }));
+
+      return ApiResponseBuilder.validationError(
+        "Invalid query parameters",
+        errors
+      );
     }
 
-    const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "12");
-    const search = searchParams.get("search") || "";
-    const category = searchParams.get("category") || "";
-    const featured = searchParams.get("featured") || "";
-    const onSale = searchParams.get("onSale") || "";
-    const inStock = searchParams.get("inStock") || "";
-    const sortBy = searchParams.get("sortBy") || "createdAt";
-    const sortOrder = searchParams.get("sortOrder") || "desc";
+    const {
+      search,
+      category,
+      onSale,
+      inStock,
+      status,
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+    } = validationResult.data;
 
-    const skip = (page - 1) * limit;
-
+    // Build optimized filter
     const filter: Record<string, unknown> = {
-      status: "active",
+      status: status || "active",
     };
 
     if (search) {
+      const sanitizedSearch = InputSanitizer.sanitizeSearchQuery(search);
       filter.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-        { tags: { $in: [new RegExp(search, "i")] } },
+        { name: { $regex: sanitizedSearch, $options: "i" } },
+        { description: { $regex: sanitizedSearch, $options: "i" } },
+        { tags: { $in: [new RegExp(sanitizedSearch, "i")] } },
       ];
     }
 
     if (category) {
-      filter.categoryId = category;
-    }
-
-    if (featured === "true") {
-      filter.featured = true;
+      const sanitizedCategoryId = InputSanitizer.sanitizeObjectId(category);
+      if (sanitizedCategoryId) {
+        filter.categoryId = sanitizedCategoryId;
+      }
     }
 
     if (onSale === "true") {
@@ -52,45 +68,25 @@ export async function GET(request: NextRequest) {
       filter.inStock = true;
     }
 
-    const sort: Record<string, 1 | -1> = {};
-    if (sortBy === "price") {
-      sort.basePrice = sortOrder === "asc" ? 1 : -1;
-    } else if (sortBy === "name") {
-      sort.name = sortOrder === "asc" ? 1 : -1;
-    } else if (sortBy === "rating") {
-      sort.rating = sortOrder === "asc" ? 1 : -1;
-    } else {
-      sort[sortBy] = sortOrder === "asc" ? 1 : -1;
-    }
+    // Use optimized query
+    const result = await QueryOptimizer.getProductsOptimized(
+      filter,
+      page,
+      limit,
+      sortBy,
+      sortOrder
+    );
 
-    const total = await Product.countDocuments(filter);
-
-    const products = await Product.find(filter)
-      .populate("category", "name slug")
-      .sort(sort)
-      .skip(skip)
-      .limit(limit)
-      .lean();
-
-    const totalPages = Math.ceil(total / limit);
-
-    return NextResponse.json({
-      success: true,
-      data: products,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages,
-        hasNext: page < totalPages,
-        hasPrevious: page > 1,
-      },
-    });
+    return ApiResponseBuilder.success(
+      result.data,
+      "Products fetched successfully",
+      200,
+      result.pagination
+    );
   } catch (error) {
-    console.error("Error fetching products:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch products" },
-      { status: 500 }
+    return ApiResponseBuilder.internalError(
+      "Failed to fetch products",
+      error as Error
     );
   }
 }

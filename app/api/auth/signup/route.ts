@@ -1,6 +1,8 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { AuthService } from "@/lib/auth-service";
 import { SignupData, AuthResponse } from "@/lib/types";
+import { CookieUtils } from "@/lib/cookie-utils";
+import { handleApiError } from "@/lib/error-handler";
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,7 +10,6 @@ export async function POST(req: NextRequest) {
     const result = await AuthService.signup(body);
 
     if (result.success) {
-
       const response = NextResponse.json<AuthResponse>(
         {
           success: true,
@@ -20,23 +21,11 @@ export async function POST(req: NextRequest) {
         { status: 201 }
       );
 
-response.cookies.set("accessToken", result.accessToken!, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60,
-        path: "/",
-      });
-
-      if (result.refreshToken) {
-        response.cookies.set("refreshToken", result.refreshToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
-          maxAge: 30 * 24 * 60 * 60,
-          path: "/",
-        });
-      }
+      CookieUtils.setAuthCookies(
+        response,
+        result.accessToken!,
+        result.refreshToken
+      );
 
       return response;
     } else {
@@ -48,10 +37,6 @@ response.cookies.set("accessToken", result.accessToken!, {
       );
     }
   } catch (error) {
-    console.error("Signup route error:", error);
-    return NextResponse.json<AuthResponse>(
-      { success: false, message: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Internal server error");
   }
 }

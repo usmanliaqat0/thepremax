@@ -37,7 +37,6 @@ const Newsletter = dynamic(
 export default function Home() {
   useScrollToTop();
 
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [topRatedProducts, setTopRatedProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -50,11 +49,6 @@ export default function Home() {
         setIsLoading(true);
         setError(null);
 
-        const featuredResponse = await fetch(
-          "/api/products?featured=true&limit=8"
-        );
-        const featuredData = await featuredResponse.json();
-
         const topRatedResponse = await fetch(
           "/api/products?sortBy=rating&sortOrder=desc&limit=8"
         );
@@ -62,10 +56,6 @@ export default function Home() {
 
         const categoriesResponse = await fetch("/api/categories");
         const categoriesData = await categoriesResponse.json();
-
-        if (featuredData.success) {
-          setFeaturedProducts(featuredData.data);
-        }
 
         if (topRatedData.success) {
           setTopRatedProducts(topRatedData.data);
@@ -318,7 +308,7 @@ export default function Home() {
           ) : (
             <>
               <ProductGridWrapper className="mb-12">
-                {featuredProducts.slice(0, 4).map((product) => (
+                {topRatedProducts.slice(0, 4).map((product) => (
                   <ProductCard key={product._id} product={product} />
                 ))}
               </ProductGridWrapper>

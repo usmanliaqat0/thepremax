@@ -1,14 +1,15 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import ContactMessage from "@/lib/models/ContactMessage";
+import ContactMessage, { IContactMessage } from "@/lib/models/ContactMessage";
 import { AdminMiddleware } from "@/lib/admin-middleware";
+import mongoose from "mongoose";
 
 export async function GET(request: NextRequest) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -20,7 +21,8 @@ export async function GET(request: NextRequest) {
 
     if (all) {
       // Return all messages without pagination for client-side handling
-      const messages = await ContactMessage.find({})
+      const messages = await (ContactMessage as mongoose.Model<IContactMessage>)
+        .find({})
         .sort({ createdAt: -1 })
         .lean();
 
@@ -53,9 +55,12 @@ export async function GET(request: NextRequest) {
       filter.status = status;
     }
 
-    const total = await ContactMessage.countDocuments(filter);
+    const total = await (
+      ContactMessage as mongoose.Model<IContactMessage>
+    ).countDocuments(filter);
 
-    const messages = await ContactMessage.find(filter)
+    const messages = await (ContactMessage as mongoose.Model<IContactMessage>)
+      .find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -76,10 +81,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Get messages error:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to fetch messages",
-      },
+      { success: false, message: "Failed to fetch messages" },
       { status: 500 }
     );
   }

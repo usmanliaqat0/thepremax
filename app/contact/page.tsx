@@ -76,7 +76,7 @@ const Contact = () => {
           toast.error(errorMessages);
         } else {
           toast.error(
-            data.error || "Failed to send message. Please try again."
+            data.message || "Failed to send message. Please try again."
           );
         }
       }

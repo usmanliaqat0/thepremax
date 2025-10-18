@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import EmailSubscription from "@/lib/models/EmailSubscription";
 import { headers } from "next/headers";
+import { handleApiError } from "@/lib/error-handler";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,14 +13,23 @@ export async function POST(request: NextRequest) {
 
     // Validate email
     if (!email || typeof email !== "string") {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Email is required",
+        },
+        { status: 400 }
+      );
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json(
-        { error: "Please enter a valid email address" },
+        {
+          success: false,
+          message: "Please enter a valid email address",
+        },
         { status: 400 }
       );
     }
@@ -42,6 +52,7 @@ export async function POST(request: NextRequest) {
       if (existingSubscription.status === "active") {
         return NextResponse.json(
           {
+            success: true,
             message: "You're already subscribed to our newsletter!",
             alreadySubscribed: true,
           },
@@ -53,16 +64,16 @@ export async function POST(request: NextRequest) {
       if (existingSubscription.status === "unsubscribed") {
         existingSubscription.status = "active";
         existingSubscription.subscribedAt = new Date();
-        existingSubscription.unsubscribedAt = undefined;
-        existingSubscription.metadata = {
-          userAgent,
-          ipAddress,
-          referrer,
-        };
+        delete existingSubscription.unsubscribedAt;
+        existingSubscription.metadata = {};
+        if (userAgent) existingSubscription.metadata.userAgent = userAgent;
+        if (ipAddress) existingSubscription.metadata.ipAddress = ipAddress;
+        if (referrer) existingSubscription.metadata.referrer = referrer;
         await existingSubscription.save();
 
         return NextResponse.json(
           {
+            success: true,
             message:
               "Welcome back! You've been resubscribed to our newsletter.",
             resubscribed: true,
@@ -86,6 +97,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
+        success: true,
         message: "Successfully subscribed to our newsletter!",
         subscribed: true,
       },
@@ -98,6 +110,7 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error && error.message.includes("duplicate key")) {
       return NextResponse.json(
         {
+          success: true,
           message: "You're already subscribed to our newsletter!",
           alreadySubscribed: true,
         },
@@ -105,9 +118,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: "Failed to subscribe. Please try again later." },
-      { status: 500 }
+    return handleApiError(
+      error,
+      "Failed to subscribe. Please try again later."
     );
   }
 }
@@ -121,7 +134,7 @@ export async function GET(request: NextRequest) {
 
     if (!email) {
       return NextResponse.json(
-        { error: "Email parameter is required" },
+        { success: false, message: "Email parameter is required" },
         { status: 400 }
       );
     }
@@ -132,22 +145,23 @@ export async function GET(request: NextRequest) {
 
     if (!subscription) {
       return NextResponse.json(
-        { subscribed: false, message: "Email not found in subscriptions" },
+        {
+          success: true,
+          subscribed: false,
+          message: "Email not found in subscriptions",
+        },
         { status: 200 }
       );
     }
 
     return NextResponse.json({
+      success: true,
       subscribed: subscription.status === "active",
       status: subscription.status,
       subscribedAt: subscription.subscribedAt,
       source: subscription.source,
     });
   } catch (error) {
-    console.error("Email subscription check error:", error);
-    return NextResponse.json(
-      { error: "Failed to check subscription status" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to check subscription status");
   }
 }

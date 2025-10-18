@@ -71,7 +71,7 @@ export default function AdminSubscriptions() {
         setStats(data.stats);
         setSourceStats(data.sourceStats);
       } else {
-        toast.error(data.error || "Failed to fetch subscriptions");
+        toast.error(data.message || "Failed to fetch subscriptions");
       }
     } catch (error) {
       console.error("Error fetching subscriptions:", error);
@@ -101,18 +101,21 @@ export default function AdminSubscriptions() {
         toast.success("Subscription status updated successfully");
 
         setAllSubscriptions((prev) =>
-          prev.map((sub) =>
-            sub._id === id
-              ? {
-                  ...sub,
-                  status: newStatus as "active" | "unsubscribed" | "bounced",
-                  unsubscribedAt:
-                    newStatus === "unsubscribed"
-                      ? new Date().toISOString()
-                      : undefined,
-                }
-              : sub
-          )
+          prev.map((sub) => {
+            if (sub._id === id) {
+              const updatedSub: EmailSubscription = {
+                ...sub,
+                status: newStatus as "active" | "unsubscribed" | "bounced",
+              };
+              if (newStatus === "unsubscribed") {
+                updatedSub.unsubscribedAt = new Date().toISOString();
+              } else if (newStatus === "active") {
+                delete updatedSub.unsubscribedAt;
+              }
+              return updatedSub;
+            }
+            return sub;
+          })
         );
         const updatedSubs = allSubscriptions.map((sub) =>
           sub._id === id
@@ -136,7 +139,7 @@ export default function AdminSubscriptions() {
         };
         setStats(newStats);
       } else {
-        toast.error(data.error || "Failed to update subscription");
+        toast.error(data.message || "Failed to update subscription");
       }
     } catch (error) {
       console.error("Error updating subscription:", error);
@@ -169,7 +172,7 @@ export default function AdminSubscriptions() {
         };
         setStats(newStats);
       } else {
-        toast.error(data.error || "Failed to delete subscription");
+        toast.error(data.message || "Failed to delete subscription");
       }
     } catch (error) {
       console.error("Error deleting subscription:", error);

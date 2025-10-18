@@ -8,7 +8,6 @@ import Navigation from "@/components/Navigation";
 import ProductGrid from "@/components/ProductGrid";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { RefreshLoader } from "@/components/ui/loader";
 
 import {
@@ -75,7 +74,7 @@ const ProductDetail = () => {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || "Failed to fetch product");
+          throw new Error(data.message || "Failed to fetch product");
         }
 
         if (data.success && data.data) {
@@ -250,17 +249,16 @@ const ProductDetail = () => {
           <div>
             <div className="relative aspect-square mb-4">
               <Image
-                src={productImages[selectedImage]}
+                src={
+                  productImages[selectedImage] ||
+                  productImages[0] ||
+                  "/placeholder.jpg"
+                }
                 alt={product.name}
                 fill
                 className="object-cover rounded-lg"
                 priority
               />
-              {product.featured && (
-                <Badge className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-accent text-accent-foreground text-xs sm:text-sm">
-                  Featured
-                </Badge>
-              )}
             </div>
 
             {/* Image Thumbnails - Only show if there are multiple images */}

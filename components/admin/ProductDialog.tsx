@@ -62,7 +62,6 @@ interface Product {
   variants: ProductVariant[];
   images: ProductImage[];
   totalSold: number;
-  featured: boolean;
   topRated: boolean;
   onSale: boolean;
   status: "active" | "inactive" | "pending" | "archived";
@@ -104,7 +103,6 @@ export default function ProductDialog({
     variants: [] as ProductVariant[],
     images: [] as ProductImage[],
     totalSold: 0,
-    featured: false,
     topRated: false,
     onSale: false,
     status: "active" as "active" | "inactive" | "pending" | "archived",
@@ -138,7 +136,6 @@ export default function ProductDialog({
           variants: product.variants || [],
           images: product.images || [],
           totalSold: product.totalSold || 0,
-          featured: product.featured || false,
           topRated: product.topRated || false,
           onSale: product.onSale || false,
           status: product.status || "active",
@@ -163,7 +160,6 @@ export default function ProductDialog({
           variants: [],
           images: [],
           totalSold: 0,
-          featured: false,
           topRated: false,
           onSale: false,
           status: "active",
@@ -588,18 +584,7 @@ export default function ProductDialog({
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Product Flags</h3>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="featured"
-                  checked={formData.featured}
-                  onCheckedChange={(checked) =>
-                    handleInputChange("featured", checked)
-                  }
-                />
-                <Label htmlFor="featured">Featured</Label>
-              </div>
-
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="topRated"

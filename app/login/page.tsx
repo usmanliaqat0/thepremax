@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ButtonLoader } from "@/components/ui/loader";
+import { AuthPageLoader } from "@/components/ui/auth-loader";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
@@ -24,8 +25,22 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { state, signin } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { state, signinForm, isAdmin } = useAuth();
   const router = useRouter();
+
+  // Redirect authenticated users away from login page
+  useEffect(() => {
+    if (!state.isLoading && state.isAuthenticated && state.user) {
+      // If user is admin, redirect to admin dashboard
+      if (isAdmin()) {
+        router.push("/admin");
+      } else {
+        // Regular users go to profile
+        router.push("/profile");
+      }
+    }
+  }, [state.isLoading, state.isAuthenticated, state.user, isAdmin, router]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -53,17 +68,23 @@ const Login = () => {
       return;
     }
 
-    const signinData: SigninData = {
-      email,
-      password,
-    };
+    setIsSubmitting(true);
 
-    const result = await signin(signinData);
-    if (result.success) {
-      router.push("/profile");
-    } else if (result.errors) {
-      // Set field-specific errors
-      setErrors(result.errors);
+    try {
+      const signinData: SigninData = {
+        email,
+        password,
+      };
+
+      const result = await signinForm(signinData);
+      if (result.success) {
+        router.push("/profile");
+      } else if (result.errors) {
+        // Set field-specific errors
+        setErrors(result.errors);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -75,6 +96,11 @@ const Login = () => {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
+
+  // Show loading while checking authentication status
+  if (state.isLoading) {
+    return <AuthPageLoader />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
@@ -155,10 +181,10 @@ const Login = () => {
                 <Button
                   type="submit"
                   className="w-full h-12 text-base font-semibold bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600 transition-all duration-200 shadow-lg hover:shadow-xl"
-                  disabled={state.isLoading}
+                  disabled={isSubmitting}
                 >
-                  {state.isLoading && <ButtonLoader variant="light" />}
-                  {state.isLoading ? "Signing In" : "Sign In"}
+                  {isSubmitting && <ButtonLoader variant="light" />}
+                  {isSubmitting ? "Signing In..." : "Sign In"}
                 </Button>
               </form>
 

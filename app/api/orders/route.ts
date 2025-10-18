@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import Order from "@/lib/models/Order";
+import Order, { IOrder } from "@/lib/models/Order";
 import { authMiddleware } from "@/lib/auth-middleware";
 import { handleApiError } from "@/lib/error-handler";
 import mongoose from "mongoose";
@@ -15,7 +15,13 @@ export async function GET(request: NextRequest) {
   try {
     const user = await authMiddleware(request);
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized",
+        },
+        { status: 401 }
+      );
     }
 
     await connectDB();
@@ -38,11 +44,17 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     const [orders, total] = await Promise.all([
-      Order.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      Order.countDocuments(query),
+      (Order as mongoose.Model<IOrder>)
+        .find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      (Order as mongoose.Model<IOrder>).countDocuments(query),
     ]);
 
     return NextResponse.json({
+      success: true,
       orders,
       pagination: {
         page,
@@ -60,7 +72,13 @@ export async function POST(request: NextRequest) {
   try {
     const user = await authMiddleware(request);
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized",
+        },
+        { status: 401 }
+      );
     }
 
     await connectDB();
@@ -82,14 +100,17 @@ export async function POST(request: NextRequest) {
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { error: "Order items are required" },
+        { success: false, message: "Order items are required" },
         { status: 400 }
       );
     }
 
     if (!shippingAddress || !billingAddress) {
       return NextResponse.json(
-        { error: "Shipping and billing addresses are required" },
+        {
+          success: false,
+          message: "Shipping and billing addresses are required",
+        },
         { status: 400 }
       );
     }
@@ -98,7 +119,7 @@ export async function POST(request: NextRequest) {
     for (const item of items) {
       if (!mongoose.Types.ObjectId.isValid(item.productId)) {
         return NextResponse.json(
-          { error: `Invalid product ID: ${item.productId}` },
+          { success: false, message: `Invalid product ID: ${item.productId}` },
           { status: 400 }
         );
       }
@@ -141,6 +162,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
+        success: true,
         message: "Order created successfully",
         order: {
           _id: order._id,

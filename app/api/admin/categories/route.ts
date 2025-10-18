@@ -1,4 +1,5 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
+import { handleApiError } from "@/lib/error-handler";
 import connectDB from "@/lib/db";
 import Category from "@/lib/models/Category";
 import { AdminMiddleware } from "@/lib/admin-middleware";
@@ -6,10 +7,10 @@ import mongoose from "mongoose";
 
 export async function GET(request: NextRequest) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -83,20 +84,16 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error fetching categories:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch categories" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -121,7 +118,7 @@ export async function POST(request: NextRequest) {
 
     if (!name) {
       return NextResponse.json(
-        { success: false, error: "Name is required" },
+        { success: false, message: "Name is required" },
         { status: 400 }
       );
     }
@@ -132,7 +129,7 @@ export async function POST(request: NextRequest) {
 
     if (existingCategory) {
       return NextResponse.json(
-        { success: false, error: "Category with this name already exists" },
+        { success: false, message: "Category with this name already exists" },
         { status: 400 }
       );
     }
@@ -145,7 +142,7 @@ export async function POST(request: NextRequest) {
     const existingSlug = await Category.findOne({ slug });
     if (existingSlug) {
       return NextResponse.json(
-        { success: false, error: "Category with this slug already exists" },
+        { success: false, message: "Category with this slug already exists" },
         { status: 400 }
       );
     }
@@ -171,10 +168,6 @@ export async function POST(request: NextRequest) {
       message: "Category created successfully",
     });
   } catch (error) {
-    console.error("Error creating category:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to create category" },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to process request");
   }
 }

@@ -75,7 +75,9 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
 
       if (existingItemIndex >= 0) {
         const updatedItems = [...state.items];
-        updatedItems[existingItemIndex].quantity += quantity;
+        if (updatedItems[existingItemIndex]) {
+          updatedItems[existingItemIndex].quantity += quantity;
+        }
         return { ...state, items: updatedItems };
       } else {
         const newItem: CartItem = {
@@ -122,7 +124,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     }
 
     case "CLEAR_CART":
-      return { ...state, items: [], appliedPromoCode: undefined };
+      return { ...state, items: [] };
 
     case "LOAD_STATE":
       return action.payload;
@@ -136,7 +138,6 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case "REMOVE_PROMO_CODE":
       return {
         ...state,
-        appliedPromoCode: undefined,
       };
 
     default:
@@ -196,8 +197,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
+  // Debounced localStorage update to prevent excessive writes
   useEffect(() => {
-    localStorage.setItem("ThePreMax-cart", JSON.stringify(state));
+    const timeoutId = setTimeout(() => {
+      try {
+        localStorage.setItem("ThePreMax-cart", JSON.stringify(state));
+      } catch (error) {
+        console.error("Failed to save cart to localStorage:", error);
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeoutId);
   }, [state]);
 
   const addToCart = useCallback(
@@ -272,7 +282,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     ) => {
       dispatch({
         type: "APPLY_PROMO_CODE",
-        payload: { code, type, value, discount, description },
+        payload: {
+          code,
+          type,
+          value,
+          discount,
+          ...(description && { description }),
+        },
       });
     },
     []

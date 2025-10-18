@@ -122,8 +122,15 @@ const OrderSchema = new Schema<IOrder>(
   }
 );
 
-OrderSchema.index({ userId: 1, createdAt: -1 });
-OrderSchema.index({ status: 1 });
+// Optimized indexes for order queries
+OrderSchema.index({ userId: 1, createdAt: -1 }); // User orders by date
+// Note: orderNumber already has unique index defined in schema
+OrderSchema.index({ status: 1, createdAt: -1 }); // Orders by status and date
+OrderSchema.index({ paymentStatus: 1, createdAt: -1 }); // Payment status queries
+OrderSchema.index({ userId: 1, status: 1 }); // User orders by status
+OrderSchema.index({ createdAt: -1 }); // All orders by date
+OrderSchema.index({ "items.productId": 1 }); // Orders by product
+OrderSchema.index({ trackingNumber: 1 }); // Order tracking
 
 const Order =
   mongoose.models.Order || mongoose.model<IOrder>("Order", OrderSchema);

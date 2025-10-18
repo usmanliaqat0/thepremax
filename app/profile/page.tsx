@@ -55,7 +55,14 @@ interface AvatarOption {
 }
 
 const Profile = () => {
-  const { state, logout, updateProfile, uploadAvatar, resetAvatar } = useAuth();
+  const {
+    state,
+    logout,
+    updateProfile,
+    uploadAvatar,
+    resetAvatar,
+    refreshUser,
+  } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -109,7 +116,13 @@ const Profile = () => {
 
   useEffect(() => {
     if (state.user?.avatar) {
-      setCurrentAvatar(state.user.avatar);
+      // Ensure the avatar URL is properly formatted
+      const avatarUrl = state.user.avatar.startsWith("/")
+        ? state.user.avatar
+        : `/${state.user.avatar}`;
+      setCurrentAvatar(avatarUrl);
+    } else {
+      setCurrentAvatar("/profile-images/defaults/male-avatar.svg");
     }
   }, [state.user?.avatar]);
 
@@ -122,6 +135,9 @@ const Profile = () => {
       const success = await uploadAvatar(selectedFile);
 
       if (success) {
+        // Force a refresh of the user data to ensure we have the latest avatar
+        await refreshUser();
+
         setShowAvatarDialog(false);
         setSelectedFile(null);
         setPreviewUrl("");
@@ -152,6 +168,9 @@ const Profile = () => {
     try {
       const success = await updateProfile({ avatar: avatar.src });
       if (success) {
+        // Force a refresh of the user data to ensure we have the latest avatar
+        await refreshUser();
+
         setCurrentAvatar(avatar.src);
         setShowAvatarDialog(false);
 
@@ -173,6 +192,9 @@ const Profile = () => {
     try {
       const success = await resetAvatar();
       if (success) {
+        // Force a refresh of the user data to ensure we have the latest avatar
+        await refreshUser();
+
         setCurrentAvatar("/profile-images/defaults/male-avatar.svg");
 
         toast({
@@ -272,8 +294,19 @@ const Profile = () => {
           <CardContent className="p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
               <div className="relative">
-                <Avatar className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 ring-4 ring-gray-100">
-                  <AvatarImage src={currentAvatar} />
+                <Avatar
+                  key={currentAvatar}
+                  className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 ring-4 ring-gray-100"
+                >
+                  <AvatarImage
+                    src={currentAvatar}
+                    alt="Profile picture"
+                    onError={() => {
+                      setCurrentAvatar(
+                        "/profile-images/defaults/male-avatar.svg"
+                      );
+                    }}
+                  />
                   <AvatarFallback className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
                     {state.user
                       ? `${state.user.firstName?.[0] || ""}${

@@ -6,38 +6,51 @@ import { AuthUser, SigninData, SignupData } from "./types";
 import User, { IUser } from "./models/User";
 import connectDB from "./db";
 import { EmailService } from "./email-service";
+import { getEnvConfig } from "./env-validation";
+import { logError } from "./logger";
 
 interface JWTPayload {
   id: string;
   email: string;
   role: string;
   type: string;
+  isEmailVerified?: boolean;
   iat?: number;
   exp?: number;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-super-secret-jwt-key-here";
-const JWT_REFRESH_SECRET =
-  process.env.JWT_REFRESH_SECRET || "your-super-secret-refresh-key-here";
-const TOKEN_EXPIRY = process.env.JWT_EXPIRES_IN || "7d";
-const REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_EXPIRES_IN || "30d";
-
-if (!process.env.JWT_SECRET) {
-  console.warn(
-    "⚠️  JWT_SECRET environment variable not found. Using default secret (not recommended for production)."
-  );
-}
+// Get environment configuration
+const env = getEnvConfig();
+const JWT_SECRET = env.JWT_SECRET;
+const JWT_REFRESH_SECRET = env.JWT_REFRESH_SECRET;
+const TOKEN_EXPIRY = env.JWT_EXPIRES_IN;
+const REFRESH_TOKEN_EXPIRY = env.JWT_REFRESH_EXPIRES_IN;
 
 const REFRESH_TOKENS_ENABLED = !!JWT_REFRESH_SECRET;
 
+/**
+ * Utility class for password hashing, validation, and comparison
+ * Provides secure password handling with bcrypt
+ */
 export class PasswordUtils {
   private static readonly SALT_ROUNDS = 12;
   private static readonly MIN_LENGTH = 8;
 
+  /**
+   * Hashes a password using bcrypt with configured salt rounds
+   * @param password - The plain text password to hash
+   * @returns Promise<string> - The hashed password
+   */
   static async hash(password: string): Promise<string> {
     return await bcrypt.hash(password, this.SALT_ROUNDS);
   }
 
+  /**
+   * Compares a plain text password with a hashed password
+   * @param password - The plain text password
+   * @param hashedPassword - The hashed password to compare against
+   * @returns Promise<boolean> - True if passwords match, false otherwise
+   */
   static async compare(
     password: string,
     hashedPassword: string
@@ -45,6 +58,11 @@ export class PasswordUtils {
     return await bcrypt.compare(password, hashedPassword);
   }
 
+  /**
+   * Validates password strength and requirements
+   * @param password - The password to validate
+   * @returns Object with validation result and error message if invalid
+   */
   static validate(password: string): { valid: boolean; message?: string } {
     if (password.length < this.MIN_LENGTH) {
       return {
@@ -191,7 +209,16 @@ export class VerificationUtils {
   }
 }
 
+/**
+ * Main authentication service class
+ * Handles user authentication, registration, and token management
+ */
 export class AuthService {
+  /**
+   * Authenticates a user with email and password
+   * @param data - Signin credentials (email and password)
+   * @returns Promise with authentication result including user data and tokens
+   */
   static async signin(data: SigninData): Promise<{
     success: boolean;
     user?: AuthUser;
@@ -218,55 +245,33 @@ export class AuthService {
 
       const normalizedEmail = EmailUtils.normalize(email);
 
-      const adminEmail = process.env.ADMIN_EMAIL;
-      const adminPassword = process.env.ADMIN_PASSWORD;
-
+      // Check if this is an admin email trying to login through normal login
+      const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
       if (
-        adminEmail &&
-        adminPassword &&
-        normalizedEmail === EmailUtils.normalize(adminEmail)
+        superAdminEmail &&
+        normalizedEmail === EmailUtils.normalize(superAdminEmail)
       ) {
-        if (password === adminPassword) {
-          const adminUserData: AuthUser = {
-            id: "admin-super-user",
-            email: normalizedEmail,
-            firstName: "Super",
-            lastName: "Admin",
-            role: "admin",
-            avatar: AvatarUtils.getDefaultAvatar(),
-            isEmailVerified: true,
-            isPhoneVerified: false,
-            status: "active",
-            preferences: {
-              currency: "USD",
-              language: "en",
-              theme: "light",
-              favoriteCategories: [],
-            },
-            addresses: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-
-          const accessToken = TokenUtils.generateAccessToken(adminUserData);
-          const refreshToken = TokenUtils.generateRefreshToken(adminUserData);
-
-          return {
-            success: true,
-            user: adminUserData,
-            accessToken,
-            refreshToken,
-            message: "Admin login successful",
-          };
-        } else {
-          return {
-            success: false,
-            message: "Invalid admin credentials",
-          };
-        }
+        return {
+          success: false,
+          message: "Admin accounts must use the admin login portal",
+        };
       }
 
       await connectDB();
+
+      // Check if this email belongs to an admin user
+      const { default: Admin } = await import("./models/Admin");
+      const adminUser = await Admin.findOne({
+        email: normalizedEmail,
+        status: "active",
+      });
+
+      if (adminUser) {
+        return {
+          success: false,
+          message: "Admin accounts must use the admin login portal",
+        };
+      }
 
       const user = await User.findOne({ email: normalizedEmail }).select(
         "+password"
@@ -290,6 +295,7 @@ export class AuthService {
         password,
         user.password
       );
+
       if (!isPasswordValid) {
         return {
           success: false,
@@ -302,8 +308,8 @@ export class AuthService {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        gender: user.gender,
-        avatar: user.avatar,
+        ...(user.gender && { gender: user.gender }),
+        ...(user.avatar && { avatar: user.avatar }),
         role: user.role,
         isEmailVerified: user.isEmailVerified,
         isPhoneVerified: user.isPhoneVerified,
@@ -325,7 +331,7 @@ export class AuthService {
         message: "Login successful",
       };
     } catch (error) {
-      console.error("Signin error:", error);
+      logError("Signin error", "Auth", error as Error);
       return {
         success: false,
         message: "Internal server error",
@@ -333,6 +339,11 @@ export class AuthService {
     }
   }
 
+  /**
+   * Registers a new user account
+   * @param data - User registration data (email, password, name, etc.)
+   * @returns Promise with registration result including user data and tokens
+   */
   static async signup(data: SignupData): Promise<{
     success: boolean;
     user?: AuthUser;
@@ -410,8 +421,8 @@ export class AuthService {
         email: savedUser.email,
         firstName: savedUser.firstName,
         lastName: savedUser.lastName,
-        gender: savedUser.gender,
-        avatar: savedUser.avatar,
+        ...(savedUser.gender && { gender: savedUser.gender }),
+        ...(savedUser.avatar && { avatar: savedUser.avatar }),
         role: savedUser.role,
         isEmailVerified: savedUser.isEmailVerified,
         isPhoneVerified: savedUser.isPhoneVerified,
@@ -442,7 +453,7 @@ export class AuthService {
           "Account created successfully. Please check your email to verify your account.",
       };
     } catch (error) {
-      console.error("Signup error:", error);
+      logError("Signup error", "Auth", error as Error);
       return {
         success: false,
         message: "Internal server error",
@@ -474,8 +485,8 @@ export class AuthService {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        gender: user.gender,
-        avatar: user.avatar,
+        ...(user.gender && { gender: user.gender }),
+        ...(user.avatar && { avatar: user.avatar }),
         role: user.role,
         isEmailVerified: user.isEmailVerified,
         isPhoneVerified: user.isPhoneVerified,
@@ -496,7 +507,7 @@ export class AuthService {
         message: "Token refreshed successfully",
       };
     } catch (error) {
-      console.error("Token refresh error:", error);
+      logError("Token refresh error", "Auth", error as Error);
       return {
         success: false,
         message: "Invalid or expired refresh token",
@@ -525,8 +536,8 @@ export class AuthService {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        gender: user.gender,
-        avatar: user.avatar,
+        ...(user.gender && { gender: user.gender }),
+        ...(user.avatar && { avatar: user.avatar }),
         role: user.role,
         isEmailVerified: user.isEmailVerified,
         isPhoneVerified: user.isPhoneVerified,
@@ -542,7 +553,7 @@ export class AuthService {
         user: userData,
       };
     } catch (error) {
-      console.error("Get user error:", error);
+      logError("Get user error", "Auth", error as Error);
       return {
         success: false,
         message: "Failed to get user data",
@@ -560,7 +571,7 @@ export class AuthService {
       let user;
       if (token.length === 6) {
         const upperCode = token.toUpperCase();
-        console.log("Looking for user with code:", upperCode);
+        // Note: Removed console.log statements for security
 
         const escapedCode = upperCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -568,13 +579,7 @@ export class AuthService {
           emailVerificationToken: { $regex: `^${escapedCode}`, $options: "i" },
         });
 
-        console.log("Found user:", user ? "Yes" : "No");
-        if (user) {
-          console.log(
-            "User token starts with:",
-            user.emailVerificationToken?.substring(0, 6)
-          );
-        }
+        // Note: Removed console.log statements for security
       } else {
         user = await User.findOne({
           emailVerificationToken: token,
@@ -589,8 +594,8 @@ export class AuthService {
       }
 
       user.isEmailVerified = true;
-      user.emailVerificationToken = undefined;
-      user.emailVerificationExpires = undefined;
+      delete user.emailVerificationToken;
+      delete user.emailVerificationExpires;
       await user.save();
 
       return {
@@ -598,7 +603,7 @@ export class AuthService {
         message: "Email verified successfully",
       };
     } catch (error) {
-      console.error("Email verification error:", error);
+      logError("Email verification error", "Auth", error as Error);
       return {
         success: false,
         message: "Failed to verify email",
@@ -655,7 +660,7 @@ export class AuthService {
         };
       }
     } catch (error) {
-      console.error("Resend verification email error:", error);
+      logError("Resend verification email error", "Auth", error as Error);
       return {
         success: false,
         message: "Failed to resend verification email",

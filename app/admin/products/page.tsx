@@ -18,6 +18,7 @@ import ProductViewDialog from "@/components/admin/ProductViewDialog";
 import { toast } from "sonner";
 import { useAdminData } from "@/hooks/use-admin-data";
 import { useDialog } from "@/hooks/use-dialog";
+import { usePermissions } from "@/context/PermissionContext";
 import {
   AdminDataTable,
   TableColumn,
@@ -66,7 +67,6 @@ interface Product extends Record<string, unknown> {
   variants: ProductVariant[];
   images: ProductImage[];
   totalSold: number;
-  featured: boolean;
   topRated: boolean;
   onSale: boolean;
   status: "active" | "inactive" | "pending" | "archived";
@@ -84,6 +84,7 @@ interface Product extends Record<string, unknown> {
 }
 
 export default function ProductsPage() {
+  const { hasPermission } = usePermissions();
   const [categories, setCategories] = useState<Category[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
@@ -157,7 +158,7 @@ export default function ProductsPage() {
         setData(products.filter((p) => p._id !== product._id));
         toast.success("Product deleted successfully");
       } else {
-        toast.error(data.error || "Failed to delete product");
+        toast.error(data.message || "Failed to delete product");
       }
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -173,7 +174,6 @@ export default function ProductsPage() {
   const stats = {
     total: products.length,
     active: products.filter((p) => p.status === "active").length,
-    featured: products.filter((p) => p.featured).length,
     onSale: products.filter((p) => p.onSale).length,
     outOfStock: products.filter((p) => !p.inStock).length,
     totalRevenue: products.reduce(
@@ -262,35 +262,44 @@ export default function ProductsPage() {
   const getActions = (): TableAction<Product>[] => {
     const actions: TableAction<Product>[] = [];
 
-    actions.push({
-      label: "View",
-      icon: <Eye className="h-4 w-4 mr-2" />,
-      onClick: (product) => {
-        setViewingProduct(product);
-        productViewDialog.openDialog();
-      },
-    });
+    // View action - available to all admins with view permission
+    if (hasPermission("products", "view")) {
+      actions.push({
+        label: "View",
+        icon: <Eye className="h-4 w-4 mr-2" />,
+        onClick: (product) => {
+          setViewingProduct(product);
+          productViewDialog.openDialog();
+        },
+      });
+    }
 
-    actions.push({
-      label: "Edit",
-      icon: <Edit className="h-4 w-4 mr-2" />,
-      onClick: (product) => {
-        setEditingProduct(product);
-        productDialog.openDialog();
-      },
-    });
+    // Edit action - only if user has update permission
+    if (hasPermission("products", "update")) {
+      actions.push({
+        label: "Edit",
+        icon: <Edit className="h-4 w-4 mr-2" />,
+        onClick: (product) => {
+          setEditingProduct(product);
+          productDialog.openDialog();
+        },
+      });
+    }
 
-    actions.push({
-      label: "Delete",
-      icon: <Trash2 className="h-4 w-4 mr-2" />,
-      onClick: (product) => handleDelete(product),
-      variant: "destructive",
-      confirm: {
-        title: "Delete Product",
-        description:
-          "Are you sure you want to delete this product? This action cannot be undone.",
-      },
-    });
+    // Delete action - only if user has delete permission
+    if (hasPermission("products", "delete")) {
+      actions.push({
+        label: "Delete",
+        icon: <Trash2 className="h-4 w-4 mr-2" />,
+        onClick: (product) => handleDelete(product),
+        variant: "destructive",
+        confirm: {
+          title: "Delete Product",
+          description:
+            "Are you sure you want to delete this product? This action cannot be undone.",
+        },
+      });
+    }
 
     return actions;
   };
@@ -351,16 +360,18 @@ export default function ProductsPage() {
             <Package className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Button onClick={handleCreate} className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Product
-          </Button>
+          {hasPermission("products", "create") && (
+            <Button onClick={handleCreate} className="w-full sm:w-auto">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Product
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
-        <Card className="p-2 sm:p-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4">
+        <Card className="p-3 sm:p-4 md:p-6">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Total Products
@@ -375,22 +386,20 @@ export default function ProductsPage() {
           </div>
         </Card>
 
-        <Card className="p-2 sm:p-3">
+        <Card className="p-3 sm:p-4 md:p-6">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
-              Featured
+              On Sale
             </CardTitle>
             <Star className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </div>
           <div className="space-y-1">
-            <div className="text-lg sm:text-xl font-bold">{stats.featured}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.onSale} on sale
-            </p>
+            <div className="text-lg sm:text-xl font-bold">{stats.onSale}</div>
+            <p className="text-xs text-muted-foreground">on sale</p>
           </div>
         </Card>
 
-        <Card className="p-2 sm:p-3">
+        <Card className="p-3 sm:p-4 md:p-6">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Out of Stock
@@ -405,7 +414,7 @@ export default function ProductsPage() {
           </div>
         </Card>
 
-        <Card className="p-2 sm:p-3">
+        <Card className="p-3 sm:p-4 md:p-6">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xs font-medium text-muted-foreground">
               Avg Rating

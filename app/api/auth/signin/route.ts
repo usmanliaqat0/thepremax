@@ -1,6 +1,8 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { AuthService } from "@/lib/auth-service";
-import { SigninData, AuthResponse } from "@/lib/types";
+import { SigninData } from "@/lib/types";
+import { CookieUtils } from "@/lib/cookie-utils";
+import { ApiResponseBuilder } from "@/lib/api-response";
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,7 +10,8 @@ export async function POST(req: NextRequest) {
     const result = await AuthService.signin(body);
 
     if (result.success) {
-      const response = NextResponse.json<AuthResponse>(
+      // Create response in the format expected by AuthContext
+      const response = NextResponse.json(
         {
           success: true,
           message: result.message!,
@@ -18,23 +21,11 @@ export async function POST(req: NextRequest) {
         { status: 200 }
       );
 
-      response.cookies.set("accessToken", result.accessToken!, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60,
-        path: "/",
-      });
-
-      if (result.refreshToken) {
-        response.cookies.set("refreshToken", result.refreshToken, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
-          maxAge: 30 * 24 * 60 * 60,
-          path: "/",
-        });
-      }
+      CookieUtils.setAuthCookies(
+        response,
+        result.accessToken!,
+        result.refreshToken
+      );
 
       return response;
     } else {
@@ -44,16 +35,18 @@ export async function POST(req: NextRequest) {
         ? 403
         : 400;
 
-      return NextResponse.json<AuthResponse>(
-        { success: false, message: result.message! },
+      return NextResponse.json(
+        {
+          success: false,
+          message: result.message!,
+        },
         { status: statusCode }
       );
     }
   } catch (error) {
-    console.error("Signin route error:", error);
-    return NextResponse.json<AuthResponse>(
-      { success: false, message: "Internal server error" },
-      { status: 500 }
+    return ApiResponseBuilder.internalError(
+      "Internal server error",
+      error as Error
     );
   }
 }

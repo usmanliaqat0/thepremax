@@ -447,7 +447,6 @@ const OrderSuccess = () => {
             <div className="flex items-center justify-center">
               <div className="text-center">
                 <RefreshLoader size="lg" className="mx-auto mb-4" />
-                <p>Loading...</p>
               </div>
             </div>
           </div>

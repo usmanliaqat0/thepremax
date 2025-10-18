@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ButtonLoader } from "@/components/ui/loader";
+import { AuthPageLoader } from "@/components/ui/auth-loader";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
@@ -31,9 +32,23 @@ const Signup = () => {
     agreeToTerms: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { state, signup } = useAuth();
+  const { state, signupForm, isAdmin } = useAuth();
   const router = useRouter();
+
+  // Redirect authenticated users away from signup page
+  useEffect(() => {
+    if (!state.isLoading && state.isAuthenticated && state.user) {
+      // If user is admin, redirect to admin dashboard
+      if (isAdmin()) {
+        router.push("/admin");
+      } else {
+        // Regular users go to profile
+        router.push("/profile");
+      }
+    }
+  }, [state.isLoading, state.isAuthenticated, state.user, isAdmin, router]);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -51,8 +66,27 @@ const Signup = () => {
     }
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    } else {
+      // Additional password strength validation
+      const hasUpperCase = /[A-Z]/.test(formData.password);
+      const hasLowerCase = /[a-z]/.test(formData.password);
+      const hasNumbers = /\d/.test(formData.password);
+      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(formData.password);
+
+      if (!hasUpperCase) {
+        newErrors.password =
+          "Password must contain at least one uppercase letter";
+      } else if (!hasLowerCase) {
+        newErrors.password =
+          "Password must contain at least one lowercase letter";
+      } else if (!hasNumbers) {
+        newErrors.password = "Password must contain at least one number";
+      } else if (!hasSpecialChar) {
+        newErrors.password =
+          "Password must contain at least one special character";
+      }
     }
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords don&apos;t match";
@@ -73,17 +107,23 @@ const Signup = () => {
       return;
     }
 
-    const result = await signup({
-      email: formData.email,
-      password: formData.password,
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-    });
+    setIsSubmitting(true);
 
-    if (result.success) {
-      router.push("/profile");
-    } else if (result.errors) {
-      setErrors((prev) => ({ ...prev, ...result.errors }));
+    try {
+      const result = await signupForm({
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      });
+
+      if (result.success) {
+        router.push("/profile");
+      } else if (result.errors) {
+        setErrors((prev) => ({ ...prev, ...result.errors }));
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -94,6 +134,11 @@ const Signup = () => {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
+
+  // Show loading while checking authentication status
+  if (state.isLoading) {
+    return <AuthPageLoader />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col">
@@ -276,11 +321,11 @@ const Signup = () => {
                 </div>
                 <Button
                   type="submit"
-                  disabled={state.isLoading}
+                  disabled={isSubmitting}
                   className="w-full h-12 text-base font-semibold bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
-                  {state.isLoading && <ButtonLoader variant="light" />}
-                  Create Account
+                  {isSubmitting && <ButtonLoader variant="light" />}
+                  {isSubmitting ? "Creating Account..." : "Create Account"}
                 </Button>
 
                 <div className="text-center pt-2">

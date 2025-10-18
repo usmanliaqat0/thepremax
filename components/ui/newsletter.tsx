@@ -160,7 +160,7 @@ export function Newsletter({
 
   return (
     <Section
-      variant={variant === "accent" ? "default" : undefined}
+      variant={variant === "accent" ? "default" : "default"}
       className={cn(variantStyles.section, className)}
     >
       <Container className={variantStyles.container}>{content}</Container>

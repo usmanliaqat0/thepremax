@@ -1,8 +1,7 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
-import { TokenUtils } from "@/lib/auth-service";
-import bcrypt from "bcryptjs";
+import { TokenUtils, PasswordUtils } from "@/lib/auth-service";
 
 export async function PUT(req: NextRequest) {
   try {
@@ -18,7 +17,7 @@ export async function PUT(req: NextRequest) {
     const decoded = TokenUtils.verifyAccessToken(token);
     const { currentPassword, newPassword } = await req.json();
 
-if (!currentPassword || !newPassword) {
+    if (!currentPassword || !newPassword) {
       return NextResponse.json(
         {
           success: false,
@@ -28,11 +27,13 @@ if (!currentPassword || !newPassword) {
       );
     }
 
-    if (newPassword.length < 6) {
+    // Validate password strength using the same validation as registration
+    const passwordValidation = PasswordUtils.validate(newPassword);
+    if (!passwordValidation.valid) {
       return NextResponse.json(
         {
           success: false,
-          message: "New password must be at least 6 characters long",
+          message: passwordValidation.message!,
         },
         { status: 400 }
       );
@@ -48,7 +49,7 @@ if (!currentPassword || !newPassword) {
       );
     }
 
-const isCurrentPasswordValid = await bcrypt.compare(
+    const isCurrentPasswordValid = await PasswordUtils.compare(
       currentPassword,
       user.password
     );
@@ -59,10 +60,9 @@ const isCurrentPasswordValid = await bcrypt.compare(
       );
     }
 
-const saltRounds = 12;
-    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+    const hashedNewPassword = await PasswordUtils.hash(newPassword);
 
-await User.findByIdAndUpdate(decoded.id, {
+    await User.findByIdAndUpdate(decoded.id, {
       password: hashedNewPassword,
     });
 

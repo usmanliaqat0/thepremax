@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -13,52 +14,80 @@ import {
   ShoppingCart,
   Mail,
   X,
+  UserCog,
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { usePermissions } from "@/context/PermissionContext";
 
-const sidebarItems = [
-  {
-    title: "Dashboard",
-    href: "/admin",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Users",
-    href: "/admin/users",
-    icon: Users,
-  },
-  {
-    title: "Categories",
-    href: "/admin/categories",
-    icon: Tag,
-  },
-  {
-    title: "Products",
-    href: "/admin/products",
-    icon: Package,
-  },
-  {
-    title: "Orders",
-    href: "/admin/orders",
-    icon: ShoppingCart,
-  },
-  {
-    title: "Messages",
-    href: "/admin/messages",
-    icon: MessageCircle,
-  },
-  {
-    title: "Subscriptions",
-    href: "/admin/subscriptions",
-    icon: Mail,
-  },
-  {
-    title: "Promo Codes",
-    href: "/admin/promo-codes",
-    icon: Tag,
-  },
-];
+const getSidebarItems = (
+  hasPermission: (section: string, action: string) => boolean,
+  isSuperAdmin: () => boolean
+) => {
+  const items = [
+    {
+      title: "Dashboard",
+      href: "/admin",
+      icon: LayoutDashboard,
+      permission: { section: "dashboard", action: "view" },
+    },
+    {
+      title: "Admins",
+      href: "/admin/admins",
+      icon: UserCog,
+      permission: { section: "admins", action: "view" },
+    },
+    {
+      title: "Users",
+      href: "/admin/users",
+      icon: Users,
+      permission: { section: "users", action: "view" },
+    },
+    {
+      title: "Categories",
+      href: "/admin/categories",
+      icon: Tag,
+      permission: { section: "categories", action: "view" },
+    },
+    {
+      title: "Products",
+      href: "/admin/products",
+      icon: Package,
+      permission: { section: "products", action: "view" },
+    },
+    {
+      title: "Orders",
+      href: "/admin/orders",
+      icon: ShoppingCart,
+      permission: { section: "orders", action: "view" },
+    },
+    {
+      title: "Messages",
+      href: "/admin/messages",
+      icon: MessageCircle,
+      permission: { section: "messages", action: "view" },
+    },
+    {
+      title: "Subscriptions",
+      href: "/admin/subscriptions",
+      icon: Mail,
+      permission: { section: "subscriptions", action: "view" },
+    },
+    {
+      title: "Promo Codes",
+      href: "/admin/promo-codes",
+      icon: Tag,
+      permission: { section: "promoCodes", action: "view" },
+    },
+  ];
+
+  // Filter items based on permissions
+  return items.filter((item) => {
+    if (isSuperAdmin()) return true;
+    return hasPermission(item.permission.section, item.permission.action);
+  });
+};
 
 interface AdminSidebarProps {
   isOpen?: boolean;
@@ -70,6 +99,13 @@ export default function AdminSidebar({
   onClose,
 }: AdminSidebarProps) {
   const pathname = usePathname();
+  const { state } = useAuth();
+  const { hasPermission, isSuperAdmin } = usePermissions();
+
+  const sidebarItems = useMemo(
+    () => getSidebarItems(hasPermission, isSuperAdmin),
+    [hasPermission, isSuperAdmin]
+  );
 
   return (
     <>
@@ -119,7 +155,11 @@ export default function AdminSidebar({
             <div className="flex items-center gap-2">
               <Shield className="h-4 w-4 text-accent" />
               <span className="text-sm font-medium text-accent">
-                Super Admin
+                {state.user?.role === "super_admin"
+                  ? "Super Admin"
+                  : state.user?.role === "admin"
+                  ? "Admin"
+                  : "User"}
               </span>
             </div>
           </div>
@@ -134,7 +174,7 @@ export default function AdminSidebar({
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      onClick={onClose}
+                      {...(onClose && { onClick: onClose })}
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200",
                         isActive

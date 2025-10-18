@@ -109,7 +109,11 @@ const ShopContent = () => {
           (product) =>
             product.name.toLowerCase().includes(searchLower) ||
             product.description.toLowerCase().includes(searchLower) ||
-            product.tags.some((tag) => tag.toLowerCase().includes(searchLower))
+            (product.tags &&
+              Array.isArray(product.tags) &&
+              product.tags.some((tag) =>
+                tag.toLowerCase().includes(searchLower)
+              ))
         );
       }
 
@@ -250,7 +254,6 @@ const ShopContent = () => {
                     <SelectItem value="price-high">
                       Price: High to Low
                     </SelectItem>
-                    <SelectItem value="featured">Featured First</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import ContactMessage from "@/lib/models/ContactMessage";
+import ContactMessage, { IContactMessage } from "@/lib/models/ContactMessage";
 import { AdminMiddleware } from "@/lib/admin-middleware";
 import { z } from "zod";
+import mongoose from "mongoose";
 
 const updateMessageSchema = z.object({
   status: z.enum(["new", "read", "replied", "closed"]).optional(),
@@ -16,10 +17,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -28,14 +29,13 @@ export async function GET(
 
     const { id } = await params;
 
-    const message = await ContactMessage.findById(id).lean();
+    const message = await (ContactMessage as mongoose.Model<IContactMessage>)
+      .findById(id)
+      .lean();
 
     if (!message) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Message not found",
-        },
+        { success: false, message: "Message not found" },
         { status: 404 }
       );
     }
@@ -47,10 +47,7 @@ export async function GET(
   } catch (error) {
     console.error("Get message error:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to fetch message",
-      },
+      { success: false, message: "Failed to fetch message" },
       { status: 500 }
     );
   }
@@ -61,10 +58,10 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -79,7 +76,7 @@ export async function PUT(
       return NextResponse.json(
         {
           success: false,
-          error: "Validation failed",
+          message: "Validation failed",
           details: validationResult.error.issues,
         },
         { status: 400 }
@@ -95,18 +92,17 @@ export async function PUT(
       updateData.closedAt = new Date();
     }
 
-    const message = await ContactMessage.findByIdAndUpdate(
-      id,
-      { $set: updateData },
-      { new: true, runValidators: true }
-    ).lean();
+    const message = await (ContactMessage as mongoose.Model<IContactMessage>)
+      .findByIdAndUpdate(
+        id,
+        { $set: updateData },
+        { new: true, runValidators: true }
+      )
+      .lean();
 
     if (!message) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Message not found",
-        },
+        { success: false, message: "Message not found" },
         { status: 404 }
       );
     }
@@ -119,10 +115,7 @@ export async function PUT(
   } catch (error) {
     console.error("Update message error:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to update message",
-      },
+      { success: false, message: "Failed to update message" },
       { status: 500 }
     );
   }
@@ -133,10 +126,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authResult = AdminMiddleware.verifyAdminToken(request);
+    const authResult = await AdminMiddleware.verifyAdminToken(request);
     if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: authResult.error },
+        { success: false, message: authResult.error },
         { status: 401 }
       );
     }
@@ -145,14 +138,13 @@ export async function DELETE(
 
     const { id } = await params;
 
-    const message = await ContactMessage.findByIdAndDelete(id);
+    const message = await (
+      ContactMessage as mongoose.Model<IContactMessage>
+    ).findByIdAndDelete(id);
 
     if (!message) {
       return NextResponse.json(
-        {
-          success: false,
-          error: "Message not found",
-        },
+        { success: false, message: "Message not found" },
         { status: 404 }
       );
     }
@@ -164,10 +156,7 @@ export async function DELETE(
   } catch (error) {
     console.error("Delete message error:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to delete message",
-      },
+      { success: false, message: "Failed to delete message" },
       { status: 500 }
     );
   }

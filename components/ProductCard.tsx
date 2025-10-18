@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
   product: Product;
-  variant?: "default" | "compact" | "featured";
+  variant?: "default" | "compact";
   className?: string;
 }
 
@@ -31,8 +31,14 @@ const ProductCard = ({
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const defaultSize = product.sizes[0];
-    const defaultColor = product.colors[0];
+
+    // Ensure sizes and colors are arrays and have default values
+    const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+    const colors = Array.isArray(product.colors) ? product.colors : [];
+
+    const defaultSize = sizes[0] || "One Size";
+    const defaultColor = colors[0] || "Default";
+
     addToCart(product, defaultSize, defaultColor, 1);
   };
 
@@ -42,8 +48,13 @@ const ProductCard = ({
     if (isInWishlist(product._id)) {
       await removeFromWishlist(product._id);
     } else {
-      const defaultSize = product.sizes?.[0];
-      const defaultColor = product.colors?.[0];
+      // Ensure sizes and colors are arrays and have default values
+      const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+      const colors = Array.isArray(product.colors) ? product.colors : [];
+
+      const defaultSize = sizes[0] || "One Size";
+      const defaultColor = colors[0] || "Default";
+
       await addToWishlist(product, defaultSize, defaultColor);
     }
   };
@@ -65,14 +76,6 @@ const ProductCard = ({
         "font-medium text-sm line-clamp-1 group-hover:text-accent transition-colors",
       price: "text-base font-bold text-primary",
     },
-    featured: {
-      card: "group overflow-hidden border-0 shadow-fashion-product hover:shadow-fashion-luxury transition-fashion-luxury bg-card",
-      content: "p-4 space-y-3",
-      image: "aspect-[4/5]",
-      title:
-        "font-heading font-bold text-lg line-clamp-2 group-hover:text-accent transition-colors",
-      price: "text-xl font-bold text-primary",
-    },
   };
 
   const variantStyles = variants[variant];
@@ -87,8 +90,8 @@ const ProductCard = ({
               alt={product.name}
               width={400}
               height={400}
-              priority={variant === "featured"}
-              loading={variant === "featured" ? "eager" : "lazy"}
+              priority={false}
+              loading="lazy"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
               className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
               placeholder="blur"
@@ -103,11 +106,6 @@ const ProductCard = ({
                 className="text-xs font-medium shadow-fashion-sm"
               >
                 SALE
-              </Badge>
-            )}
-            {product.featured && (
-              <Badge className="bg-accent text-accent-foreground text-xs font-medium shadow-fashion-sm">
-                FEATURED
               </Badge>
             )}
             {product.topRated && (
@@ -172,21 +170,11 @@ const ProductCard = ({
           <div className="flex items-center gap-2">
             <div className="flex items-center">
               <span className="text-yellow-500">★</span>
-              <span
-                className={cn(
-                  "ml-1 font-medium",
-                  variant === "featured" ? "text-sm" : "text-xs"
-                )}
-              >
+              <span className={cn("ml-1 font-medium", "text-xs")}>
                 {product.rating}
               </span>
             </div>
-            <span
-              className={cn(
-                "text-muted-foreground",
-                variant === "featured" ? "text-sm" : "text-xs"
-              )}
-            >
+            <span className={cn("text-muted-foreground", "text-xs")}>
               ({product.reviewCount})
             </span>
           </div>
@@ -197,10 +185,7 @@ const ProductCard = ({
             </span>
             {product.compareAtPrice && (
               <span
-                className={cn(
-                  "text-muted-foreground line-through",
-                  variant === "featured" ? "text-base" : "text-sm"
-                )}
+                className={cn("text-muted-foreground line-through", "text-sm")}
               >
                 {formatPrice(product.compareAtPrice)}
               </span>
@@ -208,20 +193,10 @@ const ProductCard = ({
           </div>
 
           <div className="flex items-center justify-between">
-            <span
-              className={cn(
-                "text-green-600 font-medium",
-                variant === "featured" ? "text-sm" : "text-xs"
-              )}
-            >
+            <span className={cn("text-green-600 font-medium", "text-xs")}>
               {product.inStock ? "✓ In Stock" : "Out of Stock"}
             </span>
-            <span
-              className={cn(
-                "text-muted-foreground",
-                variant === "featured" ? "text-sm" : "text-xs"
-              )}
-            >
+            <span className={cn("text-muted-foreground", "text-xs")}>
               Fast Shipping
             </span>
           </div>

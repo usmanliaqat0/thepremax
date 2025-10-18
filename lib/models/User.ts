@@ -57,7 +57,7 @@ const UserSchema = new Schema<IUser>(
     password: {
       type: String,
       required: true,
-      minlength: 6,
+      minlength: 8,
     },
     firstName: {
       type: String,
@@ -158,10 +158,8 @@ UserSchema.index({ status: 1 });
 let User: mongoose.Model<IUser> | Record<string, never>;
 
 if (typeof window === "undefined") {
-
   User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
 } else {
-
   User = {};
 }
 

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import Order from "@/lib/models/Order";
+import Order, { IOrder } from "@/lib/models/Order";
 import { authMiddleware } from "@/lib/auth-middleware";
 import { handleApiError } from "@/lib/error-handler";
 import { generateInvoicePDF, InvoiceData } from "@/lib/simple-pdf-generator";
+import mongoose from "mongoose";
 
 interface PopulatedOrder {
   _id: string;
@@ -60,7 +61,10 @@ export async function GET(
   try {
     const user = await authMiddleware(request);
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     await connectDB();
@@ -69,12 +73,18 @@ export async function GET(
 
     // Find order (without populate to avoid schema issues)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const order = (await Order.findById(
-      id
-    ).lean()) as unknown as PopulatedOrder;
+    const order = (await (Order as mongoose.Model<IOrder>)
+      .findById(id)
+      .lean()) as unknown as PopulatedOrder;
 
     if (!order) {
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Order not found",
+        },
+        { status: 404 }
+      );
     }
 
     // Check if user is admin or order owner
@@ -82,7 +92,13 @@ export async function GET(
     const orderUserId = order.userId?.toString();
 
     if (user.role !== "admin" && orderUserId && orderUserId !== user.id) {
-      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Access denied",
+        },
+        { status: 403 }
+      );
     }
 
     const invoiceData: InvoiceData = {

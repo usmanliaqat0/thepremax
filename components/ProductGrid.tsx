@@ -10,7 +10,7 @@ interface ProductGridProps {
   title?: string;
   subtitle?: string;
   limit?: number;
-  variant?: "default" | "compact" | "featured";
+  variant?: "default" | "compact";
   className?: string;
   showHeader?: boolean;
 }
@@ -28,10 +28,10 @@ const ProductGrid = ({
 
   if (products.length === 0) {
     return (
-      <Section className={className}>
+      <Section className={className || ""}>
         <Container>
           {title && showHeader && (
-            <SectionHeader title={title} subtitle={subtitle} />
+            <SectionHeader title={title} subtitle={subtitle || ""} />
           )}
           <div className="text-center py-12">
             <p className="text-muted-foreground text-lg">No products found.</p>
@@ -42,20 +42,14 @@ const ProductGrid = ({
   }
 
   return (
-    <Section className={className}>
+    <Section className={className || ""}>
       <Container>
         {title && showHeader && (
-          <SectionHeader title={title} subtitle={subtitle} />
+          <SectionHeader title={title} subtitle={subtitle || ""} />
         )}
 
         <ProductGridWrapper
-          variant={
-            variant === "compact"
-              ? "compact"
-              : variant === "featured"
-              ? "spacious"
-              : "comfortable"
-          }
+          variant={variant === "compact" ? "compact" : "comfortable"}
         >
           {displayProducts.map((product) => (
             <ProductCard

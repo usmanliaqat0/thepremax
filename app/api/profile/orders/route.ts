@@ -1,7 +1,8 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import Order from "@/lib/models/Order";
+import Order, { IOrder } from "@/lib/models/Order";
 import { TokenUtils } from "@/lib/auth-service";
+import mongoose from "mongoose";
 
 export async function GET(req: NextRequest) {
   try {
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
 
     await connectDB();
 
-const url = new URL(req.url);
+    const url = new URL(req.url);
     const page = parseInt(url.searchParams.get("page") || "1");
     const limit = parseInt(url.searchParams.get("limit") || "10");
     const status = url.searchParams.get("status");
@@ -26,7 +27,7 @@ const url = new URL(req.url);
 
     const skip = (page - 1) * limit;
 
-const query: Record<string, unknown> = { userId: decoded.id };
+    const query: Record<string, unknown> = { userId: decoded.id };
 
     if (status && status !== "all") {
       query.status = status;
@@ -39,13 +40,16 @@ const query: Record<string, unknown> = { userId: decoded.id };
       ];
     }
 
-const orders = await Order.find(query)
+    const orders = await (Order as mongoose.Model<IOrder>)
+      .find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
 
-const totalOrders = await Order.countDocuments(query);
+    const totalOrders = await (Order as mongoose.Model<IOrder>).countDocuments(
+      query
+    );
     const totalPages = Math.ceil(totalOrders / limit);
 
     return NextResponse.json({
@@ -96,10 +100,12 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    const order = await Order.findOne({
-      _id: orderId,
-      userId: decoded.id,
-    }).lean();
+    const order = await (Order as mongoose.Model<IOrder>)
+      .findOne({
+        _id: orderId,
+        userId: decoded.id,
+      })
+      .lean();
 
     if (!order) {
       return NextResponse.json(

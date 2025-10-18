@@ -1,5 +1,6 @@
 ﻿import { NextRequest } from "next/server";
 import { TokenUtils } from "@/lib/auth-service";
+import { TokenValidator } from "@/lib/token-validator";
 
 export interface AuthenticatedRequest extends NextRequest {
   user?: {
@@ -10,7 +11,6 @@ export interface AuthenticatedRequest extends NextRequest {
   };
 }
 
-// Helper functions for token extraction
 function extractTokenFromHeader(req: NextRequest): string | null {
   const authHeader = req.headers.get("authorization");
 
@@ -25,7 +25,6 @@ function extractTokenFromCookies(req: NextRequest): string | null {
   return req.cookies.get("accessToken")?.value || null;
 }
 
-// Simple auth middleware function for API routes
 export async function authMiddleware(req: NextRequest): Promise<{
   id: string;
   email: string;
@@ -67,56 +66,26 @@ export class AuthMiddleware {
     };
     error?: string;
   }> {
-    try {
-      let token = this.extractTokenFromHeader(req);
+    const result = await TokenValidator.validateUserToken(req);
 
-      if (!token) {
-        token = this.extractTokenFromCookies(req);
-      }
-
-      if (!token) {
-        return {
-          success: false,
-          error: "Authorization token required",
-        };
-      }
-
-      const decoded = TokenUtils.verifyAccessToken(token);
-
-      return {
-        success: true,
-        user: {
-          id: decoded.id,
-          email: decoded.email,
-          role: decoded.role,
-        },
-      };
-    } catch (error) {
-      console.error("Auth middleware error:", error);
-
-      if (
-        error instanceof Error &&
-        error.message.includes("Invalid or expired")
-      ) {
-        return {
-          success: false,
-          error: "Invalid or expired token",
-        };
-      }
-
+    if (!result.success) {
       return {
         success: false,
-        error: "Authentication failed",
+        error: result.error || "Authentication failed",
       };
     }
-  }
 
-  private static extractTokenFromHeader(req: NextRequest): string | null {
-    return extractTokenFromHeader(req);
-  }
-
-  private static extractTokenFromCookies(req: NextRequest): string | null {
-    return extractTokenFromCookies(req);
+    return {
+      success: true,
+      user: {
+        id: result.user!.id,
+        email: result.user!.email,
+        role: result.user!.role,
+        ...(result.user!.isEmailVerified !== undefined && {
+          isEmailVerified: result.user!.isEmailVerified,
+        }),
+      },
+    };
   }
 
   static hasRole(

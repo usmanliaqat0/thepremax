@@ -1,6 +1,7 @@
 ﻿import { toast } from "sonner";
 import { NextResponse } from "next/server";
 import { AuthResponse } from "@/lib/types";
+import { logError } from "./logger";
 
 export interface ApiError {
   field?: string;
@@ -11,31 +12,83 @@ export interface ApiError {
 // For API routes - returns NextResponse
 export function handleApiError(
   error: unknown,
-  defaultMessage: string
+  defaultMessage: string = "Internal server error",
+  statusCode?: number
 ): NextResponse {
-  console.error("API Error:", error);
+  logError("API Error", "API", error as Error);
 
   let message = defaultMessage;
-  let status = 500;
+  let status = statusCode || 500;
 
   if (error instanceof Error) {
-    message = error.message;
+    // Handle database connection errors specifically
+    if (
+      error.message.includes("ECONNREFUSED") ||
+      error.message.includes("MongoNetworkError") ||
+      error.message.includes("MongoServerError") ||
+      error.message.includes("MongoTimeoutError") ||
+      error.message.includes("connection")
+    ) {
+      message = "Database is temporarily unavailable. Please try again later.";
+      status = 503; // Service Unavailable
+    } else if (
+      error.message.includes("authentication") &&
+      error.message.includes("Mongo")
+    ) {
+      message = "Database authentication failed. Please contact support.";
+      status = 503;
+    } else {
+      message = error.message;
+    }
   } else if (typeof error === "string") {
     message = error;
   }
 
-  // Determine status code based on error type
-  if (message.includes("not found")) {
-    status = 404;
-  } else if (message.includes("unauthorized") || message.includes("access")) {
-    status = 401;
-  } else if (message.includes("forbidden")) {
-    status = 403;
-  } else if (message.includes("validation") || message.includes("required")) {
-    status = 400;
+  // Determine status code based on error type if not explicitly provided
+  if (!statusCode) {
+    if (message.includes("not found")) {
+      status = 404;
+    } else if (message.includes("unauthorized") || message.includes("access")) {
+      status = 401;
+    } else if (message.includes("forbidden")) {
+      status = 403;
+    } else if (message.includes("validation") || message.includes("required")) {
+      status = 400;
+    } else if (
+      message.includes("already exists") ||
+      message.includes("duplicate")
+    ) {
+      status = 409;
+    } else if (
+      message.includes("not active") ||
+      message.includes("deactivated")
+    ) {
+      status = 403;
+    }
   }
 
-  return NextResponse.json({ error: message }, { status });
+  return NextResponse.json(
+    {
+      success: false,
+      message: message,
+    },
+    { status }
+  );
+}
+
+// For validation errors with detailed field information
+export function handleValidationError(
+  validationErrors: unknown[],
+  defaultMessage: string = "Validation failed"
+): NextResponse {
+  return NextResponse.json(
+    {
+      success: false,
+      message: defaultMessage,
+      details: validationErrors,
+    },
+    { status: 400 }
+  );
 }
 
 // For client-side error handling - returns ApiError[]

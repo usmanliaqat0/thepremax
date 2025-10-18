@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,14 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, MapPin, ArrowLeft, Check } from "lucide-react";
+import {
+  CreditCard,
+  MapPin,
+  ArrowLeft,
+  Check,
+  AlertCircle,
+  Plus,
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
@@ -25,6 +32,9 @@ import { useScrollToTop } from "@/hooks/use-scroll-to-top";
 import { formatPrice } from "@/lib/currency";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { USA_STATES, getCitiesByState } from "@/lib/usa-address-data";
+import { cn } from "@/lib/utils";
+import { Address } from "@/lib/types";
 
 interface ShippingInfo {
   fullName: string;
@@ -33,7 +43,12 @@ interface ShippingInfo {
   address: string;
   city: string;
   postalCode: string;
-  province: string;
+  state: string;
+  country: string;
+}
+
+interface ValidationErrors {
+  [key: string]: string;
 }
 
 interface PaymentInfo {
@@ -45,7 +60,7 @@ interface PaymentInfo {
 
 const Checkout = () => {
   const { state, getCartTotal, getCartItemsCount, clearCart } = useCart();
-  const { state: authState } = useAuth();
+  const { state: authState, refreshUser } = useAuth();
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     fullName: "",
     email: "",
@@ -53,7 +68,8 @@ const Checkout = () => {
     address: "",
     city: "",
     postalCode: "",
-    province: "",
+    state: "",
+    country: "USA",
   });
   const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>({
     cardNumber: "",
@@ -63,10 +79,114 @@ const Checkout = () => {
   });
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
+    {}
+  );
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+  const [useNewAddress, setUseNewAddress] = useState(true); // Start with new address mode
+  const [saveAddress, setSaveAddress] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
   useScrollToTop();
+
+  const populateAddressFromSaved = useCallback(
+    (address: Address) => {
+      setShippingInfo({
+        fullName: `${address.firstName} ${address.lastName}`.trim(),
+        email: authState.user?.email || "",
+        phone: address.phone,
+        address: address.address,
+        city: address.city,
+        postalCode: address.postalCode,
+        state: address.state,
+        country: address.country,
+      });
+
+      // Set available cities for the selected state
+      if (address.state) {
+        setAvailableCities(getCitiesByState(address.state));
+      }
+    },
+    [authState.user?.email]
+  );
+
+  // Fetch saved addresses on component mount
+  useEffect(() => {
+    const fetchSavedAddresses = async () => {
+      try {
+        const response = await fetch("/api/profile/addresses", {
+          headers: {
+            Authorization: `Bearer ${authState.token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setSavedAddresses(data.data);
+            // Auto-select default address if available
+            const defaultAddress = data.data.find(
+              (addr: Address) => addr.isDefault
+            );
+            if (defaultAddress) {
+              setSelectedAddressId(defaultAddress.id);
+              setUseNewAddress(false);
+              populateAddressFromSaved(defaultAddress);
+            } else if (data.data.length > 0) {
+              // If no default but has addresses, select first one
+              setSelectedAddressId(data.data[0].id);
+              setUseNewAddress(false);
+              populateAddressFromSaved(data.data[0]);
+            } else {
+              // No saved addresses, use new address mode
+              setUseNewAddress(true);
+              setSelectedAddressId("new");
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching saved addresses:", error);
+      }
+    };
+
+    if (authState.token) {
+      fetchSavedAddresses();
+    }
+  }, [authState.token, populateAddressFromSaved]);
+
+  const handleAddressSelection = (addressId: string) => {
+    console.log("Address selection changed:", addressId);
+    setSelectedAddressId(addressId);
+    setUseNewAddress(false);
+
+    if (addressId === "new") {
+      setUseNewAddress(true);
+      console.log("Using new address mode");
+      // Clear form
+      setShippingInfo({
+        fullName: "",
+        email: authState.user?.email || "",
+        phone: "",
+        address: "",
+        city: "",
+        postalCode: "",
+        state: "",
+        country: "USA",
+      });
+      setAvailableCities([]);
+    } else {
+      const selectedAddress = savedAddresses.find(
+        (addr) => addr.id === addressId
+      );
+      if (selectedAddress) {
+        console.log("Using saved address:", selectedAddress);
+        populateAddressFromSaved(selectedAddress);
+      }
+    }
+  };
 
   if (!authState.token) {
     return (
@@ -126,15 +246,119 @@ const Checkout = () => {
   const total = subtotal - discount + shipping + tax;
 
   const handleShippingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setShippingInfo({ ...shippingInfo, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setShippingInfo({ ...shippingInfo, [name]: value });
+    // Clear validation error when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors({ ...validationErrors, [name]: "" });
+    }
   };
 
   const handlePaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPaymentInfo({ ...paymentInfo, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setPaymentInfo({ ...paymentInfo, [name]: value });
+    // Clear validation error when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors({ ...validationErrors, [name]: "" });
+    }
+  };
+
+  const handleStateChange = (stateCode: string) => {
+    setShippingInfo({ ...shippingInfo, state: stateCode, city: "" });
+    setAvailableCities(getCitiesByState(stateCode));
+    // Clear validation errors
+    const newErrors = { ...validationErrors };
+    delete newErrors.state;
+    delete newErrors.city;
+    setValidationErrors(newErrors);
+  };
+
+  const handleCityChange = (city: string) => {
+    setShippingInfo({ ...shippingInfo, city });
+    // Clear validation error
+    if (validationErrors.city) {
+      setValidationErrors({ ...validationErrors, city: "" });
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const errors: ValidationErrors = {};
+
+    // Validate shipping information
+    if (!shippingInfo.fullName.trim()) {
+      errors.fullName = "Full name is required";
+    }
+    if (!shippingInfo.email.trim()) {
+      errors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(shippingInfo.email)) {
+      errors.email = "Please enter a valid email address";
+    }
+    if (!shippingInfo.phone.trim()) {
+      errors.phone = "Phone number is required";
+    } else if (
+      !/^\(\d{3}\) \d{3}-\d{4}$/.test(shippingInfo.phone) &&
+      !/^\d{10}$/.test(shippingInfo.phone.replace(/\D/g, ""))
+    ) {
+      errors.phone = "Please enter a valid phone number";
+    }
+    if (!shippingInfo.address.trim()) {
+      errors.address = "Address is required";
+    }
+    if (!shippingInfo.city.trim()) {
+      errors.city = "City is required";
+    }
+    if (!shippingInfo.postalCode.trim()) {
+      errors.postalCode = "ZIP code is required";
+    } else if (!/^\d{5}(-\d{4})?$/.test(shippingInfo.postalCode)) {
+      errors.postalCode = "Please enter a valid ZIP code";
+    }
+    if (!shippingInfo.state) {
+      errors.state = "State is required";
+    }
+
+    // Validate payment information if credit card is selected
+    if (paymentMethod === "card") {
+      if (!paymentInfo.cardName.trim()) {
+        errors.cardName = "Name on card is required";
+      }
+      if (!paymentInfo.cardNumber.trim()) {
+        errors.cardNumber = "Card number is required";
+      } else if (
+        !/^\d{4}\s?\d{4}\s?\d{4}\s?\d{4}$/.test(
+          paymentInfo.cardNumber.replace(/\s/g, "")
+        )
+      ) {
+        errors.cardNumber = "Please enter a valid card number";
+      }
+      if (!paymentInfo.expiryDate.trim()) {
+        errors.expiryDate = "Expiry date is required";
+      } else if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(paymentInfo.expiryDate)) {
+        errors.expiryDate = "Please enter a valid expiry date (MM/YY)";
+      }
+      if (!paymentInfo.cvv.trim()) {
+        errors.cvv = "CVV is required";
+      } else if (!/^\d{3,4}$/.test(paymentInfo.cvv)) {
+        errors.cvv = "Please enter a valid CVV";
+      }
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate form before proceeding
+    if (!validateForm()) {
+      toast({
+        title: "Please fix the errors below",
+        description: "Some required fields are missing or invalid.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsProcessing(true);
 
     if (!authState.token) {
@@ -185,9 +409,9 @@ const Checkout = () => {
           phone: shippingInfo.phone,
           address: shippingInfo.address,
           city: shippingInfo.city,
-          state: shippingInfo.province,
+          state: shippingInfo.state,
           postalCode: shippingInfo.postalCode,
-          country: "Pakistan",
+          country: shippingInfo.country,
         },
         billingAddress: {
           firstName,
@@ -195,9 +419,9 @@ const Checkout = () => {
           phone: shippingInfo.phone,
           address: shippingInfo.address,
           city: shippingInfo.city,
-          state: shippingInfo.province,
+          state: shippingInfo.state,
           postalCode: shippingInfo.postalCode,
-          country: "Pakistan",
+          country: shippingInfo.country,
         },
       };
 
@@ -212,10 +436,75 @@ const Checkout = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create order");
+        throw new Error(errorData.message || "Failed to create order");
       }
 
       const result = await response.json();
+
+      // Save address if requested and using new address
+      if (saveAddress && (useNewAddress || selectedAddressId === "new")) {
+        try {
+          console.log("Saving address:", {
+            saveAddress,
+            useNewAddress,
+            selectedAddressId,
+            shippingInfo,
+          });
+
+          const addressResponse = await fetch("/api/profile/addresses", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${authState.token}`,
+            },
+            body: JSON.stringify({
+              type: "shipping",
+              firstName: firstName,
+              lastName: lastName,
+              phone: shippingInfo.phone,
+              address: shippingInfo.address,
+              city: shippingInfo.city,
+              state: shippingInfo.state,
+              postalCode: shippingInfo.postalCode,
+              country: shippingInfo.country,
+              isDefault: savedAddresses.length === 0, // Set as default if it's the first address
+            }),
+          });
+
+          const addressData = await addressResponse.json();
+          console.log("Address save response:", addressData);
+
+          if (addressResponse.ok && addressData.success) {
+            // Refresh user data to update addresses in auth context
+            console.log("Refreshing user data after address save...");
+            await refreshUser();
+            console.log(
+              "User data refreshed, addresses should now be visible in profile"
+            );
+            toast({
+              title: "Address saved!",
+              description: "Your address has been saved for future orders.",
+            });
+          } else {
+            console.error("Address save failed:", addressData);
+            toast({
+              title: "Address save failed",
+              description:
+                addressData.message ||
+                "Could not save address, but order was placed successfully.",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error("Error saving address:", error);
+          toast({
+            title: "Address save failed",
+            description:
+              "Could not save address, but order was placed successfully.",
+            variant: "destructive",
+          });
+        }
+      }
 
       clearCart();
       toast({
@@ -277,11 +566,85 @@ const Checkout = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                {/* Saved Addresses Selection */}
+                {savedAddresses.length > 0 && (
+                  <div className="mb-6">
+                    <Label className="text-sm font-medium mb-3 block">
+                      Choose a saved address or enter a new one
+                    </Label>
+                    <div className="space-y-3">
+                      {savedAddresses.map((address) => (
+                        <div
+                          key={address.id}
+                          className={cn(
+                            "p-3 border rounded-lg cursor-pointer transition-colors",
+                            selectedAddressId === address.id
+                              ? "border-primary bg-primary/5"
+                              : "border-border hover:border-primary/50"
+                          )}
+                          onClick={() => handleAddressSelection(address.id)}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium">
+                                  {address.firstName} {address.lastName}
+                                </span>
+                                {address.isDefault && (
+                                  <Badge variant="outline" className="text-xs">
+                                    Default
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                {address.address}, {address.city},{" "}
+                                {address.state} {address.postalCode}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {address.phone}
+                              </p>
+                            </div>
+                            <div className="ml-2">
+                              <div
+                                className={cn(
+                                  "w-4 h-4 rounded-full border-2 flex items-center justify-center",
+                                  selectedAddressId === address.id
+                                    ? "border-primary bg-primary"
+                                    : "border-muted-foreground"
+                                )}
+                              >
+                                {selectedAddressId === address.id && (
+                                  <div className="w-2 h-2 rounded-full bg-white" />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+
+                      <div
+                        className={cn(
+                          "p-3 border rounded-lg cursor-pointer transition-colors",
+                          selectedAddressId === "new" || useNewAddress
+                            ? "border-primary bg-primary/5"
+                            : "border-border hover:border-primary/50"
+                        )}
+                        onClick={() => handleAddressSelection("new")}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Plus className="h-4 w-4" />
+                          <span className="font-medium">Use a new address</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <form className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="fullName" className="mb-2 block text-sm">
-                        Full Name
+                        Full Name *
                       </Label>
                       <Input
                         id="fullName"
@@ -289,12 +652,22 @@ const Checkout = () => {
                         value={shippingInfo.fullName}
                         onChange={handleShippingChange}
                         required
-                        className="h-10"
+                        className={cn(
+                          "h-10",
+                          validationErrors.fullName &&
+                            "border-red-500 focus:border-red-500"
+                        )}
                       />
+                      {validationErrors.fullName && (
+                        <div className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                          <AlertCircle className="h-3 w-3" />
+                          <span>{validationErrors.fullName}</span>
+                        </div>
+                      )}
                     </div>
                     <div>
                       <Label htmlFor="email" className="mb-2 block text-sm">
-                        Email
+                        Email *
                       </Label>
                       <Input
                         id="email"
@@ -303,88 +676,197 @@ const Checkout = () => {
                         value={shippingInfo.email}
                         onChange={handleShippingChange}
                         required
-                        className="h-10"
+                        className={cn(
+                          "h-10",
+                          validationErrors.email &&
+                            "border-red-500 focus:border-red-500"
+                        )}
                       />
+                      {validationErrors.email && (
+                        <div className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                          <AlertCircle className="h-3 w-3" />
+                          <span>{validationErrors.email}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div>
                     <Label htmlFor="phone" className="mb-2 block text-sm">
-                      Phone Number
+                      Phone Number *
                     </Label>
                     <Input
                       id="phone"
                       name="phone"
                       value={shippingInfo.phone}
                       onChange={handleShippingChange}
+                      placeholder="(555) 123-4567"
                       required
-                      className="h-10"
+                      className={cn(
+                        "h-10",
+                        validationErrors.phone &&
+                          "border-red-500 focus:border-red-500"
+                      )}
                     />
+                    {validationErrors.phone && (
+                      <div className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                        <AlertCircle className="h-3 w-3" />
+                        <span>{validationErrors.phone}</span>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="address" className="mb-2 block text-sm">
-                      Address
+                      Street Address *
                     </Label>
                     <Input
                       id="address"
                       name="address"
                       value={shippingInfo.address}
                       onChange={handleShippingChange}
+                      placeholder="123 Main Street"
                       required
-                      className="h-10"
+                      className={cn(
+                        "h-10",
+                        validationErrors.address &&
+                          "border-red-500 focus:border-red-500"
+                      )}
+                    />
+                    {validationErrors.address && (
+                      <div className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                        <AlertCircle className="h-3 w-3" />
+                        <span>{validationErrors.address}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Country Field - Disabled with USA selected */}
+                  <div>
+                    <Label htmlFor="country" className="mb-2 block text-sm">
+                      Country
+                    </Label>
+                    <Input
+                      id="country"
+                      name="country"
+                      value="United States"
+                      disabled
+                      className="h-10 bg-muted"
                     />
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="city" className="text-sm">
-                        City
-                      </Label>
-                      <Input
-                        id="city"
-                        name="city"
-                        value={shippingInfo.city}
-                        onChange={handleShippingChange}
-                        required
-                        className="h-10"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="postalCode" className="text-sm">
-                        Postal Code
-                      </Label>
-                      <Input
-                        id="postalCode"
-                        name="postalCode"
-                        value={shippingInfo.postalCode}
-                        onChange={handleShippingChange}
-                        required
-                        className="h-10"
-                      />
-                    </div>
-                    <div className="sm:col-span-2 lg:col-span-1">
-                      <Label htmlFor="province" className="text-sm">
-                        Province
+                      <Label htmlFor="state" className="text-sm">
+                        State *
                       </Label>
                       <Select
-                        value={shippingInfo.province}
-                        onValueChange={(value) =>
-                          setShippingInfo({ ...shippingInfo, province: value })
-                        }
+                        value={shippingInfo.state}
+                        onValueChange={handleStateChange}
                       >
-                        <SelectTrigger className="h-10">
-                          <SelectValue placeholder="Select province" />
+                        <SelectTrigger
+                          className={cn(
+                            "h-10 w-full",
+                            validationErrors.state &&
+                              "border-red-500 focus:border-red-500"
+                          )}
+                        >
+                          <SelectValue placeholder="Select state" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="punjab">Punjab</SelectItem>
-                          <SelectItem value="sindh">Sindh</SelectItem>
-                          <SelectItem value="kpk">KPK</SelectItem>
-                          <SelectItem value="balochistan">
-                            Balochistan
-                          </SelectItem>
-                          <SelectItem value="islamabad">Islamabad</SelectItem>
+                          {USA_STATES.map((state) => (
+                            <SelectItem key={state.code} value={state.code}>
+                              {state.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
+                      {validationErrors.state && (
+                        <div className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                          <AlertCircle className="h-3 w-3" />
+                          <span>{validationErrors.state}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="city" className="text-sm">
+                        City *
+                      </Label>
+                      <Select
+                        value={shippingInfo.city}
+                        onValueChange={handleCityChange}
+                        disabled={!shippingInfo.state}
+                      >
+                        <SelectTrigger
+                          className={cn(
+                            "h-10 w-full",
+                            validationErrors.city &&
+                              "border-red-500 focus:border-red-500"
+                          )}
+                        >
+                          <SelectValue
+                            placeholder={
+                              shippingInfo.state
+                                ? "Select city"
+                                : "Select state first"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableCities.map((city) => (
+                            <SelectItem key={city} value={city}>
+                              {city}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {validationErrors.city && (
+                        <div className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                          <AlertCircle className="h-3 w-3" />
+                          <span>{validationErrors.city}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
+
+                  <div>
+                    <Label htmlFor="postalCode" className="text-sm">
+                      ZIP Code *
+                    </Label>
+                    <Input
+                      id="postalCode"
+                      name="postalCode"
+                      value={shippingInfo.postalCode}
+                      onChange={handleShippingChange}
+                      placeholder="12345"
+                      required
+                      className={cn(
+                        "h-10",
+                        validationErrors.postalCode &&
+                          "border-red-500 focus:border-red-500"
+                      )}
+                    />
+                    {validationErrors.postalCode && (
+                      <div className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                        <AlertCircle className="h-3 w-3" />
+                        <span>{validationErrors.postalCode}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Save Address Checkbox - Only show when using new address */}
+                  {useNewAddress && (
+                    <div className="flex items-center space-x-2 pt-4 border-t">
+                      <input
+                        type="checkbox"
+                        id="saveAddress"
+                        checked={saveAddress}
+                        onChange={(e) => setSaveAddress(e.target.checked)}
+                        className="rounded border-gray-300"
+                      />
+                      <Label htmlFor="saveAddress" className="text-sm">
+                        Save this address for future orders
+                      </Label>
+                    </div>
+                  )}
                 </form>
               </CardContent>
             </Card>
@@ -432,7 +914,7 @@ const Checkout = () => {
                     <div className="space-y-4">
                       <div>
                         <Label htmlFor="cardName" className="text-sm">
-                          Name on Card
+                          Name on Card *
                         </Label>
                         <Input
                           id="cardName"
@@ -440,12 +922,22 @@ const Checkout = () => {
                           value={paymentInfo.cardName}
                           onChange={handlePaymentChange}
                           required
-                          className="h-10"
+                          className={cn(
+                            "h-10",
+                            validationErrors.cardName &&
+                              "border-red-500 focus:border-red-500"
+                          )}
                         />
+                        {validationErrors.cardName && (
+                          <div className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                            <AlertCircle className="h-3 w-3" />
+                            <span>{validationErrors.cardName}</span>
+                          </div>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor="cardNumber" className="text-sm">
-                          Card Number
+                          Card Number *
                         </Label>
                         <Input
                           id="cardNumber"
@@ -454,13 +946,23 @@ const Checkout = () => {
                           value={paymentInfo.cardNumber}
                           onChange={handlePaymentChange}
                           required
-                          className="h-10"
+                          className={cn(
+                            "h-10",
+                            validationErrors.cardNumber &&
+                              "border-red-500 focus:border-red-500"
+                          )}
                         />
+                        {validationErrors.cardNumber && (
+                          <div className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                            <AlertCircle className="h-3 w-3" />
+                            <span>{validationErrors.cardNumber}</span>
+                          </div>
+                        )}
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="expiryDate" className="text-sm">
-                            Expiry Date
+                            Expiry Date *
                           </Label>
                           <Input
                             id="expiryDate"
@@ -469,12 +971,22 @@ const Checkout = () => {
                             value={paymentInfo.expiryDate}
                             onChange={handlePaymentChange}
                             required
-                            className="h-10"
+                            className={cn(
+                              "h-10",
+                              validationErrors.expiryDate &&
+                                "border-red-500 focus:border-red-500"
+                            )}
                           />
+                          {validationErrors.expiryDate && (
+                            <div className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                              <AlertCircle className="h-3 w-3" />
+                              <span>{validationErrors.expiryDate}</span>
+                            </div>
+                          )}
                         </div>
                         <div>
                           <Label htmlFor="cvv" className="text-sm">
-                            CVV
+                            CVV *
                           </Label>
                           <Input
                             id="cvv"
@@ -483,8 +995,18 @@ const Checkout = () => {
                             value={paymentInfo.cvv}
                             onChange={handlePaymentChange}
                             required
-                            className="h-10"
+                            className={cn(
+                              "h-10",
+                              validationErrors.cvv &&
+                                "border-red-500 focus:border-red-500"
+                            )}
                           />
+                          {validationErrors.cvv && (
+                            <div className="flex items-center gap-1 mt-1 text-sm text-red-500">
+                              <AlertCircle className="h-3 w-3" />
+                              <span>{validationErrors.cvv}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -4,7 +4,7 @@ import connectDB from "@/lib/db";
 import User from "@/lib/models/User";
 
 export const GET = AdminMiddleware.requireAdmin(
-  async (request: NextRequest, adminUser: AdminUser, ...args: unknown[]) => {
+  async (_request: NextRequest, _adminUser: AdminUser, ...args: unknown[]) => {
     const { params } = await (args[0] as { params: Promise<{ id: string }> });
     const { id } = await params;
     try {
@@ -38,11 +38,11 @@ export const GET = AdminMiddleware.requireAdmin(
 );
 
 export const PUT = AdminMiddleware.requireAdmin(
-  async (request: NextRequest, adminUser: AdminUser, ...args: unknown[]) => {
+  async (_request: NextRequest, _adminUser: AdminUser, ...args: unknown[]) => {
     const { params } = await (args[0] as { params: Promise<{ id: string }> });
     const { id } = await params;
     try {
-      const body = await request.json();
+      const body = await _request.json();
       const {
         firstName,
         lastName,
@@ -125,7 +125,7 @@ export const PUT = AdminMiddleware.requireAdmin(
 );
 
 export const DELETE = AdminMiddleware.requireAdmin(
-  async (request: NextRequest, adminUser: AdminUser, ...args: unknown[]) => {
+  async (_request: NextRequest, _adminUser: AdminUser, ...args: unknown[]) => {
     const { params } = await (args[0] as { params: Promise<{ id: string }> });
     const { id } = await params;
     try {
@@ -143,7 +143,7 @@ export const DELETE = AdminMiddleware.requireAdmin(
         );
       }
 
-      if (id === adminUser.id) {
+      if (id === _adminUser.id) {
         return NextResponse.json(
           {
             success: false,

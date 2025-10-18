@@ -134,7 +134,7 @@ export default function ClientSideAdminTable<
   const renderSkeletonRows = () => {
     return Array.from({ length: loadingRows }).map((_, i) => (
       <TableRow key={i}>
-        {columns.map((column, colIndex) => (
+        {columns.map((_column, colIndex) => (
           <TableCell key={colIndex}>
             <div className="h-4 bg-muted animate-pulse rounded w-24" />
           </TableCell>
@@ -351,7 +351,7 @@ export default function ClientSideAdminTable<
                               onClick={() => {
                                 /* Handle delete */
                               }}
-                              disabled={action.disabled?.(item)}
+                              disabled={action.disabled?.(item) || false}
                               className="text-destructive"
                             >
                               {icon}
@@ -363,7 +363,7 @@ export default function ClientSideAdminTable<
                           <DropdownMenuItem
                             key={action.key}
                             onClick={() => action.onClick(item)}
-                            disabled={action.disabled?.(item)}
+                            disabled={action.disabled?.(item) || false}
                             className={
                               action.variant === "destructive"
                                 ? "text-destructive"
@@ -471,7 +471,7 @@ export default function ClientSideAdminTable<
                                     onClick={() => {
                                       /* Handle delete */
                                     }}
-                                    disabled={action.disabled?.(item)}
+                                    disabled={action.disabled?.(item) || false}
                                     className="text-destructive"
                                   >
                                     {icon}
@@ -483,7 +483,7 @@ export default function ClientSideAdminTable<
                                 <DropdownMenuItem
                                   key={action.key}
                                   onClick={() => action.onClick(item)}
-                                  disabled={action.disabled?.(item)}
+                                  disabled={action.disabled?.(item) || false}
                                   className={
                                     action.variant === "destructive"
                                       ? "text-destructive"

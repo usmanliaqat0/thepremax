@@ -141,18 +141,23 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({
         categoryName = product.category.name;
       }
 
+      // Ensure category is never empty (required by schema)
+      if (!categoryName.trim()) {
+        categoryName = "Uncategorized";
+      }
+
       return {
         productId: product._id,
         name: product.name,
         image: imageUrl,
         price: product.basePrice || 0,
-        originalPrice: product.compareAtPrice,
+        originalPrice: product.compareAtPrice || 0,
         rating: product.rating || 0,
         reviewCount: product.reviewCount || 0,
         category: categoryName,
         inStock: product.inStock !== false,
-        size,
-        color,
+        size: size || "",
+        color: color || "",
         dateAdded: new Date(),
       };
     },
@@ -305,7 +310,7 @@ export const WishlistProvider: React.FC<{ children: ReactNode }> = ({
 
   // Move item to cart (placeholder - would need cart context integration)
   const moveToCart = useCallback(
-    (productId: string, size?: string, color?: string) => {
+    (_productId: string, _size?: string, _color?: string) => {
       // This would integrate with CartContext
       // For now, just show a message
       toast.info("Move to cart functionality would be implemented here");
