@@ -183,12 +183,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log("Avatar updated successfully:", {
-      userId: decoded.id,
-      avatarPath: uploadResult.path,
-      updatedAvatar: updatedUser.avatar,
-    });
-
     return NextResponse.json({
       success: true,
       message: "Avatar updated successfully",
