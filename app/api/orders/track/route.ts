@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import Order from "@/lib/models/Order";
+import Order, { IOrder } from "@/lib/models/Order";
 import { handleApiError } from "@/lib/error-handler";
+import mongoose from "mongoose";
 
 // GET /api/orders/track - Track order by order number
 export async function GET(request: NextRequest) {
@@ -22,7 +23,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Find order by order number (without populate to avoid schema issues)
-    const order = (await Order.findOne({ orderNumber })
+    const order = (await (Order as mongoose.Model<IOrder>)
+      .findOne({ orderNumber })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .lean()) as unknown as any;
 

@@ -71,7 +71,7 @@ export class AuthMiddleware {
     if (!result.success) {
       return {
         success: false,
-        error: result.error,
+        error: result.error || "Authentication failed",
       };
     }
 
@@ -81,17 +81,11 @@ export class AuthMiddleware {
         id: result.user!.id,
         email: result.user!.email,
         role: result.user!.role,
-        isEmailVerified: result.user!.isEmailVerified,
+        ...(result.user!.isEmailVerified !== undefined && {
+          isEmailVerified: result.user!.isEmailVerified,
+        }),
       },
     };
-  }
-
-  private static extractTokenFromHeader(req: NextRequest): string | null {
-    return extractTokenFromHeader(req);
-  }
-
-  private static extractTokenFromCookies(req: NextRequest): string | null {
-    return extractTokenFromCookies(req);
   }
 
   static hasRole(

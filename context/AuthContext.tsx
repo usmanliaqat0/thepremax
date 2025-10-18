@@ -126,25 +126,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   useEffect(() => {
-    const token = localStorage.getItem("auth_token");
-    const userData = localStorage.getItem("user_data");
+    let isMounted = true;
 
-    if (token && userData) {
+    const initializeAuth = async () => {
       try {
-        const user = JSON.parse(userData);
-        dispatch({
-          type: "AUTH_SUCCESS",
-          payload: { user, token },
-        });
+        const token = localStorage.getItem("auth_token");
+        const userData = localStorage.getItem("user_data");
+
+        if (token && userData) {
+          const user = JSON.parse(userData);
+
+          // Validate token format before setting state
+          if (user && user.id && user.email && isMounted) {
+            dispatch({
+              type: "AUTH_SUCCESS",
+              payload: { user, token },
+            });
+          } else {
+            // Invalid user data, clear storage
+            localStorage.removeItem("auth_token");
+            localStorage.removeItem("user_data");
+            if (isMounted) {
+              dispatch({ type: "AUTH_FAILURE" });
+            }
+          }
+        } else {
+          if (isMounted) {
+            dispatch({ type: "AUTH_FAILURE" });
+          }
+        }
       } catch (error) {
         console.error("Error parsing stored user data:", error);
         localStorage.removeItem("auth_token");
         localStorage.removeItem("user_data");
-        dispatch({ type: "AUTH_FAILURE" });
+        if (isMounted) {
+          dispatch({ type: "AUTH_FAILURE" });
+        }
       }
-    } else {
-      dispatch({ type: "AUTH_FAILURE" });
-    }
+    };
+
+    initializeAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const apiCall = async (
@@ -160,10 +185,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       headers.Authorization = `Bearer ${state.token}`;
     }
 
-    return fetch(endpoint, {
-      ...options,
-      headers,
-    });
+    try {
+      const response = await fetch(endpoint, {
+        ...options,
+        headers,
+      });
+
+      // Handle token expiration
+      if (response.status === 401) {
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("user_data");
+        dispatch({ type: "AUTH_FAILURE" });
+      }
+
+      return response;
+    } catch (error) {
+      console.error("API call failed:", error);
+      throw error;
+    }
   };
 
   const signin = async (
@@ -551,12 +590,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = async (): Promise<void> => {
     try {
+      console.log("AuthContext - Refreshing user data...");
       const response = await apiCall("/api/auth/profile");
       const result = await response.json();
+
+      console.log("AuthContext - Profile API response:", result);
+      console.log(
+        "AuthContext - User addresses from API:",
+        result.user?.addresses
+      );
 
       if (result.success && result.user) {
         dispatch({ type: "UPDATE_USER", payload: result.user });
         localStorage.setItem("user_data", JSON.stringify(result.user));
+        console.log("AuthContext - User data updated in context");
       }
     } catch (error) {
       console.error("Refresh user error:", error);

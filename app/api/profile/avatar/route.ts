@@ -53,7 +53,7 @@ class FileUploadService {
       if (!validation.valid) {
         return {
           success: false,
-          message: validation.message,
+          message: validation.message || "File validation failed",
         };
       }
 

@@ -101,18 +101,21 @@ export default function AdminSubscriptions() {
         toast.success("Subscription status updated successfully");
 
         setAllSubscriptions((prev) =>
-          prev.map((sub) =>
-            sub._id === id
-              ? {
-                  ...sub,
-                  status: newStatus as "active" | "unsubscribed" | "bounced",
-                  unsubscribedAt:
-                    newStatus === "unsubscribed"
-                      ? new Date().toISOString()
-                      : undefined,
-                }
-              : sub
-          )
+          prev.map((sub) => {
+            if (sub._id === id) {
+              const updatedSub: EmailSubscription = {
+                ...sub,
+                status: newStatus as "active" | "unsubscribed" | "bounced",
+              };
+              if (newStatus === "unsubscribed") {
+                updatedSub.unsubscribedAt = new Date().toISOString();
+              } else if (newStatus === "active") {
+                delete updatedSub.unsubscribedAt;
+              }
+              return updatedSub;
+            }
+            return sub;
+          })
         );
         const updatedSubs = allSubscriptions.map((sub) =>
           sub._id === id

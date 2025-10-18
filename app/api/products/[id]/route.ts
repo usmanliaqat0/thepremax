@@ -4,7 +4,7 @@ import Product from "@/lib/models/Product";
 import { handleApiError } from "@/lib/error-handler";
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import Order from "@/lib/models/Order";
+import Order, { IOrder } from "@/lib/models/Order";
 import { authMiddleware } from "@/lib/auth-middleware";
 import { handleApiError } from "@/lib/error-handler";
 import mongoose from "mongoose";
@@ -44,8 +44,13 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     const [orders, total] = await Promise.all([
-      Order.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-      Order.countDocuments(query),
+      (Order as mongoose.Model<IOrder>)
+        .find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      (Order as mongoose.Model<IOrder>).countDocuments(query),
     ]);
 
     return NextResponse.json({

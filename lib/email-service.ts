@@ -100,7 +100,7 @@ export class EmailService {
         to,
         subject,
         htmlContent,
-        textContent,
+        ...(textContent && { textContent }),
         sender: {
           name: env.BREVO_SENDER_NAME || "ThePreMax",
           email: env.BREVO_SENDER_EMAIL || "no-reply@usmanliaqat.com",
@@ -307,8 +307,7 @@ export class EmailService {
       }
 
       const verificationCode = verificationToken.substring(0, 6).toUpperCase();
-      console.log("Generated verification code:", verificationCode);
-      console.log("Full token:", verificationToken);
+      // Note: Removed console.log statements for security - tokens should not be logged
 
       const env = getEnvConfig();
       const verificationUrl = `${
@@ -341,11 +340,7 @@ export class EmailService {
         const verificationCode = verificationToken
           .substring(0, 6)
           .toUpperCase();
-        console.log(
-          "Fallback - Generated verification code:",
-          verificationCode
-        );
-        console.log("Fallback - Full token:", verificationToken);
+        // Note: Removed console.log statements for security - tokens should not be logged
 
         const env = getEnvConfig();
         const verificationUrl = `${

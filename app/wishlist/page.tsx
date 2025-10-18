@@ -130,7 +130,7 @@ const Wishlist = () => {
                     slug: item.name.toLowerCase().replace(/\s+/g, "-"),
                     description: item.name,
                     basePrice: item.price,
-                    compareAtPrice: item.originalPrice,
+                    compareAtPrice: item.originalPrice || 0,
                     categoryId: item.category
                       .toLowerCase()
                       .replace(/\s+/g, "-"),

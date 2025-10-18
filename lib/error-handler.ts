@@ -1,6 +1,7 @@
 ﻿import { toast } from "sonner";
 import { NextResponse } from "next/server";
 import { AuthResponse } from "@/lib/types";
+import { logError } from "./logger";
 
 export interface ApiError {
   field?: string;
@@ -14,7 +15,7 @@ export function handleApiError(
   defaultMessage: string = "Internal server error",
   statusCode?: number
 ): NextResponse {
-  console.error("API Error:", error);
+  logError("API Error", "API", error as Error);
 
   let message = defaultMessage;
   let status = statusCode || 500;

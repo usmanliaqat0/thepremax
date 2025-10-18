@@ -15,6 +15,10 @@ export class InputSanitizer {
       .trim()
       .replace(/[<>]/g, "") // Remove potential HTML tags
       .replace(/[\x00-\x1F\x7F]/g, "") // Remove control characters
+      .replace(/javascript:/gi, "") // Remove javascript: protocol
+      .replace(/data:/gi, "") // Remove data: protocol
+      .replace(/vbscript:/gi, "") // Remove vbscript: protocol
+      .replace(/on\w+\s*=/gi, "") // Remove event handlers
       .substring(0, maxLength);
   }
 
@@ -60,7 +64,7 @@ export class InputSanitizer {
   }
 
   /**
-   * Sanitizes a URL
+   * Sanitizes a URL with security checks
    */
   static sanitizeUrl(url: string): string | null {
     if (typeof url !== "string") {
@@ -71,7 +75,31 @@ export class InputSanitizer {
 
     // Basic URL validation
     try {
-      new URL(trimmedUrl);
+      const urlObj = new URL(trimmedUrl);
+
+      // Only allow http and https protocols
+      if (!["http:", "https:"].includes(urlObj.protocol)) {
+        return null;
+      }
+
+      // Block dangerous domains (basic protection)
+      const dangerousDomains = [
+        "localhost",
+        "127.0.0.1",
+        "0.0.0.0",
+        "::1",
+        "file:",
+        "ftp:",
+        "javascript:",
+        "data:",
+        "vbscript:",
+      ];
+
+      const hostname = urlObj.hostname.toLowerCase();
+      if (dangerousDomains.some((domain) => hostname.includes(domain))) {
+        return null;
+      }
+
       return trimmedUrl;
     } catch {
       return null;
@@ -232,5 +260,70 @@ export class InputSanitizer {
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Sanitizes HTML content by removing dangerous tags and attributes
+   */
+  static sanitizeHtml(html: string): string {
+    if (typeof html !== "string") {
+      return "";
+    }
+
+    return html
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "") // Remove script tags
+      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "") // Remove iframe tags
+      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "") // Remove object tags
+      .replace(/<embed\b[^<]*>/gi, "") // Remove embed tags
+      .replace(/<link\b[^>]*>/gi, "") // Remove link tags
+      .replace(/<meta\b[^>]*>/gi, "") // Remove meta tags
+      .replace(/on\w+\s*=\s*["'][^"']*["']/gi, "") // Remove event handlers
+      .replace(/javascript:/gi, "") // Remove javascript: protocol
+      .replace(/vbscript:/gi, "") // Remove vbscript: protocol
+      .replace(/data:/gi, ""); // Remove data: protocol
+  }
+
+  /**
+   * Sanitizes file upload data
+   */
+  static sanitizeFileUpload(file: {
+    name: string;
+    size: number;
+    type: string;
+  }): { name: string; size: number; type: string } | null {
+    if (!file || typeof file !== "object") {
+      return null;
+    }
+
+    const { name, size, type } = file;
+
+    // Validate file name
+    const sanitizedName = this.sanitizeString(name, 255);
+    if (!sanitizedName || sanitizedName !== name) {
+      return null;
+    }
+
+    // Validate file size (max 10MB)
+    if (typeof size !== "number" || size <= 0 || size > 10 * 1024 * 1024) {
+      return null;
+    }
+
+    // Validate file type
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "application/pdf",
+      "text/plain",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+
+    if (!allowedTypes.includes(type)) {
+      return null;
+    }
+
+    return { name: sanitizedName, size, type };
   }
 }

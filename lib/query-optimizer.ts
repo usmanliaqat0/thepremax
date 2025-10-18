@@ -25,9 +25,20 @@ export interface CursorPaginationResult<T> {
   lastId?: string;
 }
 
+/**
+ * Query optimization utilities for better database performance
+ * Provides optimized queries with proper indexing and aggregation pipelines
+ */
 export class QueryOptimizer {
   /**
    * Optimized product query with proper indexing and aggregation
+   * Uses MongoDB aggregation pipeline for better performance
+   * @param filter - MongoDB filter object for querying products
+   * @param page - Page number for pagination (1-based)
+   * @param limit - Number of items per page
+   * @param sortBy - Field to sort by
+   * @param sortOrder - Sort direction (asc/desc)
+   * @returns Promise with paginated product data
    */
   static async getProductsOptimized(
     filter: Record<string, unknown>,
@@ -44,8 +55,19 @@ export class QueryOptimizer {
       {
         $lookup: {
           from: "categories",
-          localField: "categoryId",
-          foreignField: "_id",
+          let: { categoryId: "$categoryId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $or: [
+                    { $eq: ["$_id", { $toObjectId: "$$categoryId" }] },
+                    { $eq: [{ $toString: "$_id" }, "$$categoryId"] },
+                  ],
+                },
+              },
+            },
+          ],
           as: "category",
         },
       },
@@ -63,6 +85,7 @@ export class QueryOptimizer {
           basePrice: 1,
           compareAtPrice: 1,
           categoryId: 1,
+          tags: 1,
           images: 1,
           onSale: 1,
           inStock: 1,
@@ -135,8 +158,8 @@ export class QueryOptimizer {
       data: products,
       hasNext,
       lastId: hasNext
-        ? products[products.length - 1]._id.toString()
-        : undefined,
+        ? products[products.length - 1]?._id.toString() || ""
+        : "",
     };
   }
 
@@ -299,11 +322,14 @@ export class QueryOptimizer {
         { $match: { paymentStatus: "paid" } },
         { $group: { _id: null, total: { $sum: "$total" } } },
       ]),
-      Order.find()
-        .populate("user", "firstName lastName email")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (Order as any)
+        .find({})
+        .populate("userId", "firstName lastName email")
         .sort({ createdAt: -1 })
         .limit(5)
-        .lean(),
+        .lean()
+        .exec(),
       this.getProductsWithStats({ status: "active" }, 5),
     ]);
 

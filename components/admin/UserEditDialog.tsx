@@ -59,7 +59,7 @@ export default function UserEditDialog({
           formData.gender === "female" ||
           formData.gender === "other"
             ? formData.gender
-            : undefined,
+            : "male",
         updatedAt: new Date().toISOString(),
       };
       await onUserUpdated(updatedUser);
@@ -128,7 +128,7 @@ export default function UserEditDialog({
           <div>
             <Label htmlFor="gender">Gender</Label>
             <Select
-              value={formData.gender}
+              value={formData.gender || "male"}
               onValueChange={(value) => handleInputChange("gender", value)}
             >
               <SelectTrigger>

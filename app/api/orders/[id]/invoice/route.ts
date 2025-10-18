@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import Order from "@/lib/models/Order";
+import Order, { IOrder } from "@/lib/models/Order";
 import { authMiddleware } from "@/lib/auth-middleware";
 import { handleApiError } from "@/lib/error-handler";
 import { generateInvoicePDF, InvoiceData } from "@/lib/simple-pdf-generator";
+import mongoose from "mongoose";
 
 interface PopulatedOrder {
   _id: string;
@@ -72,9 +73,9 @@ export async function GET(
 
     // Find order (without populate to avoid schema issues)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const order = (await Order.findById(
-      id
-    ).lean()) as unknown as PopulatedOrder;
+    const order = (await (Order as mongoose.Model<IOrder>)
+      .findById(id)
+      .lean()) as unknown as PopulatedOrder;
 
     if (!order) {
       return NextResponse.json(

@@ -64,12 +64,11 @@ export async function POST(request: NextRequest) {
       if (existingSubscription.status === "unsubscribed") {
         existingSubscription.status = "active";
         existingSubscription.subscribedAt = new Date();
-        existingSubscription.unsubscribedAt = undefined;
-        existingSubscription.metadata = {
-          userAgent,
-          ipAddress,
-          referrer,
-        };
+        delete existingSubscription.unsubscribedAt;
+        existingSubscription.metadata = {};
+        if (userAgent) existingSubscription.metadata.userAgent = userAgent;
+        if (ipAddress) existingSubscription.metadata.ipAddress = ipAddress;
+        if (referrer) existingSubscription.metadata.referrer = referrer;
         await existingSubscription.save();
 
         return NextResponse.json(

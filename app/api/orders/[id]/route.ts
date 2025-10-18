@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import Order from "@/lib/models/Order";
+import Order, { IOrder } from "@/lib/models/Order";
 import { authMiddleware } from "@/lib/auth-middleware";
 import { handleApiError } from "@/lib/error-handler";
+import mongoose from "mongoose";
 
 // GET /api/orders/[id] - Get specific order
 export async function GET(
@@ -21,10 +22,12 @@ export async function GET(
     await connectDB();
 
     const { id } = await params;
-    const order = await Order.findOne({
-      _id: id,
-      userId: user.id,
-    }).lean();
+    const order = await (Order as mongoose.Model<IOrder>)
+      .findOne({
+        _id: id,
+        userId: user.id,
+      })
+      .lean();
 
     if (!order) {
       return NextResponse.json(
@@ -63,7 +66,7 @@ export async function PUT(
     const { status, paymentStatus, trackingNumber, estimatedDelivery } = body;
 
     // Check if user is admin or order owner
-    const order = await Order.findById(id);
+    const order = await (Order as mongoose.Model<IOrder>).findById(id);
     if (!order) {
       return NextResponse.json(
         {
@@ -119,9 +122,11 @@ export async function PUT(
       updateData.deliveredAt = new Date();
     }
 
-    const updatedOrder = await Order.findByIdAndUpdate(id, updateData, {
-      new: true,
-    }).lean();
+    const updatedOrder = await (Order as mongoose.Model<IOrder>)
+      .findByIdAndUpdate(id, updateData, {
+        new: true,
+      })
+      .lean();
 
     return NextResponse.json({
       success: true,
@@ -157,7 +162,7 @@ export async function DELETE(
     await connectDB();
 
     const { id } = await params;
-    const order = await Order.findByIdAndDelete(id);
+    const order = await (Order as mongoose.Model<IOrder>).findByIdAndDelete(id);
     if (!order) {
       return NextResponse.json(
         {

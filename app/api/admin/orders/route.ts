@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import Order from "@/lib/models/Order";
+import Order, { IOrder } from "@/lib/models/Order";
 import { adminMiddleware } from "@/lib/admin-middleware";
 import { handleApiError } from "@/lib/error-handler";
+import mongoose from "mongoose";
 
 export async function GET(request: NextRequest) {
   try {
@@ -48,7 +49,10 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    let ordersQuery = Order.find(query).sort({ createdAt: -1 }).lean();
+    let ordersQuery = (Order as mongoose.Model<IOrder>)
+      .find(query)
+      .sort({ createdAt: -1 })
+      .lean();
 
     if (!all) {
       ordersQuery = ordersQuery.skip(skip).limit(limit);
@@ -56,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     const [orders, total] = await Promise.all([
       ordersQuery,
-      Order.countDocuments(query),
+      (Order as mongoose.Model<IOrder>).countDocuments(query),
     ]);
 
     const ordersWithUsers = await Promise.all(
@@ -77,7 +81,7 @@ export async function GET(request: NextRequest) {
       })
     );
 
-    const stats = await Order.aggregate([
+    const stats = await (Order as mongoose.Model<IOrder>).aggregate([
       {
         $group: {
           _id: null,

@@ -35,7 +35,7 @@ const PersonalInfoSection = () => {
     dateOfBirth: "",
   });
 
-useEffect(() => {
+  useEffect(() => {
     if (state.user) {
       setFormData({
         firstName: state.user.firstName || "",
@@ -56,7 +56,6 @@ useEffect(() => {
   };
 
   const handleSave = async () => {
-
     if (formData.phone && formData.phone.length !== 10) {
       toast.error("Phone number must be exactly 10 digits");
       return;
@@ -67,9 +66,9 @@ useEffect(() => {
       const updateData = {
         firstName: formData.firstName,
         lastName: formData.lastName,
-        phone: formData.phone || undefined,
-        gender: formData.gender || undefined,
-        dateOfBirth: formData.dateOfBirth || undefined,
+        phone: formData.phone || "",
+        gender: formData.gender || "male",
+        dateOfBirth: formData.dateOfBirth || "",
       };
 
       const success = await updateProfile(updateData);
@@ -206,7 +205,6 @@ useEffect(() => {
                         : formData.phone
                     }
                     onChange={(e) => {
-
                       let value = e.target.value.replace(/\D/g, "");
 
                       if (value.length > 10) value = value.slice(0, 10);

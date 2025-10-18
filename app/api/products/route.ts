@@ -1,9 +1,9 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest } from "next/server";
 import connectDB from "@/lib/db";
-import { handleApiError, handleValidationError } from "@/lib/error-handler";
 import { productQuerySchema } from "@/lib/validation/schemas";
 import { InputSanitizer } from "@/lib/validation/sanitizer";
 import { QueryOptimizer } from "@/lib/query-optimizer";
+import { ApiResponseBuilder } from "@/lib/api-response";
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,9 +15,15 @@ export async function GET(request: NextRequest) {
     // Validate and sanitize input
     const validationResult = productQuerySchema.safeParse(queryParams);
     if (!validationResult.success) {
-      return handleValidationError(
-        validationResult.error.issues,
-        "Invalid query parameters"
+      const errors = validationResult.error.issues.map((issue) => ({
+        code: "VALIDATION_ERROR",
+        message: issue.message,
+        field: issue.path.join("."),
+      }));
+
+      return ApiResponseBuilder.validationError(
+        "Invalid query parameters",
+        errors
       );
     }
 
@@ -71,12 +77,16 @@ export async function GET(request: NextRequest) {
       sortOrder
     );
 
-    return NextResponse.json({
-      success: true,
-      data: result.data,
-      pagination: result.pagination,
-    });
+    return ApiResponseBuilder.success(
+      result.data,
+      "Products fetched successfully",
+      200,
+      result.pagination
+    );
   } catch (error) {
-    return handleApiError(error, "Failed to fetch products");
+    return ApiResponseBuilder.internalError(
+      "Failed to fetch products",
+      error as Error
+    );
   }
 }

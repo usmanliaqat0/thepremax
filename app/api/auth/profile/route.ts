@@ -27,6 +27,9 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    console.log("Profile API - User addresses:", user.addresses);
+    console.log("Profile API - User addresses length:", user.addresses?.length);
+
     return NextResponse.json({
       success: true,
       user: {

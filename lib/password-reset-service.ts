@@ -6,12 +6,11 @@ import User from "./models/User";
 import PasswordReset, { IPasswordReset } from "./models/PasswordReset";
 
 export class PasswordResetService {
-
   static generateResetToken(): string {
     return crypto.randomBytes(32).toString("hex");
   }
 
-static async createPasswordReset(email: string): Promise<{
+  static async createPasswordReset(email: string): Promise<{
     success: boolean;
     token?: string;
     message?: string;
@@ -19,7 +18,7 @@ static async createPasswordReset(email: string): Promise<{
     try {
       await connectDB();
 
-const user = await User.findOne({ email: email.toLowerCase() });
+      const user = await User.findOne({ email: email.toLowerCase() });
       if (!user) {
         return {
           success: false,
@@ -27,22 +26,22 @@ const user = await User.findOne({ email: email.toLowerCase() });
         };
       }
 
-if (user.status !== "active") {
+      if (user.status !== "active") {
         return {
           success: false,
           message: "Account is not active. Please contact support.",
         };
       }
 
-await PasswordReset.updateMany(
+      await PasswordReset.updateMany(
         { email: email.toLowerCase(), used: false },
         { used: true }
       );
 
-const token = this.generateResetToken();
+      const token = this.generateResetToken();
       const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-const passwordReset =
+      const passwordReset =
         new (PasswordReset as mongoose.Model<IPasswordReset>)({
           email: email.toLowerCase(),
           token,
@@ -66,7 +65,7 @@ const passwordReset =
     }
   }
 
-static async verifyResetToken(token: string): Promise<{
+  static async verifyResetToken(token: string): Promise<{
     success: boolean;
     email?: string;
     message?: string;
@@ -101,7 +100,7 @@ static async verifyResetToken(token: string): Promise<{
     }
   }
 
-static async resetPassword(
+  static async resetPassword(
     token: string,
     newPassword: string
   ): Promise<{
@@ -111,17 +110,17 @@ static async resetPassword(
     try {
       await connectDB();
 
-const tokenVerification = await this.verifyResetToken(token);
+      const tokenVerification = await this.verifyResetToken(token);
       if (!tokenVerification.success) {
         return {
           success: false,
-          message: tokenVerification.message,
+          message: tokenVerification.message || "Token verification failed",
         };
       }
 
-const hashedPassword = await bcrypt.hash(newPassword, 12);
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-const user = await User.findOneAndUpdate(
+      const user = await User.findOneAndUpdate(
         { email: tokenVerification.email },
         { password: hashedPassword },
         { new: true }
@@ -134,7 +133,7 @@ const user = await User.findOneAndUpdate(
         };
       }
 
-await PasswordReset.findOneAndUpdate({ token }, { used: true });
+      await PasswordReset.findOneAndUpdate({ token }, { used: true });
 
       return {
         success: true,
@@ -149,7 +148,7 @@ await PasswordReset.findOneAndUpdate({ token }, { used: true });
     }
   }
 
-static async cleanupExpiredTokens(): Promise<void> {
+  static async cleanupExpiredTokens(): Promise<void> {
     try {
       await connectDB();
       await PasswordReset.deleteMany({

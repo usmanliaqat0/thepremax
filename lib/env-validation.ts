@@ -136,14 +136,14 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
     // Optional variables with defaults
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "7d",
     JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || "30d",
-    BREVO_API_KEY: process.env.BREVO_API_KEY,
-    BREVO_SENDER_NAME: process.env.BREVO_SENDER_NAME,
-    BREVO_SENDER_EMAIL: process.env.BREVO_SENDER_EMAIL,
+    BREVO_API_KEY: process.env.BREVO_API_KEY || "",
+    BREVO_SENDER_NAME: process.env.BREVO_SENDER_NAME || "",
+    BREVO_SENDER_EMAIL: process.env.BREVO_SENDER_EMAIL || "",
     BREVO_PASSWORD_RESET_TEMPLATE_ID:
-      process.env.BREVO_PASSWORD_RESET_TEMPLATE_ID,
+      process.env.BREVO_PASSWORD_RESET_TEMPLATE_ID || "",
     BREVO_EMAIL_VERIFICATION_TEMPLATE_ID:
-      process.env.BREVO_EMAIL_VERIFICATION_TEMPLATE_ID,
-    BREVO_WELCOME_TEMPLATE_ID: process.env.BREVO_WELCOME_TEMPLATE_ID,
+      process.env.BREVO_EMAIL_VERIFICATION_TEMPLATE_ID || "",
+    BREVO_WELCOME_TEMPLATE_ID: process.env.BREVO_WELCOME_TEMPLATE_ID || "",
     NEXT_PUBLIC_APP_URL:
       process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || "ThePreMax",
@@ -172,14 +172,14 @@ export function loadEnvironmentConfigWithDefaults(): EnvironmentConfig {
     SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL || "admin@thepremax.com",
     SUPER_ADMIN_PASSWORD:
       process.env.SUPER_ADMIN_PASSWORD || generateSecureSecret(16),
-    BREVO_API_KEY: process.env.BREVO_API_KEY,
-    BREVO_SENDER_NAME: process.env.BREVO_SENDER_NAME,
-    BREVO_SENDER_EMAIL: process.env.BREVO_SENDER_EMAIL,
+    BREVO_API_KEY: process.env.BREVO_API_KEY || "",
+    BREVO_SENDER_NAME: process.env.BREVO_SENDER_NAME || "",
+    BREVO_SENDER_EMAIL: process.env.BREVO_SENDER_EMAIL || "",
     BREVO_PASSWORD_RESET_TEMPLATE_ID:
-      process.env.BREVO_PASSWORD_RESET_TEMPLATE_ID,
+      process.env.BREVO_PASSWORD_RESET_TEMPLATE_ID || "",
     BREVO_EMAIL_VERIFICATION_TEMPLATE_ID:
-      process.env.BREVO_EMAIL_VERIFICATION_TEMPLATE_ID,
-    BREVO_WELCOME_TEMPLATE_ID: process.env.BREVO_WELCOME_TEMPLATE_ID,
+      process.env.BREVO_EMAIL_VERIFICATION_TEMPLATE_ID || "",
+    BREVO_WELCOME_TEMPLATE_ID: process.env.BREVO_WELCOME_TEMPLATE_ID || "",
     NEXT_PUBLIC_APP_URL:
       process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || "ThePreMax",

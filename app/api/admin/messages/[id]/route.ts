@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import ContactMessage from "@/lib/models/ContactMessage";
+import ContactMessage, { IContactMessage } from "@/lib/models/ContactMessage";
 import { AdminMiddleware } from "@/lib/admin-middleware";
 import { z } from "zod";
+import mongoose from "mongoose";
 
 const updateMessageSchema = z.object({
   status: z.enum(["new", "read", "replied", "closed"]).optional(),
@@ -28,7 +29,9 @@ export async function GET(
 
     const { id } = await params;
 
-    const message = await ContactMessage.findById(id).lean();
+    const message = await (ContactMessage as mongoose.Model<IContactMessage>)
+      .findById(id)
+      .lean();
 
     if (!message) {
       return NextResponse.json(
@@ -89,11 +92,13 @@ export async function PUT(
       updateData.closedAt = new Date();
     }
 
-    const message = await ContactMessage.findByIdAndUpdate(
-      id,
-      { $set: updateData },
-      { new: true, runValidators: true }
-    ).lean();
+    const message = await (ContactMessage as mongoose.Model<IContactMessage>)
+      .findByIdAndUpdate(
+        id,
+        { $set: updateData },
+        { new: true, runValidators: true }
+      )
+      .lean();
 
     if (!message) {
       return NextResponse.json(
@@ -133,7 +138,9 @@ export async function DELETE(
 
     const { id } = await params;
 
-    const message = await ContactMessage.findByIdAndDelete(id);
+    const message = await (
+      ContactMessage as mongoose.Model<IContactMessage>
+    ).findByIdAndDelete(id);
 
     if (!message) {
       return NextResponse.json(

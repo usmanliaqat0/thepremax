@@ -32,20 +32,75 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Edit, Trash2, MapPin, Home, Building } from "lucide-react";
 import { toast } from "sonner";
 import { Address } from "@/lib/types";
+import { RefreshLoader } from "@/components/ui/loader";
 
 const AddressSection = () => {
   const { state, updateProfile } = useAuth();
   const [addresses, setAddresses] = useState<Address[]>([]);
 
-useEffect(() => {
-    if (state.user?.addresses) {
+  // Fetch addresses from API when component mounts
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        setIsFetchingAddresses(true);
+        console.log("AddressSection - Fetching addresses from API...");
+        const response = await fetch("/api/profile/addresses", {
+          headers: {
+            Authorization: `Bearer ${state.token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            console.log(
+              "AddressSection - Fetched addresses from API:",
+              data.data
+            );
+            setAddresses(data.data);
+          } else {
+            console.error("AddressSection - API error:", data.message);
+            setAddresses([]);
+          }
+        } else {
+          console.error(
+            "AddressSection - Failed to fetch addresses:",
+            response.status
+          );
+          setAddresses([]);
+        }
+      } catch (error) {
+        console.error("AddressSection - Error fetching addresses:", error);
+        setAddresses([]);
+      } finally {
+        setIsFetchingAddresses(false);
+      }
+    };
+
+    if (state.token) {
+      fetchAddresses();
+    }
+  }, [state.token]);
+
+  // Also update when auth context addresses change (for real-time updates)
+  useEffect(() => {
+    console.log(
+      "AddressSection - User addresses changed:",
+      state.user?.addresses
+    );
+    if (state.user?.addresses && state.user.addresses.length > 0) {
       setAddresses(state.user.addresses);
+      console.log(
+        "AddressSection - Set addresses from context:",
+        state.user.addresses
+      );
     }
   }, [state.user?.addresses]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchingAddresses, setIsFetchingAddresses] = useState(false);
 
   const [formData, setFormData] = useState<Partial<Address>>({
     type: "shipping",
@@ -79,14 +134,11 @@ useEffect(() => {
       let updatedAddresses: Address[];
 
       if (editingAddress) {
-
         updatedAddresses = addresses.map((addr) =>
           addr.id === editingAddress.id ? addressData : addr
         );
       } else {
-
         if (addressData.isDefault) {
-
           updatedAddresses = addresses.map((addr) => ({
             ...addr,
             isDefault: false,
@@ -97,7 +149,7 @@ useEffect(() => {
         updatedAddresses.push(addressData);
       }
 
-const success = await updateProfile({ addresses: updatedAddresses });
+      const success = await updateProfile({ addresses: updatedAddresses });
 
       if (success) {
         toast.success(
@@ -209,7 +261,7 @@ const success = await updateProfile({ addresses: updatedAddresses });
                   <div className="space-y-2">
                     <Label>Address Type</Label>
                     <Select
-                      value={formData.type}
+                      value={formData.type || "shipping"}
                       onValueChange={(value: "shipping" | "billing") =>
                         handleInputChange("type", value)
                       }
@@ -346,7 +398,11 @@ const success = await updateProfile({ addresses: updatedAddresses });
         </CardHeader>
 
         <CardContent>
-          {addresses.length === 0 ? (
+          {isFetchingAddresses ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <RefreshLoader size="lg" />
+            </div>
+          ) : addresses.length === 0 ? (
             <div className="text-center py-8">
               <MapPin className="w-12 h-12 mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">

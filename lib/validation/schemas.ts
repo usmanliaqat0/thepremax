@@ -142,29 +142,64 @@ export const orderCreateSchema = z.object({
   }),
 });
 
+// Enhanced date validation
+const dateOfBirthSchema = z
+  .string()
+  .datetime("Invalid date format")
+  .refine((date) => {
+    const birthDate = new Date(date);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    // Adjust age if birthday hasn't occurred this year
+    const actualAge =
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+        ? age - 1
+        : age;
+
+    return actualAge >= 13 && actualAge <= 120;
+  }, "Date of birth must be between 13 and 120 years ago");
+
+// Enhanced phone validation
+const phoneSchema = z
+  .string()
+  .regex(/^[\+]?[1-9][\d]{0,15}$/, "Invalid phone number format")
+  .min(10, "Phone number too short")
+  .max(20, "Phone number too long")
+  .optional();
+
 // User schemas
 export const userUpdateSchema = z.object({
   firstName: z
     .string()
     .min(1, "First name is required")
     .max(50, "First name too long")
-    .trim(),
+    .trim()
+    .regex(/^[a-zA-Z\s\-']+$/, "First name contains invalid characters"),
   lastName: z
     .string()
     .min(1, "Last name is required")
     .max(50, "Last name too long")
+    .trim()
+    .regex(/^[a-zA-Z\s\-']+$/, "Last name contains invalid characters"),
+  email: z
+    .string()
+    .email("Invalid email address")
+    .max(100)
+    .toLowerCase()
     .trim(),
-  email: z.string().email("Invalid email address").max(100),
-  phone: z.string().max(20).optional(),
-  dateOfBirth: z.string().datetime().optional(),
+  phone: phoneSchema,
+  dateOfBirth: dateOfBirthSchema,
   gender: z.enum(["male", "female", "other"]).optional(),
   address: z
     .object({
-      street: z.string().max(200).optional(),
-      city: z.string().max(100).optional(),
-      state: z.string().max(100).optional(),
-      postalCode: z.string().max(20).optional(),
-      country: z.string().max(100).optional(),
+      street: z.string().max(200).min(1, "Street address is required").trim(),
+      city: z.string().max(100).min(1, "City is required").trim(),
+      state: z.string().max(100).min(1, "State is required").trim(),
+      postalCode: z.string().max(20).min(1, "Postal code is required").trim(),
+      country: z.string().max(100).min(1, "Country is required").trim(),
     })
     .optional(),
 });

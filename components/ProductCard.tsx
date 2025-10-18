@@ -31,8 +31,14 @@ const ProductCard = ({
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const defaultSize = product.sizes[0];
-    const defaultColor = product.colors[0];
+
+    // Ensure sizes and colors are arrays and have default values
+    const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+    const colors = Array.isArray(product.colors) ? product.colors : [];
+
+    const defaultSize = sizes[0] || "One Size";
+    const defaultColor = colors[0] || "Default";
+
     addToCart(product, defaultSize, defaultColor, 1);
   };
 
@@ -42,8 +48,13 @@ const ProductCard = ({
     if (isInWishlist(product._id)) {
       await removeFromWishlist(product._id);
     } else {
-      const defaultSize = product.sizes?.[0];
-      const defaultColor = product.colors?.[0];
+      // Ensure sizes and colors are arrays and have default values
+      const sizes = Array.isArray(product.sizes) ? product.sizes : [];
+      const colors = Array.isArray(product.colors) ? product.colors : [];
+
+      const defaultSize = sizes[0] || "One Size";
+      const defaultColor = colors[0] || "Default";
+
       await addToWishlist(product, defaultSize, defaultColor);
     }
   };

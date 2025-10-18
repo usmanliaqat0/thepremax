@@ -1,7 +1,8 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import Wishlist from "@/lib/models/Wishlist";
+import Wishlist, { IWishlist } from "@/lib/models/Wishlist";
 import { TokenUtils } from "@/lib/auth-service";
+import mongoose from "mongoose";
 
 export async function GET(req: NextRequest) {
   try {
@@ -18,10 +19,16 @@ export async function GET(req: NextRequest) {
 
     await connectDB();
 
-    let wishlist = await Wishlist.findOne({ userId: decoded.id }).lean();
+    let wishlist = await (Wishlist as mongoose.Model<IWishlist>)
+      .findOne({ userId: decoded.id })
+      .lean();
 
-if (!wishlist) {
-      wishlist = await Wishlist.create({ userId: decoded.id, items: [] });
+    if (!wishlist) {
+      const newWishlist = new (Wishlist as mongoose.Model<IWishlist>)({
+        userId: decoded.id,
+        items: [],
+      });
+      wishlist = (await newWishlist.save()) as unknown as typeof wishlist;
     }
 
     return NextResponse.json({
@@ -76,41 +83,50 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    let wishlist = await Wishlist.findOne({ userId: decoded.id });
+    let wishlist = await (Wishlist as mongoose.Model<IWishlist>).findOne({
+      userId: decoded.id,
+    });
 
-if (!wishlist) {
+    if (!wishlist) {
       wishlist = new Wishlist({ userId: decoded.id, items: [] });
     }
 
     if (action === "add" && item) {
-
-      const existingItemIndex = wishlist.items.findIndex(
-        (existingItem: Record<string, unknown>) =>
-          existingItem.productId === item.productId
-      );
+      const existingItemIndex =
+        wishlist?.items.findIndex(
+          (existingItem: unknown) =>
+            (existingItem as Record<string, unknown>).productId ===
+            item.productId
+        ) || -1;
 
       if (existingItemIndex === -1) {
-
-        wishlist.items.push({
+        wishlist?.items.push({
           ...item,
           dateAdded: new Date(),
         });
       } else {
-
-        wishlist.items[existingItemIndex] = {
-          ...wishlist.items[existingItemIndex],
-          ...item,
-          dateAdded: wishlist.items[existingItemIndex].dateAdded,
-        };
+        if (
+          wishlist?.items &&
+          existingItemIndex >= 0 &&
+          wishlist.items[existingItemIndex]
+        ) {
+          wishlist.items[existingItemIndex] = {
+            ...wishlist.items[existingItemIndex],
+            ...item,
+            dateAdded: wishlist.items[existingItemIndex].dateAdded,
+          };
+        }
       }
     } else if (action === "remove" && productId) {
-
-      wishlist.items = wishlist.items.filter(
-        (item: Record<string, unknown>) => item.productId !== productId
-      );
+      if (wishlist?.items) {
+        wishlist.items = wishlist.items.filter(
+          (item: unknown) =>
+            (item as Record<string, unknown>).productId !== productId
+        );
+      }
     }
 
-    await wishlist.save();
+    await wishlist?.save();
 
     return NextResponse.json({
       success: true,
@@ -118,18 +134,24 @@ if (!wishlist) {
         action === "add"
           ? "Item added to wishlist"
           : "Item removed from wishlist",
-      wishlist: {
-        id: wishlist._id.toString(),
-        userId: wishlist.userId,
-        items: wishlist.items,
-        createdAt: wishlist.createdAt,
-        updatedAt: wishlist.updatedAt,
-      },
+      wishlist: wishlist
+        ? {
+            id: (wishlist._id as unknown as { toString(): string }).toString(),
+            userId: wishlist.userId,
+            items: wishlist.items,
+            createdAt: wishlist.createdAt,
+            updatedAt: wishlist.updatedAt,
+          }
+        : null,
     });
   } catch (error) {
     console.error("Update wishlist error:", error);
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      {
+        success: false,
+        message: "Internal server error",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
@@ -150,7 +172,7 @@ export async function DELETE(req: NextRequest) {
 
     await connectDB();
 
-    await Wishlist.findOneAndUpdate(
+    await (Wishlist as mongoose.Model<IWishlist>).findOneAndUpdate(
       { userId: decoded.id },
       { items: [] },
       { upsert: true }

@@ -205,6 +205,7 @@ function VerifyCodeContent() {
     } else if (resendCooldown === 0) {
       localStorage.removeItem("resend_cooldown");
     }
+    return undefined;
   }, [resendCooldown]);
 
   const formatTime = (seconds: number) => {

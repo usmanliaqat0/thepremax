@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import Order from "@/lib/models/Order";
+import Order, { IOrder } from "@/lib/models/Order";
 import { adminMiddleware } from "@/lib/admin-middleware";
 import { handleApiError } from "@/lib/error-handler";
+import mongoose from "mongoose";
 
 // GET /api/admin/orders/[id] - Get specific order (admin only)
 export async function GET(
@@ -21,7 +22,8 @@ export async function GET(
     await connectDB();
 
     const { id } = await params;
-    const order = await Order.findById(id)
+    const order = await (Order as mongoose.Model<IOrder>)
+      .findById(id)
       .populate("userId", "firstName lastName email phone")
       .lean();
 
@@ -68,7 +70,7 @@ export async function PUT(
       billingAddress,
     } = body;
 
-    const order = await Order.findById(id);
+    const order = await (Order as mongoose.Model<IOrder>).findById(id);
     if (!order) {
       return NextResponse.json(
         {
@@ -94,9 +96,11 @@ export async function PUT(
       updateData.deliveredAt = new Date();
     }
 
-    const updatedOrder = await Order.findByIdAndUpdate(id, updateData, {
-      new: true,
-    }).populate("userId", "firstName lastName email phone");
+    const updatedOrder = await (Order as mongoose.Model<IOrder>)
+      .findByIdAndUpdate(id, updateData, {
+        new: true,
+      })
+      .populate("userId", "firstName lastName email phone");
 
     return NextResponse.json({
       success: true,
@@ -125,7 +129,7 @@ export async function DELETE(
     await connectDB();
 
     const { id } = await params;
-    const order = await Order.findByIdAndDelete(id);
+    const order = await (Order as mongoose.Model<IOrder>).findByIdAndDelete(id);
     if (!order) {
       return NextResponse.json(
         {

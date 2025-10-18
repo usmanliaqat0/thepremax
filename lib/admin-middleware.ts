@@ -22,7 +22,7 @@ export class AdminMiddleware {
     if (!result.success) {
       return {
         success: false,
-        error: result.error,
+        error: result.error || "Authentication failed",
       };
     }
 
@@ -39,7 +39,7 @@ export class AdminMiddleware {
         firstName,
         lastName,
         role: result.user!.role as "super_admin" | "admin",
-        permissions: result.user!.permissions as AdminPermissions | undefined,
+        permissions: result.user!.permissions || ({} as AdminPermissions),
       },
     };
   }
@@ -223,6 +223,6 @@ export async function adminMiddleware(request: NextRequest): Promise<{
 
   return {
     success: true,
-    user: verification.user,
+    user: verification.user!,
   };
 }

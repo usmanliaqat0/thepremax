@@ -85,8 +85,10 @@ export class TokenValidator {
   private static detectTokenType(token: string): "user" | "admin" {
     try {
       // Try to decode without verification to check type
+      const tokenParts = token.split(".");
+      if (tokenParts.length < 2 || !tokenParts[1]) return "user";
       const decoded = JSON.parse(
-        Buffer.from(token.split(".")[1], "base64").toString()
+        Buffer.from(tokenParts[1], "base64").toString()
       );
       return decoded.type === "admin" ? "admin" : "user";
     } catch {
@@ -116,7 +118,9 @@ export class TokenValidator {
           email: decoded.email,
           role: decoded.role,
           type: "user",
-          isEmailVerified: decoded.isEmailVerified,
+          ...(decoded.isEmailVerified !== undefined && {
+            isEmailVerified: decoded.isEmailVerified,
+          }),
         },
       };
     } catch (error) {
@@ -145,7 +149,7 @@ export class TokenValidator {
           email: decoded.email,
           role: decoded.role,
           type: "admin",
-          permissions: decoded.permissions,
+          ...(decoded.permissions && { permissions: decoded.permissions }),
         },
       };
     } catch (error) {

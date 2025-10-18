@@ -351,7 +351,7 @@ export default function ProductViewDialog({
             </Card>
           </div>
 
-          {product.tags.length > 0 && (
+          {product.tags && product.tags.length > 0 && (
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">

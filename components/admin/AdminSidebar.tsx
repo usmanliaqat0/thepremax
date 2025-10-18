@@ -174,7 +174,7 @@ export default function AdminSidebar({
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      onClick={onClose}
+                      {...(onClose && { onClick: onClose })}
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200",
                         isActive

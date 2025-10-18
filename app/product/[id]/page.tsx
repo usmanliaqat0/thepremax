@@ -249,7 +249,11 @@ const ProductDetail = () => {
           <div>
             <div className="relative aspect-square mb-4">
               <Image
-                src={productImages[selectedImage]}
+                src={
+                  productImages[selectedImage] ||
+                  productImages[0] ||
+                  "/placeholder.jpg"
+                }
                 alt={product.name}
                 fill
                 className="object-cover rounded-lg"

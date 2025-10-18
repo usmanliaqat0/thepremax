@@ -1,6 +1,7 @@
 ﻿import mongoose, { type Mongoose } from "mongoose";
 import { getEnvConfig } from "./env-validation";
 import { initializeServerApp } from "./server-init";
+import { logInfo, logError, logDebug } from "./logger";
 
 // Get environment configuration
 const env = getEnvConfig();
@@ -59,6 +60,11 @@ function getConnectionState(state: number): string {
   return states[state as keyof typeof states] || "unknown";
 }
 
+/**
+ * Establishes connection to MongoDB with optimized settings
+ * Implements connection pooling and graceful error handling
+ * @returns Promise<Mongoose> - The established MongoDB connection
+ */
 async function connectDB(): Promise<Mongoose> {
   // Initialize server application on first connection
   initializeServerApp();
@@ -84,46 +90,57 @@ async function connectDB(): Promise<Mongoose> {
       maxStalenessSeconds: 90, // Allow slightly stale reads for better performance
     };
 
-    console.log("🔄 Connecting to MongoDB...");
+    logInfo("Connecting to MongoDB...", "Database");
     cached.promise = mongooseStatic.connect(MONGODB_URI, connectionOptions);
   }
 
   try {
     cached.conn = await cached.promise;
 
-    console.log("✅ Connected to MongoDB successfully");
+    logInfo("Connected to MongoDB successfully", "Database");
 
     const connection = mongooseStatic.connection;
-    console.log(
-      `📍 Database: ${connection.name || connection.db?.databaseName || "N/A"}`
+    logDebug(
+      `Database: ${connection.name || connection.db?.databaseName || "N/A"}`,
+      "Database"
     );
-    console.log(`🔗 Host: ${connection.host}:${connection.port}`);
-    console.log(`📊 Ready State: ${getConnectionState(connection.readyState)}`);
+    logDebug(`Host: ${connection.host}:${connection.port}`, "Database");
+    logDebug(
+      `Ready State: ${getConnectionState(connection.readyState)}`,
+      "Database"
+    );
 
     setupConnectionEventHandlers();
+    setupGracefulShutdown();
 
     return cached.conn!;
   } catch (error: unknown) {
     cached.promise = null;
 
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-    console.error("❌ MongoDB connection error:", errorMessage);
-    console.error(
-      "🔍 Connection string being used:",
+    // const errorMessage =
+    //   error instanceof Error ? error.message : "Unknown error";
+    logError("MongoDB connection error", "Database", error as Error);
+    logDebug(
+      "Connection string being used:",
+      "Database",
       MONGODB_URI.replace(/:[^:@]*@/, ":***@")
     );
 
     if (isMongoError(error)) {
       if (error.code === 18) {
-        console.error("💡 Authentication failed. Please check:");
-        console.error("   - Username and password are correct");
-        console.error("   - Database name matches the user's permissions");
-        console.error(
-          "   - Try different authSource options (admin, database name, or none)"
+        logError(
+          "Authentication failed. Please check credentials and permissions",
+          "Database"
+        );
+        logDebug(
+          "Check: Username/password, database permissions, authSource options",
+          "Database"
         );
       } else if (error.code === 8000) {
-        console.error("💡 Authentication failed due to authSource mismatch");
+        logError(
+          "Authentication failed due to authSource mismatch",
+          "Database"
+        );
       }
     }
 
@@ -140,34 +157,75 @@ function setupConnectionEventHandlers(): void {
   connection.removeAllListeners("reconnected");
 
   connection.on("connected", () => {
-    console.log("🔌 MongoDB connection established");
+    logInfo("MongoDB connection established", "Database");
   });
 
   connection.on("error", (err?: Error) => {
-    console.error("❌ MongoDB connection error:", err);
+    logError("MongoDB connection error", "Database", err);
   });
 
   connection.on("disconnected", () => {
-    console.log("🔌 MongoDB disconnected");
-
+    logInfo("MongoDB disconnected", "Database");
     cached.conn = null;
   });
 
   connection.on("reconnected", () => {
-    console.log("🔄 MongoDB reconnected");
+    logInfo("MongoDB reconnected", "Database");
   });
 }
 
+// Graceful shutdown handler
+function setupGracefulShutdown(): void {
+  const gracefulShutdown = async (signal: string) => {
+    logInfo(`Received ${signal}. Starting graceful shutdown...`, "Database");
+
+    try {
+      await disconnectDB();
+      logInfo("Database connection closed gracefully", "Database");
+      process.exit(0);
+    } catch (error) {
+      logError("Error during graceful shutdown", "Database", error as Error);
+      process.exit(1);
+    }
+  };
+
+  // Handle different termination signals
+  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+  process.on("SIGUSR2", () => gracefulShutdown("SIGUSR2")); // For nodemon
+
+  // Handle uncaught exceptions
+  process.on("uncaughtException", (error) => {
+    logError("Uncaught Exception", "Database", error);
+    gracefulShutdown("uncaughtException");
+  });
+
+  // Handle unhandled promise rejections
+  process.on("unhandledRejection", (reason, promise) => {
+    logError(
+      "Unhandled Rejection",
+      "Database",
+      new Error(`Promise: ${promise}, Reason: ${reason}`)
+    );
+    gracefulShutdown("unhandledRejection");
+  });
+}
+
+/**
+ * Gracefully closes the MongoDB connection
+ * Cleans up cached connections and handles errors
+ * @returns Promise<void>
+ */
 export async function disconnectDB(): Promise<void> {
   try {
     if (cached.conn) {
       await mongooseStatic.connection.close();
       cached.conn = null;
       cached.promise = null;
-      console.log("📴 MongoDB connection closed");
+      logInfo("MongoDB connection closed", "Database");
     }
   } catch (error) {
-    console.error("❌ Error closing MongoDB connection:", error);
+    logError("Error closing MongoDB connection", "Database", error as Error);
     throw error;
   }
 }
