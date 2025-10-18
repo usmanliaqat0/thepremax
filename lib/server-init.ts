@@ -4,6 +4,7 @@
  */
 
 import { validateStartupForDevelopment } from "./startup-validation";
+import { auditEnvironmentSecurity } from "./env-validation";
 
 // Global flag to ensure initialization only runs once per server instance
 declare global {
@@ -25,6 +26,9 @@ export function initializeServerApp(): void {
 
     // Validate environment configuration
     validateStartupForDevelopment();
+
+    // Audit environment security
+    auditEnvironmentSecurity();
 
     // Mark as initialized
     global.__thepremax_server_initialized = true;

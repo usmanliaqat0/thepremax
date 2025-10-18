@@ -44,9 +44,18 @@ class EnvironmentValidationError extends Error {
 
 /**
  * Generates a cryptographically secure random string for JWT secrets
+ * Uses crypto.randomBytes for cryptographically secure randomness
  */
 function generateSecureSecret(length: number = 64): string {
-  return crypto.randomBytes(length).toString("hex");
+  if (length < 32) {
+    throw new Error(
+      "Secret length must be at least 32 characters for security"
+    );
+  }
+
+  // Ensure we have enough entropy (at least 256 bits for 32+ character hex string)
+  const minLength = Math.max(length, 32);
+  return crypto.randomBytes(minLength / 2).toString("hex");
 }
 
 /**
@@ -85,6 +94,39 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
     errors.push(
       "JWT_REFRESH_SECRET must be at least 32 characters long for security"
     );
+  }
+
+  // Additional security checks for production
+  if (requiredVars.NODE_ENV === "production") {
+    // Check for weak secrets in production
+    if (requiredVars.JWT_SECRET && requiredVars.JWT_SECRET.length < 64) {
+      errors.push(
+        "JWT_SECRET must be at least 64 characters long in production"
+      );
+    }
+
+    if (
+      requiredVars.JWT_REFRESH_SECRET &&
+      requiredVars.JWT_REFRESH_SECRET.length < 64
+    ) {
+      errors.push(
+        "JWT_REFRESH_SECRET must be at least 64 characters long in production"
+      );
+    }
+
+    // Check for default values that shouldn't be used in production
+    if (requiredVars.SUPER_ADMIN_EMAIL === "admin@thepremax.com") {
+      errors.push(
+        "SUPER_ADMIN_EMAIL must be changed from default value in production"
+      );
+    }
+
+    if (
+      requiredVars.MONGODB_URI &&
+      requiredVars.MONGODB_URI.includes("localhost")
+    ) {
+      errors.push("MONGODB_URI must not use localhost in production");
+    }
   }
 
   // Validate email format
@@ -154,12 +196,29 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
 
 /**
  * Gets environment configuration with fallback to secure defaults
- * This provides sensible defaults when environment variables are missing
+ * This provides sensible defaults ONLY for development environment
+ * Production environment will fail if required variables are missing
  */
 export function loadEnvironmentConfigWithDefaults(): EnvironmentConfig {
-  console.warn(
-    "⚠️  Some environment variables are missing, using secure defaults"
-  );
+  const isProduction = process.env.NODE_ENV === "production";
+  const isBuildProcess = process.env.NEXT_PHASE === "phase-production-build";
+
+  if (isProduction && !isBuildProcess) {
+    // In production runtime, fail fast if required variables are missing
+    // But allow build process to continue with defaults
+    throw new EnvironmentValidationError(
+      "Production environment requires all environment variables to be set. " +
+        "Please check your environment configuration."
+    );
+  }
+
+  // Only use defaults in development
+  // Suppress warnings during build process
+  if (!isBuildProcess) {
+    console.warn(
+      "⚠️  Development mode: Some environment variables are missing, using secure defaults"
+    );
+  }
 
   return {
     MONGODB_URI:
@@ -171,7 +230,7 @@ export function loadEnvironmentConfigWithDefaults(): EnvironmentConfig {
     JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || "30d",
     SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL || "admin@thepremax.com",
     SUPER_ADMIN_PASSWORD:
-      process.env.SUPER_ADMIN_PASSWORD || generateSecureSecret(16),
+      process.env.SUPER_ADMIN_PASSWORD || generateSecureSecret(32), // Increased length
     BREVO_API_KEY: process.env.BREVO_API_KEY || "",
     BREVO_SENDER_NAME: process.env.BREVO_SENDER_NAME || "",
     BREVO_SENDER_EMAIL: process.env.BREVO_SENDER_EMAIL || "",
@@ -200,7 +259,12 @@ export function getEnvConfig(): EnvironmentConfig {
       envConfig = loadEnvironmentConfig();
     } catch {
       // If validation fails, use defaults with warning
-      console.warn("⚠️  Environment validation failed, using secure defaults");
+      // Only show warning in development, not during build
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(
+          "⚠️  Environment validation failed, using secure defaults"
+        );
+      }
       envConfig = loadEnvironmentConfigWithDefaults();
     }
   }
@@ -222,6 +286,55 @@ export function validateEnvironment(): void {
       process.exit(1);
     }
     throw error;
+  }
+}
+
+/**
+ * Audits environment variables for security issues
+ * Logs warnings for potential security concerns
+ */
+export function auditEnvironmentSecurity(): void {
+  const config = getEnvConfig();
+  const warnings: string[] = [];
+
+  // Check for weak secrets
+  if (config.JWT_SECRET.length < 64) {
+    warnings.push("JWT_SECRET is shorter than recommended (64+ characters)");
+  }
+
+  if (config.JWT_REFRESH_SECRET.length < 64) {
+    warnings.push(
+      "JWT_REFRESH_SECRET is shorter than recommended (64+ characters)"
+    );
+  }
+
+  // Check for default values in production
+  if (config.NODE_ENV === "production") {
+    if (config.SUPER_ADMIN_EMAIL === "admin@thepremax.com") {
+      warnings.push("SUPER_ADMIN_EMAIL is using default value in production");
+    }
+
+    if (config.MONGODB_URI.includes("localhost")) {
+      warnings.push("MONGODB_URI is using localhost in production");
+    }
+
+    if (config.NEXT_PUBLIC_APP_URL?.includes("localhost")) {
+      warnings.push("NEXT_PUBLIC_APP_URL is using localhost in production");
+    }
+  }
+
+  // Check for missing optional but recommended variables
+  if (!config.BREVO_API_KEY) {
+    warnings.push(
+      "BREVO_API_KEY is not set - email functionality may not work"
+    );
+  }
+
+  if (warnings.length > 0) {
+    console.warn("🔒 Environment Security Audit:");
+    warnings.forEach((warning) => console.warn(`  ⚠️  ${warning}`));
+  } else {
+    console.log("🔒 Environment security audit passed");
   }
 }
 

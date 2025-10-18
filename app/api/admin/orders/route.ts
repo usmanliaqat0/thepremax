@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
             return { ...order, user };
           }
           return order;
-        } catch (error) {
+        } catch {
           return order;
         }
       })

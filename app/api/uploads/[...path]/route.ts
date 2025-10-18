@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { handleApiError } from "@/lib/error-handler";
 import fs from "fs/promises";
 import path from "path";
 
@@ -65,7 +66,6 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Error serving file:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return handleApiError(error, "Failed to serve file");
   }
 }

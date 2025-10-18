@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AdminAuthService } from "@/lib/admin-auth-service";
 import { CookieUtils } from "@/lib/cookie-utils";
+import { handleApiError } from "@/lib/error-handler";
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,13 +50,6 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error("Admin signin error:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "An error occurred during admin signin",
-      },
-      { status: 500 }
-    );
+    return handleApiError(error, "Failed to sign in admin");
   }
 }

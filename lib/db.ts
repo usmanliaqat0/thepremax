@@ -243,4 +243,55 @@ export function getConnectionStatus(): {
   };
 }
 
+/**
+ * Ensures database connection is healthy before operations
+ * This is more efficient than calling connectDB() on every request
+ * @returns Promise<boolean> - true if connection is healthy
+ */
+export async function ensureHealthyConnection(): Promise<boolean> {
+  const status = getConnectionStatus();
+
+  if (status.isConnected) {
+    return true;
+  }
+
+  // Only attempt reconnection if we're not already connecting
+  if (status.readyState === 2) {
+    // Wait a bit for connection to complete
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    return getConnectionStatus().isConnected;
+  }
+
+  // Attempt to reconnect if disconnected
+  try {
+    await connectDB();
+    return getConnectionStatus().isConnected;
+  } catch (error) {
+    logError(
+      "Failed to establish database connection",
+      "Database",
+      error as Error
+    );
+    return false;
+  }
+}
+
+/**
+ * Wrapper for database operations with automatic connection health check
+ * Use this instead of calling connectDB() directly in API routes
+ * @param operation - The database operation to perform
+ * @returns Promise<T>
+ */
+export async function withDatabaseOperation<T>(
+  operation: () => Promise<T>
+): Promise<T> {
+  const isHealthy = await ensureHealthyConnection();
+
+  if (!isHealthy) {
+    throw new Error("Database connection is not available");
+  }
+
+  return await operation();
+}
+
 export default connectDB;
