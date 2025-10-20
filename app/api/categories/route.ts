@@ -1,37 +1,54 @@
 ﻿import { NextRequest, NextResponse } from "next/server";
-import connectDB from "@/lib/db";
+import { withDatabaseOperation } from "@/lib/db";
 import Category from "@/lib/models/Category";
 import mongoose from "mongoose";
-import { handleApiError } from "@/lib/error-handler";
+import { ApiResponseBuilder } from "@/lib/api-response";
+import { logError } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
-    await connectDB();
+    // Use the database operation wrapper for better error handling
+    const categories = await withDatabaseOperation(async () => {
+      // Ensure Product model is registered for virtual population
+      if (!mongoose.models.Product) {
+        await import("@/lib/models/Product");
+      }
 
-    // Ensure Product model is registered for virtual population
-    if (!mongoose.models.Product) {
-      await import("@/lib/models/Product");
-    }
+      const { searchParams } = new URL(request.url);
+      const includeInactive = searchParams.get("includeInactive") === "true";
 
-    const { searchParams } = new URL(request.url);
-    const includeInactive = searchParams.get("includeInactive") === "true";
+      const filter: Record<string, unknown> = {};
 
-    const filter: Record<string, unknown> = {};
+      if (!includeInactive) {
+        filter.status = "active";
+      }
 
-    if (!includeInactive) {
-      filter.status = "active";
-    }
-
-    const categories = await Category.find(filter)
-      .populate("productCount")
-      .sort({ order: 1, createdAt: -1 })
-      .lean();
-
-    return NextResponse.json({
-      success: true,
-      data: categories,
+      return await Category.find(filter)
+        .populate("productCount")
+        .sort({ order: 1, createdAt: -1 })
+        .lean();
     });
+
+    return ApiResponseBuilder.success(
+      categories,
+      "Categories fetched successfully"
+    );
   } catch (error) {
-    return handleApiError(error, "Failed to fetch categories");
+    logError("Failed to fetch categories", "API", error as Error);
+
+    // Check if it's a database connection error
+    if (
+      error instanceof Error &&
+      error.message.includes("Database connection is not available")
+    ) {
+      return ApiResponseBuilder.serviceUnavailable(
+        "Database is temporarily unavailable. Please try again later."
+      );
+    }
+
+    return ApiResponseBuilder.internalError(
+      "Failed to fetch categories",
+      error as Error
+    );
   }
 }
