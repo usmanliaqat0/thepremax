@@ -3,7 +3,6 @@
  * This runs in Node.js runtime, not Edge Runtime
  */
 
-import { validateStartupForDevelopment } from "./startup-validation";
 import { auditEnvironmentSecurity } from "./env-validation";
 
 // Global flag to ensure initialization only runs once per server instance
@@ -23,9 +22,6 @@ export function initializeServerApp(): void {
 
   try {
     console.log("🚀 Initializing ThePreMax server application...");
-
-    // Validate environment configuration
-    validateStartupForDevelopment();
 
     // Audit environment security
     auditEnvironmentSecurity();
