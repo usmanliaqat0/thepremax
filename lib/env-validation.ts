@@ -114,13 +114,6 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
       );
     }
 
-    // Check for default values that shouldn't be used in production
-    if (requiredVars.SUPER_ADMIN_EMAIL === "admin@thepremax.com") {
-      errors.push(
-        "SUPER_ADMIN_EMAIL must be changed from default value in production"
-      );
-    }
-
     if (
       requiredVars.MONGODB_URI &&
       requiredVars.MONGODB_URI.includes("localhost")
