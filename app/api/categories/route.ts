@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest } from "next/server";
 import { withDatabaseOperation } from "@/lib/db";
 import Category from "@/lib/models/Category";
 import mongoose from "mongoose";

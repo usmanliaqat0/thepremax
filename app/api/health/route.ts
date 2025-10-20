@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+// NextResponse is not needed as ApiResponseBuilder handles responses
 import { getConnectionStatus } from "@/lib/db";
 import { ApiResponseBuilder } from "@/lib/api-response";
 
@@ -20,9 +20,7 @@ export async function GET() {
       return ApiResponseBuilder.success(healthData, "Service is healthy");
     } else {
       return ApiResponseBuilder.serviceUnavailable(
-        "Service is unhealthy - database connection failed",
-        undefined,
-        JSON.stringify(healthData)
+        "Service is unhealthy - database connection failed"
       );
     }
   } catch (error) {
