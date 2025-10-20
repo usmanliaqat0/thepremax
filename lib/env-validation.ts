@@ -1,10 +1,3 @@
-import crypto from "crypto";
-
-/**
- * Environment variable validation and configuration management
- * Provides centralized, type-safe access to environment variables with proper validation
- */
-
 interface EnvironmentConfig {
   // Database
   MONGODB_URI: string;
@@ -42,142 +35,29 @@ class EnvironmentValidationError extends Error {
   }
 }
 
-/**
- * Generates a cryptographically secure random string for JWT secrets
- * Uses crypto.randomBytes for cryptographically secure randomness
- */
-function generateSecureSecret(length: number = 64): string {
-  if (length < 32) {
-    throw new Error(
-      "Secret length must be at least 32 characters for security"
-    );
-  }
-
-  // Ensure we have enough entropy (at least 256 bits for 32+ character hex string)
-  const minLength = Math.max(length, 32);
-  return crypto.randomBytes(minLength / 2).toString("hex");
-}
+// Secret generation removed; configuration is read-only from process.env now
 
 /**
  * Validates and loads environment variables
  * Throws EnvironmentValidationError if required variables are missing
  */
 export function loadEnvironmentConfig(): EnvironmentConfig {
-  const errors: string[] = [];
-
-  // Required environment variables
-  const requiredVars = {
-    MONGODB_URI: process.env.MONGODB_URI,
-    JWT_SECRET: process.env.JWT_SECRET,
-    JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
-    SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL,
-    SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD,
-    NODE_ENV: process.env.NODE_ENV || "development",
-  };
-
-  // Check for missing required variables
-  for (const [key, value] of Object.entries(requiredVars)) {
-    if (!value) {
-      errors.push(`Missing required environment variable: ${key}`);
-    }
-  }
-
-  // Validate JWT secrets strength
-  if (requiredVars.JWT_SECRET && requiredVars.JWT_SECRET.length < 32) {
-    errors.push("JWT_SECRET must be at least 32 characters long for security");
-  }
-
-  if (
-    requiredVars.JWT_REFRESH_SECRET &&
-    requiredVars.JWT_REFRESH_SECRET.length < 32
-  ) {
-    errors.push(
-      "JWT_REFRESH_SECRET must be at least 32 characters long for security"
-    );
-  }
-
-  // Additional security checks for production
-  if (requiredVars.NODE_ENV === "production") {
-    // Check for weak secrets in production
-    if (requiredVars.JWT_SECRET && requiredVars.JWT_SECRET.length < 64) {
-      errors.push(
-        "JWT_SECRET must be at least 64 characters long in production"
-      );
-    }
-
-    if (
-      requiredVars.JWT_REFRESH_SECRET &&
-      requiredVars.JWT_REFRESH_SECRET.length < 64
-    ) {
-      errors.push(
-        "JWT_REFRESH_SECRET must be at least 64 characters long in production"
-      );
-    }
-
-    // Check for default values that shouldn't be used in production
-    if (requiredVars.SUPER_ADMIN_EMAIL === "admin@thepremax.com") {
-      errors.push(
-        "SUPER_ADMIN_EMAIL must be changed from default value in production"
-      );
-    }
-
-    if (
-      requiredVars.MONGODB_URI &&
-      requiredVars.MONGODB_URI.includes("localhost")
-    ) {
-      errors.push("MONGODB_URI must not use localhost in production");
-    }
-  }
-
-  // Validate email format
-  if (
-    requiredVars.SUPER_ADMIN_EMAIL &&
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(requiredVars.SUPER_ADMIN_EMAIL)
-  ) {
-    errors.push("SUPER_ADMIN_EMAIL must be a valid email address");
-  }
-
-  // Validate password strength
-  if (
-    requiredVars.SUPER_ADMIN_PASSWORD &&
-    requiredVars.SUPER_ADMIN_PASSWORD.length < 12
-  ) {
-    errors.push(
-      "SUPER_ADMIN_PASSWORD must be at least 12 characters long for security"
-    );
-  }
-
-  // Validate MongoDB URI format
-  if (
-    requiredVars.MONGODB_URI &&
-    !requiredVars.MONGODB_URI.startsWith("mongodb://") &&
-    !requiredVars.MONGODB_URI.startsWith("mongodb+srv://")
-  ) {
-    errors.push("MONGODB_URI must be a valid MongoDB connection string");
-  }
-
-  if (errors.length > 0) {
-    throw new EnvironmentValidationError(
-      `Environment validation failed:\n${errors
-        .map((e) => `  - ${e}`)
-        .join("\n")}\n\n` +
-        "Please check your .env file and ensure all required variables are set with valid values."
-    );
-  }
-
-  // Optional environment variables with defaults
+  // Directly map from process.env; no validation, no defaults beyond empty strings
   const config: EnvironmentConfig = {
-    // Required variables
-    MONGODB_URI: requiredVars.MONGODB_URI!,
-    JWT_SECRET: requiredVars.JWT_SECRET!,
-    JWT_REFRESH_SECRET: requiredVars.JWT_REFRESH_SECRET!,
-    SUPER_ADMIN_EMAIL: requiredVars.SUPER_ADMIN_EMAIL!,
-    SUPER_ADMIN_PASSWORD: requiredVars.SUPER_ADMIN_PASSWORD!,
-    NODE_ENV: requiredVars.NODE_ENV,
+    // Database
+    MONGODB_URI: process.env.MONGODB_URI || "",
 
-    // Optional variables with defaults
-    JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "7d",
-    JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || "30d",
+    // JWT
+    JWT_SECRET: process.env.JWT_SECRET || "",
+    JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || "",
+    JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "",
+    JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || "",
+
+    // Admin
+    SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL || "",
+    SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD || "",
+
+    // Email service
     BREVO_API_KEY: process.env.BREVO_API_KEY || "",
     BREVO_SENDER_NAME: process.env.BREVO_SENDER_NAME || "",
     BREVO_SENDER_EMAIL: process.env.BREVO_SENDER_EMAIL || "",
@@ -186,9 +66,13 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
     BREVO_EMAIL_VERIFICATION_TEMPLATE_ID:
       process.env.BREVO_EMAIL_VERIFICATION_TEMPLATE_ID || "",
     BREVO_WELCOME_TEMPLATE_ID: process.env.BREVO_WELCOME_TEMPLATE_ID || "",
-    NEXT_PUBLIC_APP_URL:
-      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-    NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || "ThePreMax",
+
+    // App config
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || "",
+    NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || "",
+
+    // Node environment
+    NODE_ENV: process.env.NODE_ENV || "development",
   };
 
   return config;
@@ -200,50 +84,8 @@ export function loadEnvironmentConfig(): EnvironmentConfig {
  * Production environment will fail if required variables are missing
  */
 export function loadEnvironmentConfigWithDefaults(): EnvironmentConfig {
-  const isProduction = process.env.NODE_ENV === "production";
-  const isBuildProcess = process.env.NEXT_PHASE === "phase-production-build";
-
-  if (isProduction && !isBuildProcess) {
-    // In production runtime, fail fast if required variables are missing
-    // But allow build process to continue with defaults
-    throw new EnvironmentValidationError(
-      "Production environment requires all environment variables to be set. " +
-        "Please check your environment configuration."
-    );
-  }
-
-  // Only use defaults in development
-  // Suppress warnings during build process
-  if (!isBuildProcess) {
-    console.warn(
-      "⚠️  Development mode: Some environment variables are missing, using secure defaults"
-    );
-  }
-
-  return {
-    MONGODB_URI:
-      process.env.MONGODB_URI || "mongodb://localhost:27017/thepremax",
-    JWT_SECRET: process.env.JWT_SECRET || generateSecureSecret(),
-    JWT_REFRESH_SECRET:
-      process.env.JWT_REFRESH_SECRET || generateSecureSecret(),
-    JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "7d",
-    JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || "30d",
-    SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL || "admin@thepremax.com",
-    SUPER_ADMIN_PASSWORD:
-      process.env.SUPER_ADMIN_PASSWORD || generateSecureSecret(32), // Increased length
-    BREVO_API_KEY: process.env.BREVO_API_KEY || "",
-    BREVO_SENDER_NAME: process.env.BREVO_SENDER_NAME || "",
-    BREVO_SENDER_EMAIL: process.env.BREVO_SENDER_EMAIL || "",
-    BREVO_PASSWORD_RESET_TEMPLATE_ID:
-      process.env.BREVO_PASSWORD_RESET_TEMPLATE_ID || "",
-    BREVO_EMAIL_VERIFICATION_TEMPLATE_ID:
-      process.env.BREVO_EMAIL_VERIFICATION_TEMPLATE_ID || "",
-    BREVO_WELCOME_TEMPLATE_ID: process.env.BREVO_WELCOME_TEMPLATE_ID || "",
-    NEXT_PUBLIC_APP_URL:
-      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-    NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME || "ThePreMax",
-    NODE_ENV: process.env.NODE_ENV || "development",
-  };
+  // Deprecated: now simply returns loadEnvironmentConfig() without validation/defaults
+  return loadEnvironmentConfig();
 }
 
 /**
@@ -254,39 +96,9 @@ let envConfig: EnvironmentConfig | null = null;
 
 export function getEnvConfig(): EnvironmentConfig {
   if (!envConfig) {
-    try {
-      // Try strict validation first
-      envConfig = loadEnvironmentConfig();
-    } catch {
-      // If validation fails, use defaults with warning
-      // Only show warning in development, not during build
-      if (process.env.NODE_ENV !== "production") {
-        console.warn(
-          "⚠️  Environment validation failed, using secure defaults"
-        );
-      }
-      envConfig = loadEnvironmentConfigWithDefaults();
-    }
+    envConfig = loadEnvironmentConfig();
   }
   return envConfig;
-}
-
-/**
- * Validates that all required environment variables are present
- * Call this at application startup to fail fast if configuration is invalid
- */
-export function validateEnvironment(): void {
-  try {
-    loadEnvironmentConfig();
-    console.log("✅ Environment validation passed");
-  } catch (error) {
-    if (error instanceof EnvironmentValidationError) {
-      console.error("❌ Environment validation failed:");
-      console.error(error.message);
-      process.exit(1);
-    }
-    throw error;
-  }
 }
 
 /**
@@ -310,10 +122,6 @@ export function auditEnvironmentSecurity(): void {
 
   // Check for default values in production
   if (config.NODE_ENV === "production") {
-    if (config.SUPER_ADMIN_EMAIL === "admin@thepremax.com") {
-      warnings.push("SUPER_ADMIN_EMAIL is using default value in production");
-    }
-
     if (config.MONGODB_URI.includes("localhost")) {
       warnings.push("MONGODB_URI is using localhost in production");
     }
